@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: healthhub-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: healthhub2026
+      POSTGRES_DB: healthhub
+    ports:
+      - "5433:5432"
+    volumes:
+      - healthhub_pgdata:/var/lib/postgresql/data
+
+volumes:
+  healthhub_pgdata:

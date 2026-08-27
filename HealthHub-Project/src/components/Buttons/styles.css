@@ -1,0 +1,10 @@
+@import "tailwindcss";
+
+@theme {
+  --color-app-stroke: #E3E3E3;
+  --color-app-entrar: #0c1137;
+  --color-app-strokeentrar: #161e50;
+  --color-brand-blue: #267AC8;
+  --color-brand-green: #62DA7C;
+  --color-brand-navy: #416D88;
+}

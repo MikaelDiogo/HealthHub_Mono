@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --color-app-stroke: #E3E3E3;
+  --color-app-entrar: #0c1137;
+  --color-app-strokeentrar: #161e50;
+  --color-brand-blue: #267AC8;
+  --color-brand-green: #62DA7C;
+  --color-brand-navy: #416D88;
+}
+
+
+/* Remove qualquer chance de elementos flutuantes do gráfico criarem scroll */
+.recharts-tooltip-wrapper {
+  outline: none !important;
+  pointer-events: none; /* Evita que o tooltip interfira no mouse */
+}
+
+/* Garante que o container do gráfico não "vaze" */
+.recharts-responsive-container {
+  overflow: hidden !important;
+}
