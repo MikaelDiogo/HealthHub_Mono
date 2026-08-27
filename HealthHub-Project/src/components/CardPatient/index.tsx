@@ -1,5 +1,11 @@
 import { Card, Text, Avatar, Button, Group, Box, SimpleGrid, ThemeIcon } from '@mantine/core';
-import { IconHeartRateMonitor, IconActivity, IconEye, IconPencil, IconTemperature } from '@tabler/icons-react';
+import {
+  IconHeartRateMonitor,
+  IconActivity,
+  IconEye,
+  IconPencil,
+  IconTemperature,
+} from '@tabler/icons-react';
 
 interface CardPatientProps {
   patientName: string;
@@ -44,13 +50,32 @@ const CardPatient = ({
   ];
 
   return (
-    <Card withBorder radius="md" p={0} h="100%" style={{ display: 'flex', flexDirection: 'column' }}>
-      <Box h={6} bg="slate.8" />
+    <Card
+      radius="md"
+      p={0}
+      h="100%"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        border: '1px solid oklch(0.90 0.01 220)',
+        backgroundColor: '#fff',
+      }}
+    >
+      {/* Gradient top bar */}
+      <Box
+        style={{
+          height: 5,
+          background: 'linear-gradient(135deg, oklch(0.62 0.13 200), oklch(0.52 0.14 240))',
+        }}
+      />
 
-      <Box p="lg" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 20 }}>
+      <Box
+        p="lg"
+        style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 20 }}
+      >
         <Box>
           <Group mb="md" wrap="nowrap">
-            <Avatar size={48} radius="md" color="slate" variant="light">
+            <Avatar size={48} radius="md" color="hub" variant="light">
               {getInitials(patientName)}
             </Avatar>
             <Box style={{ minWidth: 0 }}>
@@ -71,11 +96,12 @@ const CardPatient = ({
                 style={{
                   textAlign: 'center',
                   borderRadius: 12,
-                  backgroundColor: 'var(--mantine-color-slate-0)',
-                  border: '1px solid var(--mantine-color-slate-1)',
+                  backgroundColor: 'oklch(0.97 0.02 235)',
+                  border: '1px solid oklch(0.90 0.01 220)',
+                  borderLeft: '2px solid oklch(0.88 0.05 235)',
                 }}
               >
-                <ThemeIcon size="sm" radius="md" color="slate" variant="light" mx="auto" mb={6}>
+                <ThemeIcon size="sm" radius="md" color="hub" variant="light" mx="auto" mb={6}>
                   <Icon size={16} />
                 </ThemeIcon>
                 <Text fw={700} size="sm" c="slate.7" truncate>
@@ -86,11 +112,22 @@ const CardPatient = ({
           </SimpleGrid>
         </Box>
 
-        <Group grow pt="sm" style={{ borderTop: '1px solid var(--mantine-color-slate-1)' }}>
-          <Button variant="outline" color="slate" size="sm" leftSection={<IconEye size={16} />} onClick={handleViewAction}>
+        <Group grow pt="sm" style={{ borderTop: '1px solid oklch(0.90 0.01 220)' }}>
+          <Button
+            variant="outline"
+            color="hub"
+            size="sm"
+            leftSection={<IconEye size={16} />}
+            onClick={handleViewAction}
+          >
             Visualizar
           </Button>
-          <Button color="slate" size="sm" leftSection={<IconPencil size={16} />} onClick={onEdit}>
+          <Button
+            color="hub"
+            size="sm"
+            leftSection={<IconPencil size={16} />}
+            onClick={onEdit}
+          >
             Editar
           </Button>
         </Group>

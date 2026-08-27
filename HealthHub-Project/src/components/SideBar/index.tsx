@@ -35,6 +35,45 @@ const ROLE_LABEL: Record<string, string> = {
   recepcionista: 'Recepcionista',
 };
 
+function HHLogo({ size = 36 }: { size?: number }) {
+  const bar = Math.round(size * 0.43);
+  const thick = Math.round(size * 0.13);
+  return (
+    <div
+      style={{
+        position: 'relative',
+        width: size,
+        height: size,
+        borderRadius: Math.round(size * 0.26),
+        background: 'linear-gradient(155deg, oklch(0.62 0.13 200), oklch(0.52 0.14 240))',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          width: bar,
+          height: thick,
+          borderRadius: thick / 2,
+          background: '#fff',
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          width: thick,
+          height: bar,
+          borderRadius: thick / 2,
+          background: '#fff',
+        }}
+      />
+    </div>
+  );
+}
+
 export default function SideBar() {
   const [patientCount, setPatientCount] = useState<number | null>(null);
   const { role, nome } = useAuth();
@@ -50,7 +89,12 @@ export default function SideBar() {
   }, []);
 
   const initials = nome
-    ? nome.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase()
+    ? nome
+        .split(' ')
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
     : '?';
 
   return (
@@ -63,14 +107,22 @@ export default function SideBar() {
       {/* ── Branding ── */}
       <Box px="xs" style={{ flexShrink: 0 }}>
         <Group gap="sm" mb="sm" align="center">
-          <ThemeIcon color="teal" size={40} radius="md" variant="filled" style={{ flexShrink: 0 }}>
-            <IconActivity size={20} stroke={2} />
-          </ThemeIcon>
+          <HHLogo size={40} />
           <Stack gap={1}>
-            <Text fw={600} size="lg" c="slate.9" lh={1.1}>
-              HealthHub
+            <Text lh={1.1} style={{ fontSize: 18, lineHeight: 1.1 }}>
+              <span style={{ fontWeight: 400, color: 'oklch(0.24 0.02 240)' }}>Health</span>
+              <span style={{ fontWeight: 800, color: 'oklch(0.52 0.14 235)' }}>Hub</span>
             </Text>
-            <Text fw={500} size="10px" tt="uppercase" c="slate.4" lts={1.2}>
+            <Text
+              size="10px"
+              tt="uppercase"
+              lts={1.2}
+              style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                color: 'oklch(0.60 0.02 240)',
+                letterSpacing: '0.08em',
+              }}
+            >
               Sistemas Hospitalares
             </Text>
           </Stack>
@@ -81,26 +133,57 @@ export default function SideBar() {
           px="sm"
           py={6}
           style={{
-            backgroundColor: 'var(--mantine-color-teal-0)',
-            border: '1px solid var(--mantine-color-teal-2)',
+            backgroundColor: 'oklch(0.97 0.02 235)',
+            border: '1px solid oklch(0.88 0.05 235)',
             borderRadius: 8,
           }}
         >
-          <IconCircleCheck size={12} color="var(--mantine-color-teal-6)" />
-          <Text size="xs" fw={500} c="teal.7" style={{ flex: 1 }}>
+          <div
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              backgroundColor: 'oklch(0.62 0.19 145)',
+              flexShrink: 0,
+            }}
+          />
+          <Text
+            size="xs"
+            fw={500}
+            c="hub.7"
+            style={{ flex: 1 }}
+          >
             Sistema Online
           </Text>
-          <Badge color="teal" size="xs" variant="dot">
-            Ativo
-          </Badge>
+          <Text
+            style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: 10,
+              color: 'oklch(0.52 0.14 235)',
+              fontWeight: 600,
+            }}
+          >
+            Online
+          </Text>
         </Group>
       </Box>
 
-      <Divider my="sm" color="slate.1" mx="xs" />
+      <Divider my="sm" color="oklch(0.92 0.01 220)" mx="xs" />
 
       {/* ── Navegação ── */}
       <Box px="xs" style={{ flexShrink: 0 }}>
-        <Text size="10px" fw={700} c="slate.4" tt="uppercase" lts={1.5} mb={6} pl={4}>
+        <Text
+          size="10px"
+          fw={700}
+          tt="uppercase"
+          mb={6}
+          pl={4}
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            color: 'oklch(0.60 0.02 240)',
+            letterSpacing: '0.12em',
+          }}
+        >
           Navegação
         </Text>
         <Stack gap={2}>
@@ -152,17 +235,28 @@ export default function SideBar() {
         </Stack>
       </Box>
 
-      <Divider my="sm" color="slate.1" mx="xs" />
+      <Divider my="sm" color="oklch(0.92 0.01 220)" mx="xs" />
 
       {/* ── Estatísticas Rápidas ── */}
       <Box px="xs" style={{ flexShrink: 0 }}>
-        <Text size="10px" fw={600} c="slate.4" tt="uppercase" lts={1.2} mb={8} pl={2}>
-          Estatísticas Rápidas
+        <Text
+          size="10px"
+          fw={700}
+          tt="uppercase"
+          mb={8}
+          pl={2}
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            color: 'oklch(0.60 0.02 240)',
+            letterSpacing: '0.12em',
+          }}
+        >
+          Estatísticas
         </Text>
         <Stack gap={0}>
           <StatRow
             icon={<IconUserFilled size={11} />}
-            color="blue"
+            color="hub"
             label="Pacientes"
             value={
               patientCount === null ? (
@@ -176,20 +270,20 @@ export default function SideBar() {
           />
           {role !== 'recepcionista' && (
             <>
-              <Divider color="slate.1" />
+              <Divider color="oklch(0.92 0.01 220)" />
               <StatRow
                 icon={<IconActivity size={11} />}
-                color="teal"
+                color="hub"
                 label="Monitoramento"
                 value={
-                  <Badge color="teal" size="xs" variant="light" radius="sm">
+                  <Badge color="hub" size="xs" variant="light" radius="sm">
                     Ativo
                   </Badge>
                 }
               />
             </>
           )}
-          <Divider color="slate.1" />
+          <Divider color="oklch(0.92 0.01 220)" />
           <StatRow
             icon={<IconHeartbeat size={11} />}
             color="orange"
@@ -210,18 +304,25 @@ export default function SideBar() {
       <Box
         px="xs"
         pt="sm"
-        style={{ flexShrink: 0, borderTop: '1px solid var(--mantine-color-slate-2)' }}
+        style={{ flexShrink: 0, borderTop: '1px solid oklch(0.92 0.01 220)' }}
       >
         <Group justify="space-between" wrap="nowrap" gap="xs">
           <Group gap={8} wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-            <Avatar color="blue" radius="md" size={34} style={{ flexShrink: 0 }}>
+            <Avatar color="hub" radius="md" size={34} style={{ flexShrink: 0 }}>
               {initials}
             </Avatar>
             <Stack gap={0} style={{ minWidth: 0 }}>
               <Text size="11px" fw={800} c="slate.9" tt="uppercase" truncate lh={1.1}>
                 {nome ?? 'Usuário'}
               </Text>
-              <Text size="10px" fw={600} c="slate.4" truncate>
+              <Text
+                size="10px"
+                truncate
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  color: 'oklch(0.60 0.02 240)',
+                }}
+              >
                 {role ? ROLE_LABEL[role] : ''}
               </Text>
             </Stack>
@@ -237,8 +338,8 @@ export default function SideBar() {
                 h={32}
                 style={{
                   borderRadius: 8,
-                  border: '1px solid var(--mantine-color-slate-2)',
-                  color: 'var(--mantine-color-slate-6)',
+                  border: '1px solid oklch(0.92 0.01 220)',
+                  color: 'oklch(0.55 0.04 240)',
                   cursor: 'pointer',
                 }}
               >

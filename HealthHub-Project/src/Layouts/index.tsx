@@ -40,13 +40,13 @@ export function DashboardLayout() {
         padding={0}
         styles={{
           main: {
-            backgroundColor: 'var(--mantine-color-slate-0)',
+            backgroundColor: 'oklch(0.985 0.006 210)',
             height: '100dvh',
             overflow: 'hidden',
           },
           navbar: {
             backgroundColor: '#ffffff',
-            borderRight: '1px solid var(--mantine-color-slate-2)',
+            borderRight: '1px solid oklch(0.92 0.01 220)',
           },
         }}
       >

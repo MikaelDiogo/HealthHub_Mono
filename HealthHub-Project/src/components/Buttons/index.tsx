@@ -69,9 +69,11 @@ export const SideBarLink = ({ to, label, icon, textLabel, badge }: SidebarLinkPr
       py={5}
       style={{
         borderRadius: 8,
-        border: isActive ? '2px solid var(--mantine-color-slate-3)' : '2px solid transparent',
-        backgroundColor: isActive ? 'var(--mantine-color-slate-1)' : 'transparent',
-        transition: 'background-color 150ms ease',
+        border: isActive
+          ? '1.5px solid oklch(0.82 0.07 235)'
+          : '1.5px solid transparent',
+        backgroundColor: isActive ? 'oklch(0.96 0.025 235)' : 'transparent',
+        transition: 'background-color 150ms ease, border-color 150ms ease',
       }}
       onMouseEnter={(e) => {
         if (!isActive) e.currentTarget.style.backgroundColor = 'var(--mantine-color-slate-0)';
@@ -82,9 +84,11 @@ export const SideBarLink = ({ to, label, icon, textLabel, badge }: SidebarLinkPr
     >
       <Group gap={8} justify="space-between" w="100%">
         <Group gap={8}>
-          {icon}
+          <div style={{ color: isActive ? 'oklch(0.52 0.14 235)' : 'var(--mantine-color-slate-5)', display: 'flex' }}>
+            {icon}
+          </div>
           <Stack gap={0} align="flex-start">
-            <Text size="sm" fw={600} c={isActive ? 'slate.9' : 'slate.7'}>
+            <Text size="sm" fw={600} style={{ color: isActive ? 'oklch(0.28 0.10 235)' : 'var(--mantine-color-slate-7)' }}>
               {label}
             </Text>
             <Text size="xs" c="slate.5">
@@ -93,7 +97,7 @@ export const SideBarLink = ({ to, label, icon, textLabel, badge }: SidebarLinkPr
           </Stack>
         </Group>
         {badge && (
-          <Badge size="xs" color="teal" variant="filled" style={{ flexShrink: 0 }}>
+          <Badge size="xs" color="hub" variant="filled" style={{ flexShrink: 0 }}>
             {badge}
           </Badge>
         )}

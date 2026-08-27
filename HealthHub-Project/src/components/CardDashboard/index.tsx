@@ -1,4 +1,10 @@
-import { IconAlertTriangle, IconDroplet, IconHeartRateMonitor, IconTemperature, IconChecks } from '@tabler/icons-react';
+import {
+  IconAlertTriangle,
+  IconDroplet,
+  IconHeartRateMonitor,
+  IconTemperature,
+  IconChecks,
+} from '@tabler/icons-react';
 import { Box, Group, Paper, SimpleGrid, ThemeIcon, Text } from '@mantine/core';
 import type { Patient } from '../../types/patient';
 
@@ -21,14 +27,16 @@ export const CardDashboard = ({ patient }: CardDashboardProps) => {
       label: 'Saturação',
       value: currentVitals?.saturacao_oxigenio ? `${currentVitals.saturacao_oxigenio}%` : '--',
       icon: IconDroplet,
-      color: isHypoxic ? 'red' : 'teal',
+      color: isHypoxic ? 'red' : 'hub',
+      accentColor: isHypoxic ? 'var(--mantine-color-red-5)' : 'var(--mantine-color-hub-5)',
     },
     {
       label: 'Freq. Cardíaca',
       value: currentVitals?.frequencia_cardiaca || '--',
       unit: 'bpm',
       icon: IconHeartRateMonitor,
-      color: isTachycardic ? 'red' : 'cyan',
+      color: isTachycardic ? 'red' : 'hub',
+      accentColor: isTachycardic ? 'var(--mantine-color-red-5)' : 'var(--mantine-color-hub-5)',
     },
     {
       label: 'Temperatura',
@@ -36,23 +44,53 @@ export const CardDashboard = ({ patient }: CardDashboardProps) => {
       unit: '°C',
       icon: IconTemperature,
       color: 'yellow',
+      accentColor: 'var(--mantine-color-yellow-5)',
     },
     {
       label: 'Status Geral',
       value: !patient ? '--' : !hasVitals ? 'Sem Dados' : isCritical ? 'Crítico' : 'Estável',
       icon: !hasVitals || isCritical ? IconAlertTriangle : IconChecks,
-      color: !hasVitals ? 'slate' : isCritical ? 'red' : 'teal',
+      color: !hasVitals ? 'slate' : isCritical ? 'red' : 'hub',
+      accentColor: !hasVitals
+        ? 'var(--mantine-color-slate-5)'
+        : isCritical
+        ? 'var(--mantine-color-red-5)'
+        : 'var(--mantine-color-hub-5)',
     },
   ];
 
   return (
     <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing="md">
       {stats.map((stat) => (
-        <Paper key={stat.label} radius="md" withBorder style={{ overflow: 'hidden', minHeight: 120 }}>
-          <Box style={{ height: 3, backgroundColor: `var(--mantine-color-${stat.color}-5)` }} />
+        <Paper
+          key={stat.label}
+          radius="md"
+          style={{
+            overflow: 'hidden',
+            minHeight: 120,
+            border: '1px solid oklch(0.90 0.01 220)',
+            backgroundColor: '#fff',
+          }}
+        >
+          <Box
+            style={{
+              height: 3,
+              borderLeft: `3px solid ${stat.accentColor}`,
+              backgroundColor: stat.accentColor,
+            }}
+          />
           <Box p="md">
             <Group justify="space-between" mb="xs">
-              <Text size="xs" fw={600} tt="uppercase" c="slate.4" lts={0.8}>
+              <Text
+                fw={600}
+                tt="uppercase"
+                style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: 10,
+                  letterSpacing: '0.10em',
+                  color: 'oklch(0.60 0.02 240)',
+                }}
+              >
                 {stat.label}
               </Text>
               <ThemeIcon size="sm" radius="md" color={stat.color} variant="light">
@@ -60,7 +98,11 @@ export const CardDashboard = ({ patient }: CardDashboardProps) => {
               </ThemeIcon>
             </Group>
             <Group align="baseline" gap={4}>
-              <Text size="2rem" fw={500} c="slate.8" lh={1}>
+              <Text
+                fw={800}
+                lh={1}
+                style={{ fontSize: '2.2rem', color: 'oklch(0.24 0.02 240)' }}
+              >
                 {stat.value}
               </Text>
               {stat.unit && (
