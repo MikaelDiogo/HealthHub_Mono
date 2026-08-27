@@ -1,31 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  Grid,
-  Paper,
-  Select,
-  Text,
-  Group,
-  Stack,
-  Avatar,
-  TextInput,
-  Loader,
-  ThemeIcon,
-  Box,
-  ScrollArea,
-  ActionIcon,
-  SimpleGrid,
-  Badge,
+  Grid, Paper, Select, Text, Group, Stack, Avatar,
+  TextInput, Loader, ThemeIcon, Box, ScrollArea,
+  ActionIcon, SimpleGrid, Badge,
 } from '@mantine/core';
 import {
-  IconHeartRateMonitor,
-  IconRobot,
-  IconUser,
-  IconSend,
-  IconTemperature,
-  IconDroplet,
-  IconGauge,
-  IconMicrophone,
-  IconMicrophoneOff,
+  IconHeartRateMonitor, IconRobot, IconUser, IconSend,
+  IconTemperature, IconDroplet, IconGauge,
+  IconMicrophone, IconMicrophoneOff,
 } from '@tabler/icons-react';
 import ReactMarkdown from 'react-markdown';
 import api from '../../services/api';
@@ -72,27 +54,21 @@ export const Monitoring = () => {
       setMessages([]);
       return;
     }
-
     const patientData = patients.find((p) => p.id === value) ?? null;
     setCurrentPatient(patientData);
     const ultima = patientData?.sinaisVitais?.[0];
-
     setLoadingAI(true);
-    setMessages([
-      {
-        id: 1,
-        sender: 'ai',
-        text: `Olá! Analisando **${patientData?.nome_completo}**. Como posso ajudar neste caso?`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      },
-    ]);
-
+    setMessages([{
+      id: 1, sender: 'ai',
+      text: `Olá! Analisando **${patientData?.nome_completo}**. Como posso ajudar neste caso?`,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    }]);
     setTimeout(() => {
       if (ultima) {
         setAiSummary(
           `**Parecer para ${patientData?.nome_completo}:**\n` +
-            `SpO₂ ${ultima.saturacao_oxigenio ?? '--'}% · FC ${ultima.frequencia_cardiaca ?? '--'} bpm · ` +
-            `Temp ${ultima.temperatura ?? '--'}°C · PA ${ultima.pressao_arterial ?? '--'}.`,
+          `SpO₂ ${ultima.saturacao_oxigenio ?? '--'}% · FC ${ultima.frequencia_cardiaca ?? '--'} bpm · ` +
+          `Temp ${ultima.temperatura ?? '--'}°C · PA ${ultima.pressao_arterial ?? '--'}.`,
         );
       } else {
         setAiSummary('Sem leituras de triagem recentes. Registre sinais vitais na aba Pacientes.');
@@ -103,16 +79,13 @@ export const Monitoring = () => {
 
   const handleSendMessage = async () => {
     if (!chatInput.trim() || !selectedPatientId || !currentPatient || sendingMessage) return;
-
     const texto = chatInput.trim();
     setChatInput('');
     setSendingMessage(true);
-
     setMessages((prev) => [
       ...prev,
       { id: Date.now(), sender: 'user', text: texto, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) },
     ]);
-
     try {
       const response = await api.post(`/patients/${selectedPatientId}/chat`, {
         message: texto,
@@ -125,70 +98,41 @@ export const Monitoring = () => {
         },
         history: messages.slice(-4).map((m) => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text })),
       });
-
       if (response.data?.reply) {
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            sender: 'ai',
-            text: response.data.reply,
-            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          },
-        ]);
+        setMessages((prev) => [...prev, {
+          id: Date.now() + 1, sender: 'ai', text: response.data.reply,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        }]);
       }
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        { id: Date.now() + 2, sender: 'ai', text: 'Erro ao conectar com o assistente.', time: '' },
-      ]);
+      setMessages((prev) => [...prev, { id: Date.now() + 2, sender: 'ai', text: 'Erro ao conectar com o assistente.', time: '' }]);
     } finally {
       setSendingMessage(false);
     }
   };
 
   const handleToggleRecording = async () => {
-    if (recordingState === 'recording') {
-      mediaRecorderRef.current?.stop();
-      return;
-    }
-
+    if (recordingState === 'recording') { mediaRecorderRef.current?.stop(); return; }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
-
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
+      mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunksRef.current.push(e.data); };
       mediaRecorder.onstop = async () => {
         stream.getTracks().forEach((t) => t.stop());
         setRecordingState('transcribing');
-
         try {
           const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
           const formData = new FormData();
           formData.append('audio', audioBlob, 'audio.webm');
-
           const { data } = await api.post(`/patients/${selectedPatientId}/chat/audio`, formData);
-
-          if (data?.transcription) {
-            setChatInput(data.transcription);
-          }
-        } catch {
-          // silently fail — doctor can type manually
-        } finally {
-          setRecordingState('idle');
-        }
+          if (data?.transcription) setChatInput(data.transcription);
+        } catch { } finally { setRecordingState('idle'); }
       };
-
       mediaRecorder.start();
       setRecordingState('recording');
-    } catch {
-      setRecordingState('idle');
-    }
+    } catch { setRecordingState('idle'); }
   };
 
   const v = currentPatient?.sinaisVitais?.[0];
@@ -199,8 +143,8 @@ export const Monitoring = () => {
   return (
     <PageShell
       title="Monitoramento Clínico"
-      description="Chat assistido por IA (Grok · Ollama)"
-      icon={<IconHeartRateMonitor size={28} />}
+      description="Chat assistido por IA · Análise de sinais vitais em tempo real"
+      icon={<IconHeartRateMonitor size={24} />}
       actions={
         <Select
           label="Paciente"
@@ -210,84 +154,121 @@ export const Monitoring = () => {
           onChange={handlePatientChange}
           searchable
           w={300}
+          radius="md"
         />
       }
     >
       <Grid gutter="md" style={{ flex: 1, minHeight: 0, height: '100%' }}>
+
+        {/* ── Painel esquerdo: IA + Vitais ── */}
         <Grid.Col span={{ base: 12, lg: 5 }}>
           <Stack gap="md">
-            <Paper withBorder p="md" radius="md">
-              <Group justify="space-between" mb="xs">
-                <Group gap="xs">
-                  <ThemeIcon color="slate" size="md">
-                    <IconRobot size={16} />
-                  </ThemeIcon>
-                  <Text fw={700} size="sm">
-                    Análise de Evolução (IA)
-                  </Text>
+
+            {/* Análise IA */}
+            <Paper radius="lg" style={{ border: '1px solid oklch(0.90 0.01 220)', overflow: 'hidden' }}>
+              <Box
+                p="sm"
+                style={{ borderBottom: '1px solid oklch(0.90 0.01 220)', background: 'oklch(0.97 0.015 235)' }}
+              >
+                <Group justify="space-between">
+                  <Group gap="xs">
+                    <ThemeIcon color="hub" size="sm" radius="md" variant="light">
+                      <IconRobot size={14} />
+                    </ThemeIcon>
+                    <Text fw={700} size="sm" c="slate.8">Análise de Evolução (IA)</Text>
+                  </Group>
+                  {loadingAI && <Loader size="xs" type="dots" color="hub" />}
                 </Group>
-                {loadingAI && <Loader size="xs" type="dots" />}
-              </Group>
-              <ScrollArea mah={220}>
-                <Text size="xs" c="slate.7" style={{ whiteSpace: 'pre-line' }}>
-                  {aiSummary}
-                </Text>
-              </ScrollArea>
+              </Box>
+              <Box p="md">
+                <ScrollArea mah={200}>
+                  <Text size="xs" c="slate.7" style={{ whiteSpace: 'pre-line', lineHeight: 1.7 }}>
+                    {aiSummary}
+                  </Text>
+                </ScrollArea>
+              </Box>
             </Paper>
 
-            <Paper withBorder p="md" radius="md">
-              <Text fw={700} size="sm" mb="sm">
-                Última Leitura de Triagem
-              </Text>
-              <SimpleGrid cols={2} spacing="xs">
-                {[
-                  { label: 'Temperatura', value: v?.temperatura ? `${v.temperatura} °C` : '--', icon: IconTemperature },
-                  { label: 'FC', value: v?.frequencia_cardiaca ? `${v.frequencia_cardiaca} bpm` : '--', icon: IconHeartRateMonitor },
-                  { label: 'SpO₂', value: v?.saturacao_oxigenio ? `${v.saturacao_oxigenio}%` : '--', icon: IconDroplet },
-                  { label: 'PA', value: v?.pressao_arterial ?? '--', icon: IconGauge },
-                ].map(({ label, value, icon: Icon }) => (
-                  <Paper key={label} p="xs" withBorder>
-                    <Group gap="xs">
-                      <Icon size={18} />
-                      <Box>
-                        <Text size="10px" c="dimmed">
-                          {label}
-                        </Text>
-                        <Text fw={700} size="sm">
-                          {value}
-                        </Text>
-                      </Box>
-                    </Group>
-                  </Paper>
-                ))}
-              </SimpleGrid>
+            {/* Última leitura de vitais */}
+            <Paper radius="lg" style={{ border: '1px solid oklch(0.90 0.01 220)', overflow: 'hidden' }}>
+              <Box p="sm" style={{ borderBottom: '1px solid oklch(0.90 0.01 220)', background: 'var(--mantine-color-slate-0)' }}>
+                <Text fw={700} size="sm" c="slate.7" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                  Última Leitura de Triagem
+                </Text>
+              </Box>
+              <Box p="md">
+                <SimpleGrid cols={2} spacing="xs">
+                  {[
+                    { label: 'Temperatura', value: v?.temperatura ? `${v.temperatura} °C` : '--', icon: IconTemperature },
+                    { label: 'FC', value: v?.frequencia_cardiaca ? `${v.frequencia_cardiaca} bpm` : '--', icon: IconHeartRateMonitor },
+                    { label: 'SpO₂', value: v?.saturacao_oxigenio ? `${v.saturacao_oxigenio}%` : '--', icon: IconDroplet },
+                    { label: 'PA', value: v?.pressao_arterial ?? '--', icon: IconGauge },
+                  ].map(({ label, value, icon: Icon }) => (
+                    <Paper
+                      key={label}
+                      p="sm"
+                      radius="md"
+                      style={{ border: '1px solid oklch(0.90 0.01 220)', borderLeft: '3px solid oklch(0.72 0.10 235)' }}
+                    >
+                      <Group gap="xs">
+                        <Icon size={16} color="oklch(0.52 0.14 235)" />
+                        <Box>
+                          <Text size="10px" c="dimmed" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{label}</Text>
+                          <Text fw={700} size="sm" c="slate.8">{value}</Text>
+                        </Box>
+                      </Group>
+                    </Paper>
+                  ))}
+                </SimpleGrid>
+              </Box>
             </Paper>
+
           </Stack>
         </Grid.Col>
 
+        {/* ── Painel direito: Chat ── */}
         <Grid.Col span={{ base: 12, lg: 7 }} style={{ display: 'flex', flexDirection: 'column' }}>
-          <Paper withBorder radius="md" style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 480, overflow: 'hidden' }}>
-            <Box p="sm" bg="slate.9" c="white">
+          <Paper
+            radius="lg"
+            style={{
+              display: 'flex', flexDirection: 'column', flex: 1,
+              minHeight: 480, overflow: 'hidden',
+              border: '1px solid oklch(0.90 0.01 220)',
+            }}
+          >
+            {/* Header do chat */}
+            <Box p="sm" style={{ background: 'oklch(0.24 0.02 240)', borderBottom: '3px solid oklch(0.30 0.02 240)' }}>
               <Group gap="sm">
-                <Avatar radius="md" size="sm" color="gray">
-                  <IconRobot size={18} />
+                <Avatar radius="md" size="sm" color="gray" variant="light">
+                  <IconRobot size={16} />
                 </Avatar>
                 <Box>
-                  <Text fw={700} size="sm">
+                  <Text fw={700} size="sm" c="white" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     Assistente de Caso Clínico
                   </Text>
-                  <Text size="10px" c="slate.4">
-                    Grok · Ollama
+                  <Text size="10px" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>
+                    IA · Análise Clínica
                   </Text>
                 </Box>
+                {selectedPatientId && (
+                  <Badge size="xs" color="hub" variant="light" radius="sm" ml="auto">
+                    {currentPatient?.nome_completo?.split(' ')[0]}
+                  </Badge>
+                )}
               </Group>
             </Box>
 
+            {/* Mensagens */}
             <ScrollArea h="calc(100dvh - 300px)" p="md" bg="slate.0">
               {messages.length === 0 ? (
-                <Text size="xs" c="dimmed" ta="center" py="xl">
-                  Selecione um paciente para iniciar o chat.
-                </Text>
+                <Stack align="center" gap="xs" py="xl">
+                  <ThemeIcon size={48} radius="xl" color="hub" variant="light">
+                    <IconRobot size={24} />
+                  </ThemeIcon>
+                  <Text size="xs" c="dimmed" ta="center">
+                    Selecione um paciente para iniciar o chat.
+                  </Text>
+                </Stack>
               ) : (
                 <Stack gap="sm">
                   {messages.map((msg) => (
@@ -296,55 +277,79 @@ export const Monitoring = () => {
                       gap="xs"
                       align="flex-start"
                       style={{
-                        maxWidth: '90%',
+                        maxWidth: '88%',
                         marginLeft: msg.sender === 'user' ? 'auto' : 0,
                         flexDirection: msg.sender === 'user' ? 'row-reverse' : 'row',
                       }}
                     >
-                      <Avatar size="sm" radius="md" color="slate">
+                      <Avatar
+                        size="sm"
+                        radius="md"
+                        color={msg.sender === 'user' ? 'hub' : 'gray'}
+                        variant={msg.sender === 'user' ? 'filled' : 'light'}
+                      >
                         {msg.sender === 'user' ? <IconUser size={12} /> : <IconRobot size={12} />}
                       </Avatar>
                       <Paper
                         p="xs"
                         radius="md"
-                        bg={msg.sender === 'user' ? 'slate.8' : 'white'}
-                        c={msg.sender === 'user' ? 'white' : 'slate.8'}
-                        withBorder={msg.sender === 'ai'}
+                        style={{
+                          background: msg.sender === 'user' ? 'oklch(0.52 0.14 235)' : '#fff',
+                          color: msg.sender === 'user' ? '#fff' : 'oklch(0.24 0.02 240)',
+                          border: msg.sender === 'ai' ? '1px solid oklch(0.90 0.01 220)' : 'none',
+                        }}
                       >
                         <Box style={{ fontSize: 12 }}>
                           <ReactMarkdown>{msg.text}</ReactMarkdown>
                         </Box>
-                        <Text size="9px" ta="right" mt={4} c={msg.sender === 'user' ? 'slate.4' : 'dimmed'}>
-                          {msg.time}
-                        </Text>
+                        {msg.time && (
+                          <Text size="9px" ta="right" mt={4} style={{ opacity: 0.6 }}>
+                            {msg.time}
+                          </Text>
+                        )}
                       </Paper>
                     </Group>
                   ))}
-                  {sendingMessage && <Loader size="xs" type="dots" />}
+                  {sendingMessage && (
+                    <Group gap="xs" align="center">
+                      <Avatar size="sm" radius="md" color="gray" variant="light"><IconRobot size={12} /></Avatar>
+                      <Loader size="xs" type="dots" color="hub" />
+                    </Group>
+                  )}
                   <div ref={messagesEndRef} />
                 </Stack>
               )}
             </ScrollArea>
 
-            {/* Indicador de estado de gravação */}
+            {/* Indicador de gravação */}
             {(isRecording || isTranscribing) && (
-              <Group px="sm" py={4} gap="xs" bg={isRecording ? 'red.0' : 'blue.0'}>
+              <Group
+                px="sm"
+                py={6}
+                gap="xs"
+                style={{ background: isRecording ? 'oklch(0.97 0.05 25)' : 'oklch(0.97 0.02 235)', borderTop: '1px solid oklch(0.92 0.01 220)' }}
+              >
                 {isTranscribing
-                  ? <Loader size={10} color="blue" />
-                  : <Box w={8} h={8} bg="red" style={{ borderRadius: '50%', animation: 'pulse 1s infinite' }} />
+                  ? <Loader size={10} color="hub" />
+                  : <Box w={8} h={8} bg="red" style={{ borderRadius: '50%', animation: 'pulse 1s infinite', flexShrink: 0 }} />
                 }
-                <Text size="xs" c={isRecording ? 'red.7' : 'blue.7'}>
+                <Text size="xs" c={isRecording ? 'red.7' : 'hub.6'}>
                   {isRecording ? 'Gravando... clique no microfone para parar' : 'Transcrevendo áudio...'}
                 </Text>
               </Group>
             )}
 
-            <Group p="sm" style={{ borderTop: '1px solid var(--mantine-color-slate-2)' }}>
-              {/* Botão de microfone */}
+            {/* Input do chat */}
+            <Group
+              p="sm"
+              gap="xs"
+              style={{ borderTop: '1px solid oklch(0.90 0.01 220)', background: '#fff' }}
+            >
               <ActionIcon
                 size="lg"
-                color={isRecording ? 'red' : 'slate'}
+                color={isRecording ? 'red' : 'hub'}
                 variant={isRecording ? 'filled' : 'light'}
+                radius="md"
                 disabled={micDisabled}
                 loading={isTranscribing}
                 onClick={handleToggleRecording}
@@ -355,13 +360,11 @@ export const Monitoring = () => {
 
               <TextInput
                 style={{ flex: 1 }}
+                radius="md"
                 placeholder={
-                  isRecording
-                    ? 'Gravando...'
-                    : isTranscribing
-                    ? 'Transcrevendo...'
-                    : selectedPatientId
-                    ? 'Mensagem ou use o microfone...'
+                  isRecording ? 'Gravando...'
+                    : isTranscribing ? 'Transcrevendo...'
+                    : selectedPatientId ? 'Mensagem ou use o microfone...'
                     : 'Selecione um paciente...'
                 }
                 disabled={!selectedPatientId || sendingMessage || isRecording || isTranscribing}
@@ -372,8 +375,9 @@ export const Monitoring = () => {
 
               <ActionIcon
                 size="lg"
-                color="slate"
+                color="hub"
                 variant="filled"
+                radius="md"
                 disabled={!selectedPatientId || sendingMessage || isRecording || isTranscribing}
                 loading={sendingMessage}
                 onClick={handleSendMessage}
@@ -383,6 +387,7 @@ export const Monitoring = () => {
             </Group>
           </Paper>
         </Grid.Col>
+
       </Grid>
 
       <style>{`
