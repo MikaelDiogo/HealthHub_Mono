@@ -1,2 +1,77 @@
-@import "tailwindcss";
+@keyframes hubPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.5; }
+}
 
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.login-root {
+  display: grid;
+  grid-template-columns: 420px 1fr;
+  min-height: 100dvh;
+}
+
+.login-panel-left {
+  background: oklch(0.24 0.02 240);
+  display: flex;
+  flex-direction: column;
+  padding: 48px 40px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-panel-right {
+  background: oklch(0.985 0.006 210);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+}
+
+.hub-pulse-dot {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: oklch(1 0 0 / 0.45);
+  animation: hubPulse 2.6s ease-in-out infinite;
+}
+
+.login-card {
+  animation: fadeUp 0.45s ease both;
+}
+
+.login-queue-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: oklch(0.30 0.02 240);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.login-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: oklch(0.75 0.18 150);
+  animation: hubPulse 2s ease-in-out infinite;
+}
+
+@media (min-width: 769px) {
+  .login-mobile-brand {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-root {
+    grid-template-columns: 1fr;
+  }
+  .login-panel-left {
+    display: none;
+  }
+}
