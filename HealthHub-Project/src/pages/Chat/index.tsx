@@ -495,7 +495,9 @@ export function Chat() {
 
               {/* Input */}
               <Box
-                p="sm"
+                px="md"
+                pt="sm"
+                pb={18}
                 style={{ borderTop: '1px solid var(--mantine-color-slate-2)', background: '#fff', flexShrink: 0 }}
               >
                 {/* Toggle de prioridade */}
@@ -533,7 +535,7 @@ export function Chat() {
                 <Group gap="xs" wrap="nowrap">
                   <TextInput
                     style={{ flex: 1 }}
-                    radius="xl"
+                    radius="md"
                     placeholder="Escreva uma mensagem..."
                     value={input}
                     onChange={e => setInput(e.currentTarget.value)}
@@ -553,7 +555,7 @@ export function Chat() {
                       size="lg"
                       color="hub.6"
                       variant="filled"
-                      radius="xl"
+                      radius="md"
                       loading={sending}
                       disabled={!input.trim()}
                       onClick={handleSend}
