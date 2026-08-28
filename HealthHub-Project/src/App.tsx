@@ -11,7 +11,6 @@ import { MobileTriage } from './pages/MobileTriage'
 import DashboardHome from './pages/Dashboard'
 import { CareProvider } from './context/CareContext'
 import { AuthProvider, useAuth, type UserRole } from './context/AuthContext'
-import { useMobile } from './hooks/useMobile'
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const token = localStorage.getItem('token')
@@ -29,22 +28,8 @@ function RoleRoute({ children, roles }: { children: React.ReactNode; roles: User
   return <>{children}</>
 }
 
-// Redireciona usuários móveis (enfermeiro/recepcionista) para o fluxo mobile
-function MobileGuard({ children }: { children: React.ReactNode }) {
-  const { role } = useAuth()
-  const isMobile = useMobile()
-  if (isMobile && (role === 'enfermeiro' || role === 'recepcionista')) {
-    return <Navigate to="/mobile" replace />
-  }
-  return <>{children}</>
-}
-
 function DefaultHome() {
   const { role } = useAuth()
-  const isMobile = useMobile()
-  if (isMobile && (role === 'enfermeiro' || role === 'recepcionista')) {
-    return <Navigate to="/mobile" replace />
-  }
   if (role === 'recepcionista') return <Navigate to="/main/alertas" replace />
   return <DashboardHome />
 }
@@ -57,14 +42,12 @@ export default function App() {
           <Routes>
             <Route path="/" element={<Login />} />
 
-            {/* ── Rotas desktop ── */}
+            {/* ── Rotas desktop (responsivas para todos os roles) ── */}
             <Route
               path="/main"
               element={
                 <PrivateRoute>
-                  <MobileGuard>
-                    <DashboardLayout />
-                  </MobileGuard>
+                  <DashboardLayout />
                 </PrivateRoute>
               }
             >
@@ -90,7 +73,7 @@ export default function App() {
               <Route path="politica" element={<PoliticaDados />} />
             </Route>
 
-            {/* ── Rotas mobile (enfermeiro / recepcionista) ── */}
+            {/* ── Rota mobile dedicada (opcional, todos os roles) ── */}
             <Route
               path="/mobile"
               element={

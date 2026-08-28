@@ -75,7 +75,7 @@ const CardPatient = ({
       >
         <Box>
           <Group mb="md" wrap="nowrap">
-            <Avatar size={48} radius="md" color="hub" variant="light">
+            <Avatar size={48} radius="md" color="slate" variant="light">
               {getInitials(patientName)}
             </Avatar>
             <Box style={{ minWidth: 0 }}>
@@ -96,12 +96,11 @@ const CardPatient = ({
                 style={{
                   textAlign: 'center',
                   borderRadius: 12,
-                  backgroundColor: 'oklch(0.97 0.02 235)',
+                  backgroundColor: 'var(--mantine-color-slate-0)',
                   border: '1px solid oklch(0.90 0.01 220)',
-                  borderLeft: '2px solid oklch(0.88 0.05 235)',
                 }}
               >
-                <ThemeIcon size="sm" radius="md" color="hub" variant="light" mx="auto" mb={6}>
+                <ThemeIcon size="sm" radius="md" color="slate" variant="light" mx="auto" mb={6}>
                   <Icon size={16} />
                 </ThemeIcon>
                 <Text fw={700} size="sm" c="slate.7" truncate>
@@ -115,7 +114,7 @@ const CardPatient = ({
         <Group grow pt="sm" style={{ borderTop: '1px solid oklch(0.90 0.01 220)' }}>
           <Button
             variant="outline"
-            color="hub"
+            color="slate"
             size="sm"
             leftSection={<IconEye size={16} />}
             onClick={handleViewAction}
@@ -123,7 +122,7 @@ const CardPatient = ({
             Visualizar
           </Button>
           <Button
-            color="hub"
+            color="slate"
             size="sm"
             leftSection={<IconPencil size={16} />}
             onClick={onEdit}

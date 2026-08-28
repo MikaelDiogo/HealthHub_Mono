@@ -161,27 +161,22 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
   };
 
   return (
-    <Modal opened={opened} onClose={onClose} withCloseButton={false} centered size="lg" radius="md" padding={0}>
+    <Modal opened={opened} onClose={onClose} withCloseButton={false} centered size="lg" radius="lg" padding={0}>
       <Box pos="relative">
         <LoadingOverlay visible={loading} />
 
         <form onSubmit={form.onSubmit(handleUpdate)}>
-          <Box
-            p="lg"
-            style={{
-              background: 'linear-gradient(90deg, var(--mantine-color-slate-9), var(--mantine-color-slate-8))',
-            }}
-          >
+          <Box p="lg" style={{ background: 'oklch(0.24 0.02 240)' }}>
             <Group justify="space-between">
               <Group gap="md">
                 <ThemeIcon size="xl" radius="md" variant="light" color="gray">
                   <IconUser size={24} />
                 </ThemeIcon>
                 <Box>
-                  <Title order={4} c="white">
+                  <Title order={4} c="white" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     Editar Prontuário
                   </Title>
-                  <Text size="xs" c="slate.4">
+                  <Text size="xs" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>
                     {patient?.nome_completo}
                   </Text>
                 </Box>
@@ -286,7 +281,7 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
             </Tabs>
           </Box>
 
-          <Group justify="flex-end" p="md" style={{ borderTop: '1px solid var(--mantine-color-slate-1)', backgroundColor: 'var(--mantine-color-slate-0)' }}>
+          <Group justify="flex-end" p="md" style={{ borderTop: '1px solid oklch(0.90 0.01 220)', backgroundColor: 'var(--mantine-color-slate-0)' }}>
             <Button variant="subtle" color="gray" onClick={onClose}>
               Cancelar
             </Button>

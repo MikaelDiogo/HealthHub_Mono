@@ -1,4 +1,4 @@
-import { Paper, Group, Stack, Text, ThemeIcon } from '@mantine/core';
+import { Box, Group, Stack, Text, UnstyledButton } from '@mantine/core';
 import { IconUser } from '@tabler/icons-react';
 import type { Patient } from '../../types/patient';
 
@@ -10,53 +10,60 @@ interface PatientSidebarCardProps {
 
 export function PatientSidebarCard({ patient, isActive, onClick }: PatientSidebarCardProps) {
   return (
-    <Paper
-      withBorder
-      p="sm"
-      radius="md"
+    <UnstyledButton
       onClick={onClick}
+      w="100%"
+      p="sm"
       style={{
-        cursor: 'pointer',
-        width: '100%',
-        backgroundColor: isActive ? 'oklch(0.95 0.04 235)' : '#fff',
-        borderColor: isActive ? 'oklch(0.52 0.14 235)' : 'oklch(0.90 0.01 220)',
-        borderLeft: isActive ? '3px solid oklch(0.52 0.14 235)' : '3px solid transparent',
-        boxShadow: isActive ? 'var(--mantine-shadow-sm)' : undefined,
+        borderRadius: 10,
+        border: isActive
+          ? '1.5px solid var(--mantine-color-slate-7)'
+          : '1.5px solid var(--mantine-color-slate-2)',
+        backgroundColor: isActive ? 'var(--mantine-color-slate-8)' : '#fff',
+        transition: 'all 120ms ease',
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) e.currentTarget.style.backgroundColor = 'var(--mantine-color-slate-0)';
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) e.currentTarget.style.backgroundColor = '#fff';
       }}
     >
       <Group wrap="nowrap" gap="sm">
-        <ThemeIcon
-          size="lg"
-          radius="md"
-          variant={isActive ? 'light' : 'default'}
-          color={isActive ? 'hub' : 'slate'}
+        <Box
+          style={{
+            width: 34,
+            height: 34,
+            borderRadius: 8,
+            background: isActive ? 'rgba(255,255,255,0.15)' : 'var(--mantine-color-slate-1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            color: isActive ? '#fff' : 'var(--mantine-color-slate-5)',
+          }}
         >
-          <IconUser size={18} stroke={2} />
-        </ThemeIcon>
+          <IconUser size={16} stroke={2} />
+        </Box>
 
-        <Stack gap={0} style={{ flex: 1, overflow: 'hidden' }}>
+        <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
           <Text
             size="sm"
             fw={700}
             truncate
             lh={1.2}
-            style={{ color: isActive ? 'oklch(0.24 0.02 240)' : 'var(--mantine-color-slate-7)' }}
+            style={{ color: isActive ? '#fff' : 'var(--mantine-color-slate-8)' }}
           >
             {patient.nome_completo}
           </Text>
-          <Group gap={6} mt={3}>
-            <Text size="11px" fw={500} c={isActive ? 'slate.6' : 'slate.5'}>
-              {patient.idade ? `${patient.idade} anos` : '-- anos'}
-            </Text>
-            <Text size="11px" c={isActive ? 'slate.4' : 'slate.3'}>
-              •
-            </Text>
-            <Text size="11px" fw={500} c={isActive ? 'slate.6' : 'slate.5'} tt="capitalize">
-              {patient.sexo || 'Não inf.'}
-            </Text>
-          </Group>
+          <Text
+            size="11px"
+            style={{ color: isActive ? 'rgba(255,255,255,0.6)' : 'var(--mantine-color-slate-5)' }}
+          >
+            {patient.idade ? `${patient.idade} anos` : '--'} · {patient.sexo || '—'}
+          </Text>
         </Stack>
       </Group>
-    </Paper>
+    </UnstyledButton>
   );
 }

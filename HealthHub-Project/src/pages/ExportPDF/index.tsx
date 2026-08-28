@@ -56,7 +56,7 @@ function InfoRow({ label, value }: { label: string; value?: string | number }) {
 function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
     <Group gap="xs" mb="sm">
-      <ThemeIcon size="sm" radius="md" color="hub" variant="light">{icon}</ThemeIcon>
+      <ThemeIcon size="sm" radius="md" color="slate" variant="light">{icon}</ThemeIcon>
       <Text fw={700} size="xs" c="slate.6" tt="uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.1em' }}>{title}</Text>
     </Group>
   );
@@ -482,7 +482,7 @@ function AtestadoModal({
         />
         <Group justify="flex-end" pt="sm">
           <Button variant="subtle" color="gray" onClick={onClose}>Cancelar</Button>
-          <Button color="hub" leftSection={<IconDownload size={14} />} onClick={handleGerar} disabled={!dias || Number(dias) < 1}>
+          <Button color="slate" leftSection={<IconDownload size={14} />} onClick={handleGerar} disabled={!dias || Number(dias) < 1}>
             Gerar Atestado PDF
           </Button>
         </Group>
@@ -548,7 +548,7 @@ function PrescricaoModal({
           <Divider color="slate.1" />
           <Group justify="flex-end">
             <Button variant="subtle" color="gray" onClick={onClose}>Cancelar</Button>
-            <Button color="hub" leftSection={<IconDownload size={14} />} onClick={handleGerar}>
+            <Button color="slate" leftSection={<IconDownload size={14} />} onClick={handleGerar}>
               Gerar Guia PDF
             </Button>
           </Group>
@@ -644,7 +644,7 @@ export const ExportPDF = () => {
                   radius="md"
                   style={{ flex: 1 }}
                 />
-                <Button radius="md" color="hub" onClick={buscarPaciente} loading={searching} px="md">
+                <Button radius="md" color="slate" onClick={buscarPaciente} loading={searching} px="md">
                   Buscar
                 </Button>
               </Group>
@@ -701,14 +701,14 @@ export const ExportPDF = () => {
           {loadingDetail ? (
             <Center h={400}>
               <Stack align="center" gap="xs">
-                <Loader color="hub" size="md" type="dots" />
+                <Loader color="slate" size="md" type="dots" />
                 <Text size="xs" c="slate.5">Carregando ficha médica...</Text>
               </Stack>
             </Center>
           ) : !selected ? (
             <Center h={400}>
               <Stack align="center" gap="sm">
-                <ThemeIcon size={56} radius="xl" color="hub" variant="light">
+                <ThemeIcon size={56} radius="xl" color="slate" variant="light">
                   <IconClipboardText size={28} />
                 </ThemeIcon>
                 <Text fw={600} c="slate.6">Selecione um paciente para visualizar a ficha</Text>
@@ -723,7 +723,7 @@ export const ExportPDF = () => {
                 {/* Header da ficha */}
                 <Group justify="space-between" mb="md" wrap="wrap" gap="sm">
                   <Group gap="xs">
-                    <ThemeIcon size="lg" radius="md" color="hub" variant="light">
+                    <ThemeIcon size="lg" radius="md" color="slate" variant="light">
                       <IconUser size={20} />
                     </ThemeIcon>
                     <Box>
@@ -737,7 +737,7 @@ export const ExportPDF = () => {
                   {/* Botões de exportação */}
                   <Group gap="xs" wrap="wrap">
                     <Button
-                      color="hub"
+                      color="slate"
                       variant="filled"
                       leftSection={<IconDownload size={16} />}
                       radius="md"
@@ -749,7 +749,7 @@ export const ExportPDF = () => {
                     {isMedico && (
                       <>
                         <Button
-                          color="hub"
+                          color="slate"
                           variant="light"
                           leftSection={<IconFileCertificate size={16} />}
                           radius="md"
@@ -759,7 +759,7 @@ export const ExportPDF = () => {
                           Atestado
                         </Button>
                         <Button
-                          color="hub"
+                          color="slate"
                           variant="outline"
                           leftSection={<IconPill size={16} />}
                           radius="md"

@@ -22,40 +22,38 @@ export const CardDashboard = ({ patient }: CardDashboardProps) => {
   const isTachycardic = hasVitals && bpm > 100;
   const isCritical = isHypoxic || isTachycardic;
 
+  const NAVY = 'oklch(0.24 0.02 240)';
+
   const stats = [
     {
       label: 'Saturação',
       value: currentVitals?.saturacao_oxigenio ? `${currentVitals.saturacao_oxigenio}%` : '--',
       icon: IconDroplet,
-      color: isHypoxic ? 'red' : 'hub',
-      accentColor: isHypoxic ? 'var(--mantine-color-red-5)' : 'var(--mantine-color-hub-5)',
+      color: isHypoxic ? 'red' : 'slate',
+      accentColor: isHypoxic ? 'var(--mantine-color-red-5)' : NAVY,
     },
     {
       label: 'Freq. Cardíaca',
       value: currentVitals?.frequencia_cardiaca || '--',
       unit: 'bpm',
       icon: IconHeartRateMonitor,
-      color: isTachycardic ? 'red' : 'hub',
-      accentColor: isTachycardic ? 'var(--mantine-color-red-5)' : 'var(--mantine-color-hub-5)',
+      color: isTachycardic ? 'red' : 'slate',
+      accentColor: isTachycardic ? 'var(--mantine-color-red-5)' : NAVY,
     },
     {
       label: 'Temperatura',
       value: currentVitals?.temperatura ? `${currentVitals.temperatura}` : '--',
       unit: '°C',
       icon: IconTemperature,
-      color: 'yellow',
-      accentColor: 'var(--mantine-color-yellow-5)',
+      color: 'slate',
+      accentColor: NAVY,
     },
     {
       label: 'Status Geral',
       value: !patient ? '--' : !hasVitals ? 'Sem Dados' : isCritical ? 'Crítico' : 'Estável',
       icon: !hasVitals || isCritical ? IconAlertTriangle : IconChecks,
-      color: !hasVitals ? 'slate' : isCritical ? 'red' : 'hub',
-      accentColor: !hasVitals
-        ? 'var(--mantine-color-slate-5)'
-        : isCritical
-        ? 'var(--mantine-color-red-5)'
-        : 'var(--mantine-color-hub-5)',
+      color: isCritical ? 'red' : 'slate',
+      accentColor: isCritical ? 'var(--mantine-color-red-5)' : NAVY,
     },
   ];
 

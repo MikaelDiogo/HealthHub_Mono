@@ -31,6 +31,7 @@ interface SidebarLinkProps {
   textLabel: string;
   icon: React.ReactNode;
   badge?: string;
+  onClick?: () => void;
 }
 
 export const ButtonLogOut = ({ to, icon }: SidebarLinkProps) => {
@@ -56,7 +57,7 @@ export const ButtonLogOut = ({ to, icon }: SidebarLinkProps) => {
   );
 };
 
-export const SideBarLink = ({ to, label, icon, textLabel, badge }: SidebarLinkProps) => {
+export const SideBarLink = ({ to, label, icon, textLabel, badge, onClick }: SidebarLinkProps) => {
   const location = useLocation();
   const isActive = location.pathname === to;
 
@@ -67,6 +68,7 @@ export const SideBarLink = ({ to, label, icon, textLabel, badge }: SidebarLinkPr
       w="100%"
       px="sm"
       py={5}
+      onClick={onClick}
       style={{
         borderRadius: 8,
         border: isActive
@@ -97,7 +99,7 @@ export const SideBarLink = ({ to, label, icon, textLabel, badge }: SidebarLinkPr
           </Stack>
         </Group>
         {badge && (
-          <Badge size="xs" color="hub" variant="filled" style={{ flexShrink: 0 }}>
+          <Badge size="xs" color="slate" variant="filled" style={{ flexShrink: 0 }}>
             {badge}
           </Badge>
         )}
@@ -179,26 +181,20 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
         Adicionar Paciente
       </Button>
 
-      <Modal opened={opened} onClose={close} withCloseButton={false} centered size="lg" radius="md" padding={0}>
-        <Box
-          p="lg"
-          style={{
-            background: 'linear-gradient(90deg, var(--mantine-color-slate-9), var(--mantine-color-slate-8))',
-            color: 'white',
-          }}
-        >
+      <Modal opened={opened} onClose={close} withCloseButton={false} centered size="lg" radius="lg" padding={0}>
+        <Box p="lg" style={{ background: 'oklch(0.24 0.02 240)' }}>
           <Group gap="sm">
             <ThemeIcon size="lg" radius="md" variant="light" color="gray">
               <IconHeartRateMonitor size={20} />
             </ThemeIcon>
             <Box>
-              <Title order={3} c="white" size="lg">
-                Admitir Novo Paciente
+              <Title order={3} c="white" size="lg" style={{ fontFamily: "'Manrope', sans-serif" }}>
+                Novo Paciente
               </Title>
-              <Text size="xs" c="slate.4">
+              <Text size="xs" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>
                 {isRecepcionista
-                  ? 'Preencha os dados pessoais. Todos os campos são opcionais.'
-                  : 'Preencha os dados cadastrais e de triagem do HealthHub.'}
+                  ? 'Todos os campos são opcionais — emergências podem ser admitidas em branco.'
+                  : 'Dados cadastrais, triagem e anamnese do paciente.'}
               </Text>
             </Box>
           </Group>
@@ -253,7 +249,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
                 </Stack>
               </>
             ) : (
-              <Tabs color="dark" defaultValue="pessoais" variant="pills">
+              <Tabs color="slate" defaultValue="pessoais" variant="pills">
                 <Tabs.List grow mb="xl" style={{ backgroundColor: 'var(--mantine-color-slate-0)', padding: 4, borderRadius: 12 }}>
                   <Tabs.Tab value="pessoais" leftSection={<IconUser size={16} />}>
                     Pessoais

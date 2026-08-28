@@ -74,7 +74,7 @@ function HHLogo({ size = 36 }: { size?: number }) {
   );
 }
 
-export default function SideBar() {
+export default function SideBar({ onNavClose }: { onNavClose?: () => void }) {
   const [patientCount, setPatientCount] = useState<number | null>(null);
   const { role, nome } = useAuth();
   const termosAceitos = useTermosAceitos();
@@ -150,7 +150,7 @@ export default function SideBar() {
           <Text
             size="xs"
             fw={500}
-            c="hub.7"
+            c="slate.7"
             style={{ flex: 1 }}
           >
             Sistema Online
@@ -188,50 +188,17 @@ export default function SideBar() {
         </Text>
         <Stack gap={2}>
           {role !== 'recepcionista' && (
-            <SideBarLink
-              to="/main"
-              label="Dashboard"
-              textLabel="Visão Geral"
-              icon={<IconLayoutDashboard size={18} stroke={2} />}
-            />
+            <SideBarLink to="/main" label="Dashboard" textLabel="Visão Geral" icon={<IconLayoutDashboard size={18} stroke={2} />} onClick={onNavClose} />
           )}
-          <SideBarLink
-            to="/main/pacientes"
-            label="Pacientes"
-            textLabel={role === 'recepcionista' ? 'Cadastrar Pacientes' : 'Gerenciar Pacientes'}
-            icon={<IconUsers size={18} stroke={2} />}
-          />
+          <SideBarLink to="/main/pacientes" label="Pacientes" textLabel={role === 'recepcionista' ? 'Cadastrar Pacientes' : 'Gerenciar Pacientes'} icon={<IconUsers size={18} stroke={2} />} onClick={onNavClose} />
           {role !== 'recepcionista' && (
-            <SideBarLink
-              to="/main/monitor"
-              label="Monitoramento"
-              textLabel="Sinais em Tempo Real"
-              icon={<IconWaveSawTool size={18} stroke={2} />}
-            />
+            <SideBarLink to="/main/monitor" label="Monitoramento" textLabel="Sinais em Tempo Real" icon={<IconWaveSawTool size={18} stroke={2} />} onClick={onNavClose} />
           )}
-          <SideBarLink
-            to="/main/alertas"
-            label="Esteira de Cuidado"
-            textLabel="Triagem e Fluxo Clínico"
-            icon={<IconAlertTriangle size={18} stroke={2} />}
-          />
+          <SideBarLink to="/main/alertas" label="Esteira de Cuidado" textLabel="Triagem e Fluxo Clínico" icon={<IconAlertTriangle size={18} stroke={2} />} onClick={onNavClose} />
           {role !== 'recepcionista' && (
-            <SideBarLink
-              to="/main/exportar"
-              label="Exportar Prontuário"
-              textLabel="Gerar PDF do Paciente"
-              icon={<IconFile size={18} stroke={2} />}
-            />
+            <SideBarLink to="/main/exportar" label="Exportar Prontuário" textLabel="Gerar PDF do Paciente" icon={<IconFile size={18} stroke={2} />} onClick={onNavClose} />
           )}
-
-          {/* Política de Dados — sempre visível, com badge "Novo" se ainda não aceitou */}
-          <SideBarLink
-            to="/main/politica"
-            label="Política de Dados"
-            textLabel="LGPD e Privacidade"
-            icon={<IconShieldLock size={18} stroke={2} />}
-            badge={!termosAceitos ? 'Novo' : undefined}
-          />
+          <SideBarLink to="/main/politica" label="Política de Dados" textLabel="LGPD e Privacidade" icon={<IconShieldLock size={18} stroke={2} />} badge={!termosAceitos ? 'Novo' : undefined} onClick={onNavClose} />
         </Stack>
       </Box>
 
@@ -256,7 +223,7 @@ export default function SideBar() {
         <Stack gap={0}>
           <StatRow
             icon={<IconUserFilled size={11} />}
-            color="hub"
+            color="slate"
             label="Pacientes"
             value={
               patientCount === null ? (
@@ -273,10 +240,10 @@ export default function SideBar() {
               <Divider color="oklch(0.92 0.01 220)" />
               <StatRow
                 icon={<IconActivity size={11} />}
-                color="hub"
+                color="slate"
                 label="Monitoramento"
                 value={
-                  <Badge color="hub" size="xs" variant="light" radius="sm">
+                  <Badge color="slate" size="xs" variant="light" radius="sm">
                     Ativo
                   </Badge>
                 }
@@ -308,7 +275,7 @@ export default function SideBar() {
       >
         <Group justify="space-between" wrap="nowrap" gap="xs">
           <Group gap={8} wrap="nowrap" style={{ flex: 1, minWidth: 0 }}>
-            <Avatar color="hub" radius="md" size={34} style={{ flexShrink: 0 }}>
+            <Avatar color="slate" radius="md" size={34} style={{ flexShrink: 0 }}>
               {initials}
             </Avatar>
             <Stack gap={0} style={{ minWidth: 0 }}>

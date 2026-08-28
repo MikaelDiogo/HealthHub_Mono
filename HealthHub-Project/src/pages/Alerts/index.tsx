@@ -180,7 +180,7 @@ function AdmitirModal({ opened, onClose, onAdmit, filaIds }: {
       onClose={onClose}
       title={
         <Group gap="xs">
-          <ThemeIcon size="sm" color="hub" variant="light" radius="md"><IconUserPlus size={13} /></ThemeIcon>
+          <ThemeIcon size="sm" color="slate" variant="light" radius="md"><IconUserPlus size={13} /></ThemeIcon>
           <Text fw={700} size="sm">Admitir Paciente na Esteira</Text>
         </Group>
       }
@@ -195,7 +195,7 @@ function AdmitirModal({ opened, onClose, onAdmit, filaIds }: {
         radius="md"
       />
       {loading ? (
-        <Center py="xl"><Loader size="sm" color="hub" type="dots" /></Center>
+        <Center py="xl"><Loader size="sm" color="slate" type="dots" /></Center>
       ) : filtered.length === 0 ? (
         <Text size="xs" c="dimmed" ta="center" py="xl">
           {dbPatients.length === 0 ? 'Nenhum paciente cadastrado.' : 'Todos já estão na esteira ou não encontrados.'}
@@ -222,7 +222,7 @@ function AdmitirModal({ opened, onClose, onAdmit, filaIds }: {
                   {[p.idade ? `${p.idade} anos` : null, p.sexo].filter(Boolean).join(' · ')}
                 </Text>
               </Box>
-              <Button size="xs" color="hub" leftSection={<IconPlus size={12} />} onClick={() => { onAdmit(p); onClose(); }}>
+              <Button size="xs" color="slate" leftSection={<IconPlus size={12} />} onClick={() => { onAdmit(p); onClose(); }}>
                 Admitir
               </Button>
             </Group>
@@ -297,10 +297,10 @@ function AltaModal({ patient, opened, onClose, onConfirm, medicoNome }: {
         <Divider my="md" color="oklch(0.92 0.01 220)" />
         <Group justify="flex-end" gap="xs">
           <Button variant="subtle" color="gray" onClick={onClose} disabled={saving}>Cancelar</Button>
-          <Button variant="outline" color="hub" loading={saving} onClick={() => handleConfirm(false)}>
+          <Button variant="outline" color="slate" loading={saving} onClick={() => handleConfirm(false)}>
             Dar Alta sem PDF
           </Button>
-          <Button color="hub" leftSection={<IconDownload size={14} />} loading={saving} onClick={() => handleConfirm(true)}>
+          <Button color="slate" leftSection={<IconDownload size={14} />} loading={saving} onClick={() => handleConfirm(true)}>
             Exportar Guia e Dar Alta
           </Button>
         </Group>
@@ -347,7 +347,7 @@ export const Alerts = () => {
     return (
       <Center style={{ height: '60vh' }}>
         <Stack align="center" gap="xs">
-          <Loader color="hub" type="dots" />
+          <Loader color="slate" type="dots" />
           <Text size="xs" c="dimmed">Carregando esteira...</Text>
         </Stack>
       </Center>
@@ -366,10 +366,10 @@ export const Alerts = () => {
               <Text size="xs" fw={700} c="slate.5" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.06em' }}>
                 VISÃO:
               </Text>
-              <Badge color="hub" size="sm" variant="light" radius="sm">{currentRole}</Badge>
+              <Badge color="slate" size="sm" variant="light" radius="sm">{currentRole}</Badge>
             </Group>
           </Paper>
-          <Button size="sm" color="hub" leftSection={<IconUserPlus size={16} />} radius="md" onClick={openAdmitir}>
+          <Button size="sm" color="slate" leftSection={<IconUserPlus size={16} />} radius="md" onClick={openAdmitir}>
             Admitir Paciente
           </Button>
         </Group>

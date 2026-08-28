@@ -168,16 +168,16 @@ export const Monitoring = () => {
             <Paper radius="lg" style={{ border: '1px solid oklch(0.90 0.01 220)', overflow: 'hidden' }}>
               <Box
                 p="sm"
-                style={{ borderBottom: '1px solid oklch(0.90 0.01 220)', background: 'oklch(0.97 0.015 235)' }}
+                style={{ background: 'oklch(0.24 0.02 240)', borderBottom: '3px solid oklch(0.30 0.02 240)' }}
               >
                 <Group justify="space-between">
                   <Group gap="xs">
-                    <ThemeIcon color="hub" size="sm" radius="md" variant="light">
+                    <ThemeIcon color="gray" size="sm" radius="md" variant="light">
                       <IconRobot size={14} />
                     </ThemeIcon>
-                    <Text fw={700} size="sm" c="slate.8">Análise de Evolução (IA)</Text>
+                    <Text fw={700} size="sm" c="white" style={{ fontFamily: "'Manrope', sans-serif" }}>Análise de Evolução (IA)</Text>
                   </Group>
-                  {loadingAI && <Loader size="xs" type="dots" color="hub" />}
+                  {loadingAI && <Loader size="xs" type="dots" color="gray" />}
                 </Group>
               </Box>
               <Box p="md">
@@ -191,8 +191,8 @@ export const Monitoring = () => {
 
             {/* Última leitura de vitais */}
             <Paper radius="lg" style={{ border: '1px solid oklch(0.90 0.01 220)', overflow: 'hidden' }}>
-              <Box p="sm" style={{ borderBottom: '1px solid oklch(0.90 0.01 220)', background: 'var(--mantine-color-slate-0)' }}>
-                <Text fw={700} size="sm" c="slate.7" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+              <Box p="sm" style={{ borderBottom: '1px solid oklch(0.90 0.01 220)', background: 'oklch(0.24 0.02 240)' }}>
+                <Text fw={700} size="sm" c="white" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                   Última Leitura de Triagem
                 </Text>
               </Box>
@@ -208,10 +208,10 @@ export const Monitoring = () => {
                       key={label}
                       p="sm"
                       radius="md"
-                      style={{ border: '1px solid oklch(0.90 0.01 220)', borderLeft: '3px solid oklch(0.72 0.10 235)' }}
+                      style={{ border: '1px solid oklch(0.90 0.01 220)', background: 'var(--mantine-color-slate-0)' }}
                     >
                       <Group gap="xs">
-                        <Icon size={16} color="oklch(0.52 0.14 235)" />
+                        <Icon size={16} color="oklch(0.60 0.03 230)" />
                         <Box>
                           <Text size="10px" c="dimmed" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{label}</Text>
                           <Text fw={700} size="sm" c="slate.8">{value}</Text>
@@ -251,7 +251,7 @@ export const Monitoring = () => {
                   </Text>
                 </Box>
                 {selectedPatientId && (
-                  <Badge size="xs" color="hub" variant="light" radius="sm" ml="auto">
+                  <Badge size="xs" color="slate" variant="light" radius="sm" ml="auto">
                     {currentPatient?.nome_completo?.split(' ')[0]}
                   </Badge>
                 )}
@@ -262,7 +262,7 @@ export const Monitoring = () => {
             <ScrollArea h="calc(100dvh - 300px)" p="md" bg="slate.0">
               {messages.length === 0 ? (
                 <Stack align="center" gap="xs" py="xl">
-                  <ThemeIcon size={48} radius="xl" color="hub" variant="light">
+                  <ThemeIcon size={48} radius="xl" color="slate" variant="light">
                     <IconRobot size={24} />
                   </ThemeIcon>
                   <Text size="xs" c="dimmed" ta="center">
@@ -313,7 +313,7 @@ export const Monitoring = () => {
                   {sendingMessage && (
                     <Group gap="xs" align="center">
                       <Avatar size="sm" radius="md" color="gray" variant="light"><IconRobot size={12} /></Avatar>
-                      <Loader size="xs" type="dots" color="hub" />
+                      <Loader size="xs" type="dots" color="slate" />
                     </Group>
                   )}
                   <div ref={messagesEndRef} />
@@ -330,7 +330,7 @@ export const Monitoring = () => {
                 style={{ background: isRecording ? 'oklch(0.97 0.05 25)' : 'oklch(0.97 0.02 235)', borderTop: '1px solid oklch(0.92 0.01 220)' }}
               >
                 {isTranscribing
-                  ? <Loader size={10} color="hub" />
+                  ? <Loader size={10} color="slate" />
                   : <Box w={8} h={8} bg="red" style={{ borderRadius: '50%', animation: 'pulse 1s infinite', flexShrink: 0 }} />
                 }
                 <Text size="xs" c={isRecording ? 'red.7' : 'hub.6'}>
@@ -375,7 +375,7 @@ export const Monitoring = () => {
 
               <ActionIcon
                 size="lg"
-                color="hub"
+                color="slate"
                 variant="filled"
                 radius="md"
                 disabled={!selectedPatientId || sendingMessage || isRecording || isTranscribing}
