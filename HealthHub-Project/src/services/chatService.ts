@@ -31,6 +31,7 @@ export interface Conversation {
 
 export interface IChatService {
   listConversations(): Promise<Conversation[]>;
+  listContacts(): Promise<Contact[]>;
   listMessages(conversationId: string): Promise<ChatMessage[]>;
   sendMessage(conversationId: string, content: string, priority: Priority, sender: Contact): Promise<ChatMessage>;
   onNewMessage(cb: (msg: ChatMessage) => void): () => void;
@@ -167,6 +168,11 @@ class RealChatService implements IChatService {
   async listConversations(): Promise<Conversation[]> {
     const data = await apiFetch<any[]>('/chat/conversations');
     return data.map(mapConversation);
+  }
+
+  async listContacts(): Promise<Contact[]> {
+    const data = await apiFetch<any[]>('/chat/contacts');
+    return data.map(mapContact);
   }
 
   async listMessages(conversationId: string): Promise<ChatMessage[]> {

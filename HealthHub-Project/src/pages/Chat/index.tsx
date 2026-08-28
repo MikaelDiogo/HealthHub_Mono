@@ -226,8 +226,9 @@ export function Chat() {
   const navigate = useNavigate();
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [activeConvId, setActiveConvId] = useState<string>('geral');
+  const [activeConvId, setActiveConvId] = useState<string>('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [allContacts, setAllContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState('');
   const [input, setInput] = useState('');
   const [priority, setPriority] = useState<Priority>('normal');
@@ -236,9 +237,19 @@ export function Chat() {
   const [showDetails, setShowDetails] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Carrega conversas
+  // Carrega contatos + conversas em paralelo
   useEffect(() => {
-    chatService.listConversations().then(setConversations);
+    Promise.all([
+      chatService.listConversations(),
+      chatService.listContacts(),
+    ]).then(([convs, contactList]) => {
+      setAllContacts(contactList);
+      setConversations(convs);
+      // Abre o Grupo Geral automaticamente na primeira carga
+      const group = convs.find(c => c.type === 'group');
+      if (group) setActiveConvId(group.id);
+      else if (convs.length > 0) setActiveConvId(convs[0].id);
+    });
   }, []);
 
   // Carrega mensagens quando muda de conversa + marca como lida
@@ -452,7 +463,7 @@ export function Chat() {
                     </Text>
                     {activeConv.type === 'group' ? (
                       <Text size="10px" c="slate.4" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-                        {activeConv.participants.length} participantes
+                        {allContacts.length + 1} participantes
                       </Text>
                     ) : otherParticipant ? (
                       <>
@@ -624,28 +635,35 @@ export function Chat() {
 
             {/* Participantes */}
             <Box p="sm" style={{ flex: 1, overflow: 'auto' }}>
-              <Text size="10px" fw={700} c="slate.4" tt="uppercase" mb={6} style={{ letterSpacing: '0.08em' }}>
-                Participantes
-              </Text>
-              <Stack gap={6}>
-                {activeConv.participants.map(p => (
-                  <Group key={p.id} gap={8} wrap="nowrap">
-                    <Avatar size={24} radius="xl" color={ROLE_COLOR[p.role]} variant="filled"
-                      style={{ fontSize: 9, fontWeight: 700 }}>
-                      {getInitials(p.name)}
-                    </Avatar>
-                    <Text size="xs" c="slate.7" truncate style={{ flex: 1 }}>
-                      {p.name}{p.id === me.id ? ' (você)' : ''}
+              {(() => {
+                // Grupo: todos os contatos + eu. DM: só o peer.
+                const detailParticipants = activeConv.type === 'group'
+                  ? [me, ...allContacts]
+                  : otherParticipant ? [otherParticipant] : [];
+                return (
+                  <>
+                    <Text size="10px" fw={700} c="slate.4" tt="uppercase" mb={6} style={{ letterSpacing: '0.08em' }}>
+                      {detailParticipants.length} {detailParticipants.length === 1 ? 'participante' : 'participantes'}
                     </Text>
-                    <Badge size="xs" color={ROLE_COLOR[p.role]} variant="light" radius="sm">
-                      {ROLE_LABEL[p.role]}
-                    </Badge>
-                  </Group>
-                ))}
-                {activeConv.participants.length === 0 && (
-                  <Text size="xs" c="slate.4">Todos os profissionais participam.</Text>
-                )}
-              </Stack>
+                    <Stack gap={6}>
+                      {detailParticipants.map(p => (
+                        <Group key={p.id} gap={8} wrap="nowrap">
+                          <Avatar size={24} radius="xl" color={ROLE_COLOR[p.role]} variant="filled"
+                            style={{ fontSize: 9, fontWeight: 700 }}>
+                            {getInitials(p.name)}
+                          </Avatar>
+                          <Text size="xs" c="slate.7" truncate style={{ flex: 1 }}>
+                            {p.name}{p.id === me.id ? ' (você)' : ''}
+                          </Text>
+                          <Badge size="xs" color={ROLE_COLOR[p.role]} variant="light" radius="sm">
+                            {ROLE_LABEL[p.role]}
+                          </Badge>
+                        </Group>
+                      ))}
+                    </Stack>
+                  </>
+                );
+              })()}
             </Box>
           </Box>
         )}
