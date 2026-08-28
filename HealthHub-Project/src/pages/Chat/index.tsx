@@ -6,7 +6,7 @@ import {
 } from '@mantine/core';
 import {
   IconSearch, IconSend, IconAlertTriangle, IconUsers,
-  IconUser, IconMessageCircle, IconCircleFilled, IconArrowLeft,
+  IconUser, IconMessageCircle, IconCircleFilled, IconArrowLeft, IconInfoCircle,
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
@@ -193,18 +193,15 @@ function MessageBubble({
         {/* Bolha */}
         <Paper
           p="xs"
-          radius="md"
           style={{
             background: isMe
               ? 'var(--mantine-color-hub-1)'
               : '#fff',
             color: 'var(--mantine-color-slate-8)',
-            border: isUrgent
-              ? '2px solid var(--mantine-color-red-5)'
-              : isMe
-                ? '1px solid var(--mantine-color-hub-2)'
-                : '1px solid var(--mantine-color-slate-2)',
+            border: isUrgent ? '2px solid var(--mantine-color-red-5)' : 'none',
             borderLeft: isUrgent && !isMe ? '4px solid var(--mantine-color-red-5)' : undefined,
+            borderRadius: 14,
+            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.07)',
             maxWidth: '100%',
           }}
         >
@@ -235,6 +232,7 @@ export function Chat() {
   const [input, setInput] = useState('');
   const [priority, setPriority] = useState<Priority>('normal');
   const [sending, setSending] = useState(false);
+  const [showDetails, setShowDetails] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Carrega conversas
@@ -471,6 +469,11 @@ export function Chat() {
                       </>
                     ) : null}
                   </Group>
+                  <Tooltip label="Detalhes da conversa" withArrow>
+                    <ActionIcon variant="subtle" color="hub.7" radius="xl" onClick={() => setShowDetails(s => !s)}>
+                      <IconInfoCircle size={16} />
+                    </ActionIcon>
+                  </Tooltip>
                 </Group>
               </Box>
 
@@ -529,7 +532,7 @@ export function Chat() {
                 <Group gap="xs" wrap="nowrap">
                   <TextInput
                     style={{ flex: 1 }}
-                    radius="md"
+                    radius="xl"
                     placeholder="Escreva uma mensagem..."
                     value={input}
                     onChange={e => setInput(e.currentTarget.value)}
@@ -537,23 +540,24 @@ export function Chat() {
                     disabled={sending}
                     styles={{
                       input: {
+                        background: '#fff',
                         border: priority === 'urgente'
                           ? '1.5px solid var(--mantine-color-red-4)'
-                          : '1.5px solid oklch(0.88 0.01 220)',
+                          : '1px solid var(--mantine-color-hub-2)',
                       },
                     }}
                   />
                   <Tooltip label="Enviar (Enter)" withArrow>
                     <ActionIcon
                       size="lg"
-                      color="hub.7"
+                      color="hub.6"
                       variant="filled"
-                      radius="md"
+                      radius="xl"
                       loading={sending}
                       disabled={!input.trim()}
                       onClick={handleSend}
                     >
-                      <IconSend size={18} />
+                      <IconSend size={17} />
                     </ActionIcon>
                   </Tooltip>
                 </Group>
@@ -570,6 +574,78 @@ export function Chat() {
             </Box>
           )}
         </Box>
+
+        {/* ── Painel de detalhes da conversa (inspirado no Freshchat) ── */}
+        {activeConv && showDetails && (
+          <Box
+            visibleFrom="md"
+            style={{
+              width: 240,
+              flexShrink: 0,
+              borderLeft: '1px solid var(--mantine-color-hub-2)',
+              background: '#fff',
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Cabeçalho do contato */}
+            <Stack align="center" gap={6} p="md" style={{ borderBottom: '1px solid var(--mantine-color-hub-1)' }}>
+              {activeConv.type === 'group' ? (
+                <ThemeIcon size={56} radius="xl" variant="light" color="hub">
+                  <IconUsers size={28} />
+                </ThemeIcon>
+              ) : (
+                <Avatar size={56} radius="xl"
+                  color={otherParticipant ? ROLE_COLOR[otherParticipant.role] : 'hub'}
+                  variant="filled" style={{ fontSize: 20, fontWeight: 700 }}>
+                  {getInitials(otherParticipant?.name ?? '?')}
+                </Avatar>
+              )}
+              <Text fw={700} size="sm" c="hub.9" ta="center">{activeConv.name}</Text>
+              {activeConv.type === 'direct' && otherParticipant ? (
+                <Group justify="center" gap={6}>
+                  <Badge size="xs" color={ROLE_COLOR[otherParticipant.role]} variant="light" radius="sm">
+                    {ROLE_LABEL[otherParticipant.role]}
+                  </Badge>
+                  {otherParticipant.online && (
+                    <Badge size="xs" color="green" variant="dot" radius="sm">online</Badge>
+                  )}
+                </Group>
+              ) : (
+                <Text size="10px" c="slate.4" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                  Canal geral da equipe
+                </Text>
+              )}
+            </Stack>
+
+            {/* Participantes */}
+            <Box p="sm" style={{ flex: 1, overflow: 'auto' }}>
+              <Text size="10px" fw={700} c="slate.4" tt="uppercase" mb={6} style={{ letterSpacing: '0.08em' }}>
+                Participantes
+              </Text>
+              <Stack gap={6}>
+                {activeConv.participants.map(p => (
+                  <Group key={p.id} gap={8} wrap="nowrap">
+                    <Avatar size={24} radius="xl" color={ROLE_COLOR[p.role]} variant="filled"
+                      style={{ fontSize: 9, fontWeight: 700 }}>
+                      {getInitials(p.name)}
+                    </Avatar>
+                    <Text size="xs" c="slate.7" truncate style={{ flex: 1 }}>
+                      {p.name}{p.id === me.id ? ' (você)' : ''}
+                    </Text>
+                    <Badge size="xs" color={ROLE_COLOR[p.role]} variant="light" radius="sm">
+                      {ROLE_LABEL[p.role]}
+                    </Badge>
+                  </Group>
+                ))}
+                {activeConv.participants.length === 0 && (
+                  <Text size="xs" c="slate.4">Todos os profissionais participam.</Text>
+                )}
+              </Stack>
+            </Box>
+          </Box>
+        )}
 
       </Box>
     </Box>
