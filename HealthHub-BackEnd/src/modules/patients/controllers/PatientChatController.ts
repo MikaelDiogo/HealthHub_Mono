@@ -1,9 +1,8 @@
 import { Request, Response } from "express";
 import axios from "axios";
 
-// Endpoint e modelo via OAuth token do Claude Code
-const CLAUDE_API_URL = "https://api.anthropic.com/v1/messages";
-const MODEL = "claude-sonnet-4-5";
+const GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+const MODEL = "openai/gpt-oss-120b";
 const MAX_TOKENS = 1024;
 
 function buildSystemPrompt(ctx: any): string {
@@ -30,12 +29,13 @@ export class PatientChatController {
   public async handle(req: Request, res: Response): Promise<Response> {
     const { message, patientContext, history } = req.body;
 
-    const token = process.env.CLAUDE_OAUTH_TOKEN;
-    if (!token) {
-      return res.status(503).json({ error: 'Assistente clínico não configurado. Adicione CLAUDE_OAUTH_TOKEN no .env.' });
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({ error: 'GROQ_API_KEY não configurada no .env.' });
     }
 
     const messages = [
+      { role: 'system', content: buildSystemPrompt(patientContext) },
       ...((history as { role: string; content: string }[]) || [])
         .filter((m) => m.role === 'user' || m.role === 'assistant')
         .map((m) => ({ role: m.role, content: m.content })),
@@ -44,34 +44,24 @@ export class PatientChatController {
 
     try {
       const response = await axios.post(
-        CLAUDE_API_URL,
-        {
-          model: MODEL,
-          max_tokens: MAX_TOKENS,
-          system: buildSystemPrompt(patientContext),
-          messages,
-        },
+        GROQ_URL,
+        { model: MODEL, max_tokens: MAX_TOKENS, messages },
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'User-Agent': 'claude-code/1.0.0',
-            'anthropic-version': '2023-06-01',
-            'Accept': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
           },
           timeout: 30000,
         },
       );
 
-      const textBlock = response.data.content?.find((b: any) => b.type === 'text');
-      const reply = textBlock?.text ?? '';
-
-      return res.json({ reply, source: 'claude-sonnet-oauth' });
+      const reply = response.data.choices?.[0]?.message?.content ?? '';
+      return res.json({ reply, source: 'groq-llama3.3-70b' });
     } catch (err: any) {
       const status = err.response?.status;
       const detail = err.response?.data ?? err.message;
-      console.error('[HealthHub Chat] Erro:', status, JSON.stringify(detail));
-      return res.status(500).json({ error: 'Assistente clínico indisponível.', status, detail });
+      console.error('[HealthHub Chat] Groq erro:', status, JSON.stringify(detail));
+      return res.status(500).json({ error: 'Assistente clínico indisponível.', detail });
     }
   }
 }
