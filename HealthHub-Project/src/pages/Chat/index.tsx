@@ -71,11 +71,11 @@ function ConversationItem({
       py={7}
       onClick={onClick}
       style={{
-        backgroundColor: isActive ? 'var(--mantine-color-hub-1)' : 'transparent',
+        backgroundColor: isActive ? 'var(--mantine-color-slate-1)' : 'transparent',
         borderBottom: '1px solid var(--mantine-color-slate-0)',
         transition: 'background 120ms ease',
       }}
-      onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'var(--mantine-color-hub-0)'; }}
+      onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'var(--mantine-color-slate-0)'; }}
       onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'transparent'; }}
     >
       <Group gap="sm" wrap="nowrap">
@@ -232,7 +232,8 @@ export function Chat() {
   const [input, setInput] = useState('');
   const [priority, setPriority] = useState<Priority>('normal');
   const [sending, setSending] = useState(false);
-  const [showDetails, setShowDetails] = useState(true);
+  // Painel de detalhes fechado por padrão — abre só pelo ícone ⓘ
+  const [showDetails, setShowDetails] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Carrega conversas
@@ -318,11 +319,11 @@ export function Chat() {
         style={{
           height: 42,
           flexShrink: 0,
-          background: 'var(--mantine-color-hub-0)',
+          background: '#fff',
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          borderBottom: '1px solid var(--mantine-color-hub-2)',
+          borderBottom: '1px solid var(--mantine-color-slate-2)',
         }}
       >
         {/* Usuário logado à esquerda */}
@@ -339,7 +340,7 @@ export function Chat() {
           </Badge>
         </Group>
 
-        <Divider orientation="vertical" color="var(--mantine-color-hub-2)" my={8} />
+        <Divider orientation="vertical" color="var(--mantine-color-slate-2)" my={8} />
 
         <Group gap={8}>
           <IconMessageCircle size={15} color="var(--mantine-color-hub-6)" />
@@ -373,13 +374,13 @@ export function Chat() {
             flexShrink: 0,
             display: 'flex',
             flexDirection: 'column',
-            borderRight: '1px solid var(--mantine-color-hub-2)',
+            borderRight: '1px solid var(--mantine-color-slate-2)',
             background: '#fff',
             overflow: 'hidden',
           }}
         >
           {/* Header da lista (claro, busca estilo WhatsApp) */}
-          <Box px="sm" py={8} style={{ background: '#fff', borderBottom: '1px solid var(--mantine-color-hub-1)', flexShrink: 0 }}>
+          <Box px="sm" py={8} style={{ background: '#fff', borderBottom: '1px solid var(--mantine-color-slate-1)', flexShrink: 0 }}>
             <TextInput
               placeholder="Buscar conversa..."
               size="xs"
@@ -388,7 +389,7 @@ export function Chat() {
               value={search}
               onChange={e => setSearch(e.currentTarget.value)}
               styles={{
-                input: { background: 'var(--mantine-color-hub-0)', border: 'none', minHeight: 30, height: 30 },
+                input: { background: 'var(--mantine-color-slate-1)', border: 'none', minHeight: 30, height: 30 },
               }}
             />
           </Box>
@@ -432,7 +433,7 @@ export function Chat() {
               <Box
                 px="sm"
                 py={6}
-                style={{ background: 'var(--mantine-color-hub-0)', borderBottom: '1px solid var(--mantine-color-hub-2)', flexShrink: 0 }}
+                style={{ background: '#fff', borderBottom: '1px solid var(--mantine-color-slate-2)', flexShrink: 0 }}
               >
                 <Group gap="sm" wrap="nowrap">
                   {activeConv.type === 'group' ? (
@@ -477,8 +478,8 @@ export function Chat() {
                 </Group>
               </Box>
 
-              {/* Área de mensagens — fundo claro da identidade */}
-              <ScrollArea style={{ flex: 1 }} p="md" bg="hub.0">
+              {/* Área de mensagens — fundo cinza claro neutro */}
+              <ScrollArea style={{ flex: 1 }} p="md" bg="slate.0">
                 <Stack gap="xs">
                   {groupedMessages.map(({ msg, showSender }) => (
                     <MessageBubble
@@ -495,7 +496,7 @@ export function Chat() {
               {/* Input */}
               <Box
                 p="sm"
-                style={{ borderTop: '1px solid var(--mantine-color-hub-2)', background: 'var(--mantine-color-hub-0)', flexShrink: 0 }}
+                style={{ borderTop: '1px solid var(--mantine-color-slate-2)', background: '#fff', flexShrink: 0 }}
               >
                 {/* Toggle de prioridade */}
                 <Group gap="xs" mb="xs">
@@ -543,7 +544,7 @@ export function Chat() {
                         background: '#fff',
                         border: priority === 'urgente'
                           ? '1.5px solid var(--mantine-color-red-4)'
-                          : '1px solid var(--mantine-color-hub-2)',
+                          : '1px solid var(--mantine-color-slate-2)',
                       },
                     }}
                   />
@@ -582,7 +583,7 @@ export function Chat() {
             style={{
               width: 240,
               flexShrink: 0,
-              borderLeft: '1px solid var(--mantine-color-hub-2)',
+              borderLeft: '1px solid var(--mantine-color-slate-2)',
               background: '#fff',
               display: 'flex',
               flexDirection: 'column',
@@ -590,7 +591,7 @@ export function Chat() {
             }}
           >
             {/* Cabeçalho do contato */}
-            <Stack align="center" gap={6} p="md" style={{ borderBottom: '1px solid var(--mantine-color-hub-1)' }}>
+            <Stack align="center" gap={6} p="md" style={{ borderBottom: '1px solid var(--mantine-color-slate-1)' }}>
               {activeConv.type === 'group' ? (
                 <ThemeIcon size={56} radius="xl" variant="light" color="hub">
                   <IconUsers size={28} />
