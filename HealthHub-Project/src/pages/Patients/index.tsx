@@ -36,7 +36,7 @@ const STATUS_ICON: Record<string, React.ReactNode> = {
 };
 
 const GRAVIDADE_COLOR: Record<string, string> = {
-  Verde: 'green', Amarelo: 'yellow', Vermelho: 'red',
+  Vermelho: 'red', Laranja: 'orange', Amarelo: 'yellow', Verde: 'green', Azul: 'blue',
 };
 
 function getInitials(name: string) {

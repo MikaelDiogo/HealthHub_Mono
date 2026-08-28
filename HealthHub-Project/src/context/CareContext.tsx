@@ -10,7 +10,7 @@ export type PatientStatus =
   | 'Em Observação'
   | 'Alta';
 
-export type Gravidade = 'Verde' | 'Amarelo' | 'Vermelho';
+export type Gravidade = 'Vermelho' | 'Laranja' | 'Amarelo' | 'Verde' | 'Azul';
 
 export interface FilaPaciente {
   id: string;

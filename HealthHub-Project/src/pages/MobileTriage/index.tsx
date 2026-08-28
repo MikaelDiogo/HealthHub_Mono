@@ -25,18 +25,20 @@ function gerarSenha(): string {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+const MANCHESTER_MOBILE = [
+  { g: 'Vermelho' as Gravidade, color: '#ef4444', mantine: 'red',    tempo: 'Imediato' },
+  { g: 'Laranja'  as Gravidade, color: '#f97316', mantine: 'orange', tempo: '10 min' },
+  { g: 'Amarelo'  as Gravidade, color: '#eab308', mantine: 'yellow', tempo: '60 min' },
+  { g: 'Verde'    as Gravidade, color: '#22c55e', mantine: 'green',  tempo: '120 min' },
+  { g: 'Azul'     as Gravidade, color: '#3b82f6', mantine: 'blue',   tempo: '240 min' },
+];
+
 function gravColor(g?: Gravidade): string {
-  if (g === 'Vermelho') return '#ef4444';
-  if (g === 'Amarelo') return '#eab308';
-  if (g === 'Verde') return '#22c55e';
-  return 'var(--mantine-color-slate-3)';
+  return MANCHESTER_MOBILE.find((m) => m.g === g)?.color ?? 'var(--mantine-color-slate-3)';
 }
 
 function gravBadgeColor(g?: Gravidade) {
-  if (g === 'Vermelho') return 'red';
-  if (g === 'Amarelo') return 'yellow';
-  if (g === 'Verde') return 'green';
-  return 'gray';
+  return MANCHESTER_MOBILE.find((m) => m.g === g)?.mantine ?? 'gray';
 }
 
 function statusBorderColor(p: FilaPaciente): string {
@@ -243,16 +245,19 @@ function FilaCard({
 
             {showClassificar && (
               <Stack gap="xs">
-                <Text size="xs" fw={700} c="slate.6" tt="uppercase">
-                  Classificar risco:
+                <Text size="10px" fw={700} c="slate.5" tt="uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.06em' }}>
+                  Escala de Manchester:
                 </Text>
-                <Group grow gap="xs">
-                  {(['Verde', 'Amarelo', 'Vermelho'] as Gravidade[]).map((g) => (
+                <Stack gap={6}>
+                  {MANCHESTER_MOBILE.map(({ g, mantine, tempo }) => (
                     <Button
                       key={g}
                       size="md"
-                      color={gravBadgeColor(g)}
+                      color={mantine}
                       loading={loading}
+                      justify="space-between"
+                      rightSection={<Text size="xs" style={{ opacity: 0.85 }}>{tempo}</Text>}
+                      fullWidth
                       onClick={() =>
                         act(() => onAvancar(patient.id, 'Aguardando Atendimento', g))
                       }
@@ -260,7 +265,7 @@ function FilaCard({
                       {g}
                     </Button>
                   ))}
-                </Group>
+                </Stack>
               </Stack>
             )}
           </Box>

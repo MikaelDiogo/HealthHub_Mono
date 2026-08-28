@@ -337,11 +337,20 @@ export const Alerts = () => {
   );
   const emObservacao = patients.filter((p) => p.status === 'Em Observação');
 
+  // Escala de Manchester — 5 níveis
+  const MANCHESTER: { g: Gravidade; label: string; mantine: string; oklch: string; tempo: string }[] = [
+    { g: 'Vermelho', label: 'Vermelho',  mantine: 'red',    oklch: 'oklch(0.55 0.21 25)',  tempo: 'Imediato' },
+    { g: 'Laranja',  label: 'Laranja',   mantine: 'orange', oklch: 'oklch(0.68 0.18 45)',  tempo: '10 min' },
+    { g: 'Amarelo',  label: 'Amarelo',   mantine: 'yellow', oklch: 'oklch(0.82 0.15 90)',  tempo: '60 min' },
+    { g: 'Verde',    label: 'Verde',     mantine: 'green',  oklch: 'oklch(0.68 0.14 150)', tempo: '120 min' },
+    { g: 'Azul',     label: 'Azul',      mantine: 'blue',   oklch: 'oklch(0.55 0.13 240)', tempo: '240 min' },
+  ];
+
   const badgeColor = (g?: Gravidade) =>
-    g === 'Vermelho' ? 'red' : g === 'Amarelo' ? 'yellow' : g === 'Verde' ? 'green' : 'gray';
+    MANCHESTER.find((m) => m.g === g)?.mantine ?? 'gray';
 
   const riskBorderColor = (g?: Gravidade) =>
-    g === 'Vermelho' ? 'oklch(0.55 0.21 25)' : g === 'Amarelo' ? 'oklch(0.82 0.15 90)' : g === 'Verde' ? 'oklch(0.68 0.14 150)' : 'var(--mantine-color-slate-3)';
+    MANCHESTER.find((m) => m.g === g)?.oklch ?? 'var(--mantine-color-slate-3)';
 
   if (loading) {
     return (
@@ -408,20 +417,29 @@ export const Alerts = () => {
                           </Button>
                         )}
                         {p.status === 'Em Triagem (Enfermeiro)' && currentRole === 'Enfermeiro' && (
-                          <Stack gap={4}>
+                          <Stack gap={6}>
                             <Text size="10px" c="slate.5" fw={700} style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.06em' }}>
-                              CLASSIFICAR RISCO:
+                              ESCALA DE MANCHESTER:
                             </Text>
-                            <Group gap={4}>
-                              {(['Verde', 'Amarelo', 'Vermelho'] as Gravidade[]).map((g) => (
+                            <Stack gap={4}>
+                              {MANCHESTER.map(({ g, label, mantine, tempo }) => (
                                 <Button
-                                  key={g} size="xs" color={badgeColor(g)} variant="filled" radius="md"
+                                  key={g}
+                                  size="xs"
+                                  color={mantine}
+                                  variant="filled"
+                                  radius="md"
+                                  justify="space-between"
+                                  rightSection={
+                                    <Text size="9px" style={{ opacity: 0.8 }}>{tempo}</Text>
+                                  }
                                   onClick={() => avançarFluxo(p.id, 'Aguardando Atendimento', g)}
+                                  fullWidth
                                 >
-                                  {g}
+                                  {label}
                                 </Button>
                               ))}
-                            </Group>
+                            </Stack>
                           </Stack>
                         )}
                       </Box>

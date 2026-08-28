@@ -3,7 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const MODEL = "claude-haiku-4-5";
+const MODEL = "claude-haiku-4-5-20251001";
 const MAX_TOKENS = 1024;
 
 export class PatientChatController {
@@ -60,8 +60,8 @@ ${extras}
 
       return res.json({ reply, source: 'claude-haiku' });
     } catch (err: any) {
-      console.error('[HealthHub] Erro ao chamar Claude:', err.message);
-      return res.status(500).json({ error: 'Assistente clínico indisponível no momento.' });
+      console.error('[HealthHub] Erro ao chamar Claude:', err.message, err.status, err.error);
+      return res.status(500).json({ error: 'Assistente clínico indisponível no momento.', detail: err.message });
     }
   }
 }
