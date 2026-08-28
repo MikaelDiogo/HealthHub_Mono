@@ -72,7 +72,7 @@ function ConversationItem({
       onClick={onClick}
       style={{
         borderRadius: 10,
-        backgroundColor: isActive ? 'var(--mantine-color-slate-8)' : 'transparent',
+        backgroundColor: isActive ? 'var(--mantine-color-hub-8)' : 'transparent',
         transition: 'background 120ms ease',
       }}
       onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'var(--mantine-color-slate-0)'; }}
@@ -207,7 +207,7 @@ function MessageBubble({
           radius="md"
           style={{
             background: isMe
-              ? 'var(--mantine-color-slate-8)'
+              ? 'var(--mantine-color-hub-7)'
               : '#fff',
             color: isMe ? '#fff' : 'var(--mantine-color-slate-8)',
             border: isUrgent
@@ -325,60 +325,53 @@ export function Chat() {
   return (
     <Box style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: 'oklch(0.985 0.006 210)' }}>
 
-      {/* ── Barra de navegação superior ── */}
+      {/* ── Barra de navegação superior (fina, identidade HealthHub) ── */}
       <Box
-        px="xl"
+        px="md"
         style={{
-          height: 56,
+          height: 42,
           flexShrink: 0,
-          background: 'oklch(0.24 0.02 240)',
+          background: 'var(--mantine-color-hub-9)',
           display: 'flex',
           alignItems: 'center',
-          gap: 16,
-          borderBottom: '3px solid oklch(0.30 0.02 240)',
+          gap: 12,
+          borderBottom: '2px solid var(--mantine-color-hub-6)',
         }}
       >
         <Button
-          leftSection={<IconArrowLeft size={16} />}
-          variant="light"
-          color="gray"
-          size="sm"
+          leftSection={<IconArrowLeft size={14} />}
+          variant="subtle"
+          color="gray.0"
+          size="compact-sm"
           radius="md"
           onClick={() => navigate('/main')}
-          styles={{ root: { fontFamily: "'Manrope', sans-serif", fontWeight: 700 } }}
+          styles={{ root: { fontFamily: "'Manrope', sans-serif", fontWeight: 600, color: '#fff' } }}
         >
-          Voltar para o Painel
+          Voltar ao Painel
         </Button>
 
-        <Divider orientation="vertical" color="oklch(0.35 0.02 240)" />
+        <Divider orientation="vertical" color="var(--mantine-color-hub-7)" my={8} />
 
-        <Group gap="xs">
-          <ThemeIcon size="sm" radius="sm" variant="light" color="gray">
-            <IconMessageCircle size={14} />
-          </ThemeIcon>
+        <Group gap={8}>
+          <IconMessageCircle size={15} color="var(--mantine-color-hub-3)" />
           <Text fw={700} size="sm" c="white" style={{ fontFamily: "'Manrope', sans-serif" }}>
             Chat Interno
-          </Text>
-          <Text size="10px" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.60 0.03 230)' }}>
-            · Comunicação da equipe HealthHub
           </Text>
         </Group>
 
         {/* Minha presença no canto direito */}
         <Box style={{ marginLeft: 'auto' }}>
-          <Group gap="xs" wrap="nowrap">
-            <Indicator color="green" size={8} offset={2} position="bottom-end">
-              <Avatar size={30} radius="md" color={ROLE_COLOR[me.role]} variant="light"
+          <Group gap={8} wrap="nowrap">
+            <Indicator color="green" size={7} offset={2} position="bottom-end">
+              <Avatar size={26} radius="md" color={ROLE_COLOR[me.role]} variant="filled"
                 style={{ fontSize: 10, fontWeight: 700 }}>
                 {getInitials(me.name)}
               </Avatar>
             </Indicator>
-            <Box>
-              <Text size="xs" fw={700} c="white" truncate maw={120}>{me.name}</Text>
-              <Badge size="xs" color={ROLE_COLOR[me.role]} variant="light" radius="sm">
-                {ROLE_LABEL[me.role]}
-              </Badge>
-            </Box>
+            <Text size="xs" fw={600} c="white" truncate maw={140}>{me.name}</Text>
+            <Badge size="xs" color={ROLE_COLOR[me.role]} variant="light" radius="sm">
+              {ROLE_LABEL[me.role]}
+            </Badge>
           </Group>
         </Box>
       </Box>
@@ -399,24 +392,26 @@ export function Chat() {
             overflow: 'hidden',
           }}
         >
-          {/* Header da lista */}
-          <Box p="sm" style={{ background: 'oklch(0.24 0.02 240)', flexShrink: 0 }}>
-            <Text fw={700} size="sm" c="white" mb="xs"
-              style={{ fontFamily: "'Manrope', sans-serif" }}>
-              Conversas
-            </Text>
-            <TextInput
-              placeholder="Buscar..."
-              size="xs"
-              radius="md"
-              leftSection={<IconSearch size={13} />}
-              value={search}
-              onChange={e => setSearch(e.currentTarget.value)}
-              styles={{
-                input: { background: 'oklch(0.32 0.02 240)', border: 'none', color: '#fff',
-                  '::placeholder': { color: 'oklch(0.55 0.02 230)' } },
-              }}
-            />
+          {/* Header da lista (fino, identidade HealthHub) */}
+          <Box px="sm" py={8} style={{ background: 'var(--mantine-color-hub-9)', flexShrink: 0 }}>
+            <Group gap="xs" wrap="nowrap">
+              <Text fw={700} size="xs" c="white" style={{ fontFamily: "'Manrope', sans-serif", flexShrink: 0 }}>
+                Conversas
+              </Text>
+              <TextInput
+                placeholder="Buscar..."
+                size="xs"
+                radius="md"
+                style={{ flex: 1 }}
+                leftSection={<IconSearch size={13} />}
+                value={search}
+                onChange={e => setSearch(e.currentTarget.value)}
+                styles={{
+                  input: { background: 'var(--mantine-color-hub-8)', border: 'none', color: '#fff', minHeight: 28, height: 28,
+                    '::placeholder': { color: 'var(--mantine-color-hub-3)' } },
+                }}
+              />
+            </Group>
           </Box>
 
           {/* Lista */}
@@ -456,46 +451,47 @@ export function Chat() {
         >
           {activeConv ? (
             <>
-              {/* Header da conversa */}
+              {/* Header da conversa (fino, identidade HealthHub) */}
               <Box
-                p="sm"
-                style={{ background: 'oklch(0.24 0.02 240)', borderBottom: '3px solid oklch(0.30 0.02 240)', flexShrink: 0 }}
+                px="sm"
+                py={6}
+                style={{ background: 'var(--mantine-color-hub-9)', borderBottom: '2px solid var(--mantine-color-hub-6)', flexShrink: 0 }}
               >
                 <Group gap="sm" wrap="nowrap">
                   {activeConv.type === 'group' ? (
-                    <ThemeIcon size={36} radius="md" variant="light" color="gray">
-                      <IconUsers size={18} />
+                    <ThemeIcon size={28} radius="md" variant="light" color="hub.3">
+                      <IconUsers size={15} />
                     </ThemeIcon>
                   ) : (
-                    <Avatar size={36} radius="md" color={otherParticipant ? ROLE_COLOR[otherParticipant.role] : 'slate'}
-                      variant="filled" style={{ fontSize: 13, fontWeight: 700 }}>
+                    <Avatar size={28} radius="md" color={otherParticipant ? ROLE_COLOR[otherParticipant.role] : 'hub'}
+                      variant="filled" style={{ fontSize: 11, fontWeight: 700 }}>
                       {getInitials(otherParticipant?.name ?? '?')}
                     </Avatar>
                   )}
-                  <Box style={{ flex: 1, minWidth: 0 }}>
+                  <Group gap={8} style={{ flex: 1, minWidth: 0 }} wrap="nowrap">
                     <Text fw={700} size="sm" c="white" truncate style={{ fontFamily: "'Manrope', sans-serif" }}>
                       {activeConv.name}
                     </Text>
                     {activeConv.type === 'group' ? (
-                      <Text size="10px" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>
-                        {activeConv.participants.length} participantes · Canal geral
+                      <Text size="10px" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'var(--mantine-color-hub-3)' }}>
+                        {activeConv.participants.length} participantes
                       </Text>
                     ) : otherParticipant ? (
-                      <Group gap={6}>
+                      <>
                         <Badge size="xs" color={ROLE_COLOR[otherParticipant.role]} variant="light" radius="sm">
                           {ROLE_LABEL[otherParticipant.role]}
                         </Badge>
                         {otherParticipant.online && (
                           <Group gap={4}>
-                            <IconCircleFilled size={8} color="var(--mantine-color-green-5)" />
-                            <Text size="10px" style={{ color: 'oklch(0.65 0.03 230)', fontFamily: "'IBM Plex Mono', monospace" }}>
+                            <IconCircleFilled size={7} color="var(--mantine-color-green-5)" />
+                            <Text size="10px" style={{ color: 'var(--mantine-color-hub-3)', fontFamily: "'IBM Plex Mono', monospace" }}>
                               online
                             </Text>
                           </Group>
                         )}
-                      </Group>
+                      </>
                     ) : null}
-                  </Box>
+                  </Group>
                 </Group>
               </Box>
 
@@ -571,7 +567,7 @@ export function Chat() {
                   <Tooltip label="Enviar (Enter)" withArrow>
                     <ActionIcon
                       size="lg"
-                      color="slate"
+                      color="hub.7"
                       variant="filled"
                       radius="md"
                       loading={sending}
