@@ -1,4 +1,8 @@
-import { createTheme } from '@mantine/core';
+import {
+  createTheme,
+  TextInput, PasswordInput, Select, Textarea, NumberInput,
+  MultiSelect, Button, Badge, ActionIcon,
+} from '@mantine/core';
 
 export const healthHubTheme = createTheme({
   primaryColor: 'slate',
@@ -18,5 +22,18 @@ export const healthHubTheme = createTheme({
       '#f8fafc', '#f1f5f9', '#e2e8f0', '#cbd5e1',
       '#94a3b8', '#64748b', '#475569', '#334155', '#1e293b', '#0f172a',
     ],
+  },
+  components: {
+    // Inputs menores por padrão — evita overrides locais
+    TextInput:     TextInput.extend({ defaultProps: { size: 'sm', radius: 'md' } }),
+    PasswordInput: PasswordInput.extend({ defaultProps: { size: 'sm', radius: 'md' } }),
+    Select:        Select.extend({ defaultProps: { size: 'sm', radius: 'md' } }),
+    Textarea:      Textarea.extend({ defaultProps: { size: 'sm', radius: 'md' } }),
+    NumberInput:   NumberInput.extend({ defaultProps: { size: 'sm', radius: 'md' } }),
+    MultiSelect:   MultiSelect.extend({ defaultProps: { size: 'sm', radius: 'md' } }),
+    // Botões sem borda arredondada exagerada
+    Button:      Button.extend({ defaultProps: { radius: 'md' } }),
+    ActionIcon:  ActionIcon.extend({ defaultProps: { radius: 'md' } }),
+    Badge:       Badge.extend({ defaultProps: { radius: 'sm' } }),
   },
 });

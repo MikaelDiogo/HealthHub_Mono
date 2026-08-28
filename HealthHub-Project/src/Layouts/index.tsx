@@ -3,6 +3,7 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import { AppShell, Box, Burger } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import SideBar from '../components/SideBar';
+import { ChatBubble } from '../components/ChatBubble';
 import { TermosUsoModal, useTermosAceitos } from '../components/TermosUsoModal';
 import { useAuth } from '../context/AuthContext';
 
@@ -88,6 +89,9 @@ export function DashboardLayout() {
           </Box>
         </AppShell.Main>
       </AppShell>
+
+      {/* Bolinha flutuante de chat — visível em todas as telas do /main */}
+      <ChatBubble />
     </>
   );
 }

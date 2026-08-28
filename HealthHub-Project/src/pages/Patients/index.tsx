@@ -14,6 +14,7 @@ import {
 import { ButtonAddPatient } from '../../components/Buttons';
 import CardPatient from '../../components/CardPatient';
 import api from '../../services/api';
+import { manchesterCSSColor } from '../../utils/vitalStatus';
 import { ModalEditPatient } from '../../components/Buttons/ModalEditPatient';
 import { PageShell } from '../../components/PageShell';
 import type { Patient } from '../../types/patient';
@@ -344,6 +345,9 @@ export const Patients = () => {
                       temp={v?.temperatura ? `${v.temperatura}°C` : '--'}
                       bpm={v?.frequencia_cardiaca ? `${v.frequencia_cardiaca} bpm` : '--'}
                       spo2={v?.saturacao_oxigenio ? `${v.saturacao_oxigenio}%` : '--'}
+                      topColor={manchesterCSSColor(
+                        carePatients.find(c => c.paciente_id === patient.id)?.gravidade
+                      )}
                       onView={() => { setSelectedPatient(patient); open(); }}
                       onEdit={() => { setPatientToEdit(patient); openEdit(); }}
                     />

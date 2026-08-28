@@ -30,6 +30,7 @@ import api from '../../services/api';
 import type { Patient } from '../../types/patient';
 import { useCare } from '../../context/CareContext';
 import { formatCPF, formatPhone, onlyDigits, stripMask } from '../../utils/formatters';
+import { dispatchVitalsUpdated } from '../../utils/vitalStatus';
 
 interface ModalEditProps {
   opened: boolean;
@@ -151,6 +152,7 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
         });
       }
 
+      dispatchVitalsUpdated(patient.id);
       onClose();
       onUpdated?.();
     } catch (error) {

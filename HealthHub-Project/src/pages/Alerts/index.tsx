@@ -126,10 +126,7 @@ function PatientCard({ patient, borderColor, footer }: {
     <Paper
       radius="md"
       style={{
-        borderLeft: `4px solid ${borderColor}`,
         border: '1px solid oklch(0.90 0.01 220)',
-        borderLeftWidth: 4,
-        borderLeftColor: borderColor,
         background: '#fff',
       }}
     >

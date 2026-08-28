@@ -7,6 +7,7 @@ import api from '../../services/api';
 interface HistoryChartProps {
   patientId: string | number;
   patientName: string;
+  refreshKey?: number; // incrementar para forçar refetch após salvar sinais
 }
 
 interface VitalRecord {
@@ -17,7 +18,7 @@ interface VitalRecord {
   created_at: string | Date;
 }
 
-export const HistoryChart = ({ patientId, patientName }: HistoryChartProps) => {
+export const HistoryChart = ({ patientId, patientName, refreshKey = 0 }: HistoryChartProps) => {
   const [rawData, setRawData] = useState<VitalRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -25,6 +26,7 @@ export const HistoryChart = ({ patientId, patientName }: HistoryChartProps) => {
   useEffect(() => {
     async function fetchVitalsHistory() {
       if (!patientId) return;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
       setLoading(true);
       setError(false);
       try {
@@ -38,7 +40,8 @@ export const HistoryChart = ({ patientId, patientName }: HistoryChartProps) => {
       }
     }
     fetchVitalsHistory();
-  }, [patientId]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patientId, refreshKey]);
 
   const chartData = useMemo(
     () =>

@@ -24,8 +24,10 @@ import {
   IconHeartbeat,
   IconFile,
   IconShieldLock,
+  IconMessages,
 } from '@tabler/icons-react';
 import { useTermosAceitos } from '../TermosUsoModal';
+import { useMediaQuery } from '@mantine/hooks';
 import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 
@@ -77,6 +79,7 @@ function HHLogo({ size = 36 }: { size?: number }) {
 export default function SideBar({ onNavClose }: { onNavClose?: () => void }) {
   const [patientCount, setPatientCount] = useState<number | null>(null);
   const { role, nome } = useAuth();
+  const isMobile = useMediaQuery('(max-width: 768px)') ?? false;
   const termosAceitos = useTermosAceitos();
 
   useEffect(() => {
@@ -187,18 +190,25 @@ export default function SideBar({ onNavClose }: { onNavClose?: () => void }) {
           Navegação
         </Text>
         <Stack gap={2}>
-          {role !== 'recepcionista' && (
+          {/* Desktop-only: Dashboard e Monitoramento */}
+          {!isMobile && role !== 'recepcionista' && (
             <SideBarLink to="/main" label="Dashboard" textLabel="Visão Geral" icon={<IconLayoutDashboard size={18} stroke={2} />} onClick={onNavClose} />
           )}
+          {/* Admitir Pacientes — disponível em todos */}
           <SideBarLink to="/main/pacientes" label="Pacientes" textLabel={role === 'recepcionista' ? 'Cadastrar Pacientes' : 'Gerenciar Pacientes'} icon={<IconUsers size={18} stroke={2} />} onClick={onNavClose} />
-          {role !== 'recepcionista' && (
+          {!isMobile && role !== 'recepcionista' && (
             <SideBarLink to="/main/monitor" label="Monitoramento" textLabel="Sinais em Tempo Real" icon={<IconWaveSawTool size={18} stroke={2} />} onClick={onNavClose} />
           )}
+          {/* Triagem — disponível em todos */}
           <SideBarLink to="/main/alertas" label="Esteira de Cuidado" textLabel="Triagem e Fluxo Clínico" icon={<IconAlertTriangle size={18} stroke={2} />} onClick={onNavClose} />
-          {role !== 'recepcionista' && (
+          {!isMobile && role !== 'recepcionista' && (
             <SideBarLink to="/main/exportar" label="Exportar Prontuário" textLabel="Gerar PDF do Paciente" icon={<IconFile size={18} stroke={2} />} onClick={onNavClose} />
           )}
-          <SideBarLink to="/main/politica" label="Política de Dados" textLabel="LGPD e Privacidade" icon={<IconShieldLock size={18} stroke={2} />} badge={!termosAceitos ? 'Novo' : undefined} onClick={onNavClose} />
+          {/* Chat — disponível em todos */}
+          <SideBarLink to="/chat" label="Chat Interno" textLabel="Comunicação da Equipe" icon={<IconMessages size={18} stroke={2} />} onClick={onNavClose} />
+          {!isMobile && (
+            <SideBarLink to="/main/politica" label="Política de Dados" textLabel="LGPD e Privacidade" icon={<IconShieldLock size={18} stroke={2} />} badge={!termosAceitos ? 'Novo' : undefined} onClick={onNavClose} />
+          )}
         </Stack>
       </Box>
 

@@ -1,5 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Text, Box, Paper, Stack, ScrollArea, Center, Loader, Flex, Group, Title, TextInput, Pagination } from '@mantine/core';
+import { useEffect, useState, useCallback } from 'react';
+import {
+  Text, Box, Paper, Stack, ScrollArea, Center, Loader,
+  Flex, Group, Title, TextInput, Pagination,
+} from '@mantine/core';
 import { CardDashboard } from '../../components/CardDashboard';
 import { HistoryChart } from '../../components/GraphVital';
 import api from '../../services/api';
@@ -7,6 +10,8 @@ import { PatientSidebarCard } from '../../components/PatientSideBarCard';
 import { IconUsers, IconSearch } from '@tabler/icons-react';
 import { PageShell } from '../../components/PageShell';
 import type { Patient } from '../../types/patient';
+import { useCare } from '../../context/CareContext';
+import { manchesterCSSColor } from '../../utils/vitalStatus';
 
 const SIDEBAR_PAGE_SIZE = 6;
 
@@ -16,22 +21,40 @@ export default function DashboardHome() {
   const [loading, setLoading] = useState(true);
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [sidebarPage, setSidebarPage] = useState(1);
+  const [graphRefreshKey, setGraphRefreshKey] = useState(0);
+  const { carePatients } = useCare();
 
-  useEffect(() => {
-    async function loadPatients() {
-      try {
-        const response = await api.get('/patients');
-        const data = response.data as Patient[];
-        setPatients(data);
-        if (data.length > 0) setSelectedPatient(data[0]);
-      } catch (error) {
-        console.error('Erro ao carregar pacientes:', error);
-      } finally {
-        setLoading(false);
+  const loadPatients = useCallback(async () => {
+    try {
+      const response = await api.get('/patients');
+      const data = response.data as Patient[];
+      setPatients(data);
+      // Atualiza o paciente selecionado com dados frescos
+      if (selectedPatient) {
+        const fresh = data.find(p => p.id === selectedPatient.id);
+        if (fresh) setSelectedPatient(fresh);
+      } else if (data.length > 0) {
+        setSelectedPatient(data[0]);
       }
+    } catch (error) {
+      console.error('Erro ao carregar pacientes:', error);
+    } finally {
+      setLoading(false);
     }
-    loadPatients();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => { loadPatients(); }, [loadPatients]);
+
+  // Escuta evento global de sinais vitais salvos → refaz fetch + atualiza gráfico
+  useEffect(() => {
+    const handler = () => {
+      loadPatients();
+      setGraphRefreshKey(k => k + 1);
+    };
+    window.addEventListener('vitals-updated', handler);
+    return () => window.removeEventListener('vitals-updated', handler);
+  }, [loadPatients]);
 
   const filteredSidebarPatients = patients.filter(
     (p) =>
@@ -55,9 +78,7 @@ export default function DashboardHome() {
       <Center h="100%">
         <Stack align="center" gap="xs">
           <Loader color="slate" size="md" type="dots" />
-          <Text size="xs" c="slate.5">
-            Carregando painel central...
-          </Text>
+          <Text size="xs" c="slate.5">Carregando painel central...</Text>
         </Stack>
       </Center>
     );
@@ -75,7 +96,7 @@ export default function DashboardHome() {
         </>
       }
     >
-      <Box style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 'var(--mantine-spacing-lg)' }}>
+      <Box style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 'var(--mantine-spacing-md)' }}>
         <Box style={{ flexShrink: 0 }}>
           <CardDashboard patient={selectedPatient} />
         </Box>
@@ -85,26 +106,25 @@ export default function DashboardHome() {
             <HistoryChart
               patientId={selectedPatient?.id ?? ''}
               patientName={selectedPatient?.nome_completo ?? ''}
+              refreshKey={graphRefreshKey}
             />
           </Box>
 
-          <Box w={{ base: '100%', lg: 340 }} style={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
-            <Paper p="md" radius="md" withBorder style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-              <Group gap="xs" mb="sm">
-                <IconUsers size={16} color="var(--mantine-color-slate-5)" />
-                <Title order={6} c="slate.5" tt="uppercase" size="xs">
+          <Box w={{ base: '100%', lg: 300 }} style={{ flexShrink: 0, display: 'flex', flexDirection: 'column' }}>
+            <Paper p="sm" radius="md" withBorder style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, border: '1px solid var(--mantine-color-slate-2)' }}>
+              <Group gap="xs" mb="xs">
+                <IconUsers size={14} color="var(--mantine-color-slate-5)" />
+                <Title order={6} c="slate.5" tt="uppercase" size="10px" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.1em' }}>
                   Pacientes Disponíveis
                 </Title>
               </Group>
 
               <TextInput
-                size="xs"
-                radius="md"
                 placeholder="Nome ou CPF..."
-                leftSection={<IconSearch size={13} />}
+                leftSection={<IconSearch size={12} />}
                 value={sidebarSearch}
                 onChange={(e) => handleSidebarSearch(e.currentTarget.value)}
-                mb="sm"
+                mb="xs"
               />
 
               <ScrollArea style={{ flex: 1 }} type="hover" offsetScrollbars>
@@ -116,6 +136,9 @@ export default function DashboardHome() {
                         patient={p}
                         isActive={selectedPatient?.id === p.id}
                         onClick={() => setSelectedPatient(p)}
+                        dotColor={manchesterCSSColor(
+                          carePatients.find(c => c.paciente_id === p.id)?.gravidade
+                        )}
                       />
                     ))
                   ) : (
@@ -128,7 +151,7 @@ export default function DashboardHome() {
 
               {sidebarTotalPages > 1 && (
                 <Pagination
-                  mt="sm"
+                  mt="xs"
                   value={sidebarPage}
                   onChange={setSidebarPage}
                   total={sidebarTotalPages}

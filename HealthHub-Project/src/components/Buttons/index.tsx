@@ -24,6 +24,7 @@ import { IconUser, IconStethoscope, IconClipboardText } from '@tabler/icons-reac
 import type { Patient } from '../../types/patient';
 import { useAuth } from '../../context/AuthContext';
 import { formatCPF, formatPhone, onlyDigits, stripMask } from '../../utils/formatters';
+import { dispatchVitalsUpdated } from '../../utils/vitalStatus';
 
 interface SidebarLinkProps {
   to: string;
@@ -155,14 +156,15 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
         }),
       });
 
+      const patientId = response.data.id;
       if (!isRecepcionista && (values.temperatura || values.frequencia_cardiaca)) {
-        const patientId = response.data.id;
         await api.post(`/sinais/${patientId}`, {
           temperatura: values.temperatura,
           frequencia_cardiaca: values.frequencia_cardiaca,
           saturacao_oxigenio: values.saturacao_oxigenio,
           pressao_arterial: values.pressao_arterial,
         });
+        dispatchVitalsUpdated(patientId);
       }
 
       form.reset();

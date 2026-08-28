@@ -1,36 +1,36 @@
-import "reflect-metadata";
-import "dotenv/config";
-import { AppDataSource } from "./data-source.js";
-import { User } from "../modules/users/entities/User.js";
-import bcrypt from "bcryptjs";
+import 'reflect-metadata';
+import 'dotenv/config';
+import { AppDataSource } from './data-source';
+import { User } from '../modules/auth/domain/user.entity';
+import * as bcrypt from 'bcryptjs';
 
 // Senhas lidas de variáveis de ambiente — nunca hardcoded
 const SEED_USERS = [
   {
-    nome: "Dr. João Silva",
-    email: process.env.SEED_MEDICO_EMAIL ?? "medico@healthhub.com",
+    nome: 'Dr. João Silva',
+    email: process.env.SEED_MEDICO_EMAIL ?? 'medico@healthhub.com',
     senha: process.env.SEED_MEDICO_SENHA,
-    role: "medico" as const,
+    role: 'medico' as const,
   },
   {
-    nome: "Ana Souza",
-    email: process.env.SEED_RECEPCIONISTA_EMAIL ?? "recepcionista@healthhub.com",
+    nome: 'Ana Souza',
+    email: process.env.SEED_RECEPCIONISTA_EMAIL ?? 'recepcionista@healthhub.com',
     senha: process.env.SEED_RECEPCIONISTA_SENHA,
-    role: "recepcionista" as const,
+    role: 'recepcionista' as const,
   },
   {
-    nome: "Mikael Diogo",
-    email: process.env.SEED_ENFERMEIRO_EMAIL ?? "enfermeiro@healthhub.com",
+    nome: 'Mikael Diogo',
+    email: process.env.SEED_ENFERMEIRO_EMAIL ?? 'enfermeiro@healthhub.com',
     senha: process.env.SEED_ENFERMEIRO_SENHA,
-    role: "enfermeiro" as const,
+    role: 'enfermeiro' as const,
   },
 ];
 
 async function seed() {
-  const missing = SEED_USERS.filter(u => !u.senha).map(u => u.role);
+  const missing = SEED_USERS.filter((u) => !u.senha).map((u) => u.role);
   if (missing.length > 0) {
     console.error(`Erro: variáveis de ambiente de senha faltando para: ${missing.join(', ')}`);
-    console.error("Defina SEED_MEDICO_SENHA, SEED_RECEPCIONISTA_SENHA e SEED_ENFERMEIRO_SENHA no .env");
+    console.error('Defina SEED_MEDICO_SENHA, SEED_RECEPCIONISTA_SENHA e SEED_ENFERMEIRO_SENHA no .env');
     process.exit(1);
   }
 
@@ -49,7 +49,7 @@ async function seed() {
   }
 
   await AppDataSource.destroy();
-  console.log("Seed concluído.");
+  console.log('Seed concluído.');
 }
 
 seed().catch(console.error);
