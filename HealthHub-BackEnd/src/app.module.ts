@@ -13,6 +13,7 @@ import { SinaisVitaisModule } from './modules/sinais-vitais/sinais-vitais.module
 import { FilaModule } from './modules/fila/fila.module';
 import { AiModule } from './modules/ai/ai.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { VisitasModule } from './modules/visitas/visitas.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ChatModule } from './modules/chat/chat.module';
     FilaModule,
     AiModule,
     ChatModule,
+    VisitasModule,
   ],
   providers: [
     // Guards globais: toda rota exige JWT (exceto @Public) e respeita @Roles

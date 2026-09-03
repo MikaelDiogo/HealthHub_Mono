@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsInt, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateFilaDto {
   @IsUUID()
@@ -24,4 +24,8 @@ export class CreateFilaDto {
   @IsString()
   @MaxLength(50)
   status!: string;
+
+  @IsOptional()
+  @IsString()
+  motivo_visita?: string;
 }

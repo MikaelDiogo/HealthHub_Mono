@@ -2,7 +2,8 @@ import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box, Text, Group, SimpleGrid, Modal, Stack, Paper, Badge,
   Avatar, Skeleton, ScrollArea, ThemeIcon, ActionIcon,
-  Pagination, Center, Alert, TextInput, Divider,
+  Pagination, Center, Alert, TextInput, Divider, Tabs,
+  Timeline,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -10,6 +11,7 @@ import {
   IconUser, IconAlertCircle, IconStethoscope, IconCapsule,
   IconActivity, IconId, IconPhone, IconMapPin, IconX,
   IconBed, IconClock, IconUserPlus, IconUsers, IconSearch,
+  IconHistory, IconCalendar, IconArrowRight,
 } from '@tabler/icons-react';
 import { ButtonAddPatient } from '../../components/Buttons';
 import CardPatient from '../../components/CardPatient';
@@ -55,6 +57,8 @@ export const Patients = () => {
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
   const [patientToEdit, setPatientToEdit] = useState<Patient | null>(null);
+  const [visitas, setVisitas] = useState<any[]>([]);
+  const [loadingVisitas, setLoadingVisitas] = useState(false);
 
   const PAGE_SIZE = 8;
 
@@ -85,6 +89,26 @@ export const Patients = () => {
     setSearchFilter(value);
     setCurrentPage(1);
   }
+
+  // Carrega histórico de visitas quando abre o modal
+  function openPatientModal(patient: Patient) {
+    setSelectedPatient(patient);
+    setVisitas([]);
+    setLoadingVisitas(true);
+    api.get(`/patients/${patient.id}/visitas`)
+      .then(r => setVisitas(r.data?.visitas ?? []))
+      .catch(() => {})
+      .finally(() => setLoadingVisitas(false));
+    open();
+  }
+
+  const MANCHESTER_COLOR: Record<string, string> = {
+    Vermelho: 'red', Laranja: 'orange', Amarelo: 'yellow', Verde: 'green', Azul: 'blue',
+  };
+  const DESFECHO_COLOR: Record<string, string> = {
+    'Em Atendimento': 'blue', Alta: 'green', Internacao: 'orange',
+    Transferencia: 'violet', 'Saida Voluntaria': 'gray',
+  };
 
   return (
     <PageShell
@@ -145,8 +169,24 @@ export const Patients = () => {
                 </Group>
               </Box>
 
-              {/* Corpo */}
-              <Box style={{ maxHeight: '62vh', overflowY: 'auto' }}>
+              {/* Corpo com abas */}
+              <Tabs defaultValue="dados" color="slate">
+                <Tabs.List px="lg" pt="sm" style={{ borderBottom: '1px solid var(--mantine-color-slate-2)' }}>
+                  <Tabs.Tab value="dados" leftSection={<IconUser size={14} />}>Dados Clínicos</Tabs.Tab>
+                  <Tabs.Tab
+                    value="historico"
+                    leftSection={<IconHistory size={14} />}
+                    rightSection={visitas.length > 0
+                      ? <Badge size="xs" color="slate" radius="xl">{visitas.length}</Badge>
+                      : undefined}
+                  >
+                    Histórico de Visitas
+                  </Tabs.Tab>
+                </Tabs.List>
+
+                {/* Aba: Dados Clínicos */}
+                <Tabs.Panel value="dados">
+              <Box style={{ maxHeight: '55vh', overflowY: 'auto' }}>
                 <Stack gap="xl" p="lg">
 
                   {/* Status na esteira */}
@@ -262,6 +302,67 @@ export const Patients = () => {
 
                 </Stack>
               </Box>
+                </Tabs.Panel>
+
+                {/* Aba: Histórico de Visitas */}
+                <Tabs.Panel value="historico">
+                  <Box style={{ maxHeight: '55vh', overflowY: 'auto' }} p="lg">
+                    {loadingVisitas ? (
+                      <Center py="xl"><Skeleton height={120} radius="md" /></Center>
+                    ) : visitas.length === 0 ? (
+                      <Center py="xl">
+                        <Stack align="center" gap="xs">
+                          <ThemeIcon size={48} radius="xl" color="slate" variant="light">
+                            <IconHistory size={24} />
+                          </ThemeIcon>
+                          <Text c="dimmed" size="sm">Nenhuma visita registrada.</Text>
+                          <Text c="dimmed" size="xs">O histórico aparece automaticamente ao admitir o paciente na esteira.</Text>
+                        </Stack>
+                      </Center>
+                    ) : (
+                      <Timeline active={0} bulletSize={20} lineWidth={2} color="slate">
+                        {visitas.map((v, i) => (
+                          <Timeline.Item
+                            key={v.id}
+                            bullet={<IconCalendar size={10} />}
+                            title={
+                              <Group gap="xs" wrap="nowrap">
+                                <Text size="sm" fw={700}>
+                                  Visita #{visitas.length - i}
+                                </Text>
+                                {v.gravidade_manchester && (
+                                  <Badge size="xs" color={MANCHESTER_COLOR[v.gravidade_manchester] ?? 'gray'} variant="filled">
+                                    {v.gravidade_manchester}
+                                  </Badge>
+                                )}
+                                <Badge size="xs" color={DESFECHO_COLOR[v.desfecho] ?? 'gray'} variant="light">
+                                  {v.desfecho}
+                                </Badge>
+                              </Group>
+                            }
+                          >
+                            <Text size="xs" c="dimmed" mt={4}>
+                              <IconArrowRight size={10} style={{ marginRight: 4 }} />
+                              Chegada: {new Date(v.chegada).toLocaleString('pt-BR')}
+                            </Text>
+                            {v.alta && (
+                              <Text size="xs" c="dimmed">
+                                <IconArrowRight size={10} style={{ marginRight: 4 }} />
+                                Alta: {new Date(v.alta).toLocaleString('pt-BR')}
+                                {' · '}
+                                {Math.round((new Date(v.alta).getTime() - new Date(v.chegada).getTime()) / 60000)}min
+                              </Text>
+                            )}
+                            {v.motivo_visita && (
+                              <Text size="xs" c="slate.6" mt={2}>Motivo: {v.motivo_visita}</Text>
+                            )}
+                          </Timeline.Item>
+                        ))}
+                      </Timeline>
+                    )}
+                  </Box>
+                </Tabs.Panel>
+              </Tabs>
             </Box>
           );
         })()}
@@ -279,10 +380,10 @@ export const Patients = () => {
         <Group gap="md">
           <TextInput
             style={{ flex: 1 }}
-            size="md"
+            size="sm"
             radius="md"
             placeholder="Pesquisar por nome ou CPF..."
-            leftSection={<IconSearch size={16} color="oklch(0.65 0.03 230)" />}
+            leftSection={<IconSearch size={14} color="oklch(0.65 0.03 230)" />}
             value={searchFilter}
             onChange={(e) => handleSearchChange(e.currentTarget.value)}
             styles={{
@@ -348,7 +449,7 @@ export const Patients = () => {
                       topColor={manchesterCSSColor(
                         carePatients.find(c => c.paciente_id === patient.id)?.gravidade
                       )}
-                      onView={() => { setSelectedPatient(patient); open(); }}
+                      onView={() => openPatientModal(patient)}
                       onEdit={() => { setPatientToEdit(patient); openEdit(); }}
                     />
                   );

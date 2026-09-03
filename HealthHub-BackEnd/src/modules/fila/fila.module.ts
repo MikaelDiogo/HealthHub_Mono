@@ -8,9 +8,10 @@ import { ListFilaService } from './application/list-fila.service';
 import { UpdateFilaService } from './application/update-fila.service';
 import { DeleteFilaService } from './application/delete-fila.service';
 import { FilaController } from './presentation/fila.controller';
+import { VisitasModule } from '../visitas/visitas.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FilaPaciente])],
+  imports: [TypeOrmModule.forFeature([FilaPaciente]), VisitasModule],
   controllers: [FilaController],
   providers: [
     CreateFilaService,

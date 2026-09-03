@@ -179,7 +179,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
 
   return (
     <>
-      <Button color="slate" size="md" radius="md" leftSection={<IconPlus size={18} />} onClick={open}>
+      <Button color="slate" size="sm" radius="md" leftSection={<IconPlus size={15} />} onClick={open}>
         Adicionar Paciente
       </Button>
 
