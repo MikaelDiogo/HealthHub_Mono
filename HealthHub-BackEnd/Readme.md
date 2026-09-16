@@ -1,28 +1,199 @@
-# HealthHub - Engine de Inteligência Clínica
+# HealthHub — Backend
 
-O **HealthHub Backend** é o núcleo de processamento e persistência de dados desenvolvido para modernizar a gestão hospitalar em unidades de pequeno e médio porte. O sistema atua como o cérebro de uma operação digital, substituindo processos manuais lentos por uma arquitetura de dados segura e organizada.
+API REST + WebSocket do sistema de gestão hospitalar com triagem inteligente.
 
-## 🚀 O Problema e a Necessidade
-Hospitais de menor porte muitas vezes sofrem com a **fichagem manual**, um processo obsoleto que gera:
-1. **Lentidão na Triagem:** Pacientes aguardam enquanto dados vitais são anotados à mão em papéis que podem rasgar ou extraviar.
-2. **Dados Fragmentados:** Informações críticas ficam isoladas em prontuários físicos, dificultando a consulta rápida em momentos de emergência.
-3. **Falta de Histórico Clínico:** É impossível analisar a evolução de um paciente (como picos febris ou queda de saturação) sem folhear dezenas de páginas.
+**Stack:** NestJS 10 · TypeORM 0.3 · PostgreSQL 16 · Socket.IO 4 · Groq API
 
-O **HealthHub** resolve isso centralizando a inteligência clínica em uma API RESTful escalável, capaz de gerenciar desde o cadastro inicial até fluxos complexos de sinais vitais baseados no dataset clínico **PhysioNet**.
+---
 
-## 💡 Aplicação Prática e Benefícios
-* **Aceleração da Triagem:** A digitalização reduz o tempo de recepção e triagem em até 60%, permitindo que o atendimento médico comece com informações precisas já em mãos.
-* **Fim das Fichas Manuais:** Organização completa de dados cadastrais, alergias e medicamentos em uso, garantindo busca instantânea por ID ou CPF.
-* **Observação Dinâmica:** O sistema armazena o histórico de sinais vitais (Temperatura, BPM, SpO²), permitindo uma visão evolutiva da saúde do paciente que fichas estáticas de papel jamais ofereceriam.
+## Pré-requisitos
 
-## 🛠️ Stack Técnica
-* **Node.js & TypeScript:** Garantia de estabilidade e tipagem forte para manipulação de dados sensíveis.
-* **TypeORM & PostgreSQL:** Banco de dados relacional otimizado para vincular pacientes a múltiplos registros de saúde.
-* **Service Layer Pattern:** Lógica de negócio isolada, facilitando a manutenção e futuras expansões do sistema.
+| Ferramenta | Versão mínima |
+|---|---|
+| Node.js | 20 LTS |
+| Docker + Docker Compose | qualquer atual |
+| npm | 10 |
 
-## 🔧 Instalação e Execução
-1. `git clone <url-do-repo>`
-2. `npm install`
-3. Configure o arquivo `.env` com as credenciais do seu banco PostgreSQL local.
-4. `npm run typeorm migration:run` (Para criar a estrutura de tabelas automaticamente).
-5. `npm run dev` (O servidor iniciará em `http://localhost:3333`).
+---
+
+## Configuração do ambiente
+
+### 1. Copiar e preencher o `.env`
+
+```bash
+cp .env.example .env
+```
+
+Edite `.env` com os seguintes valores obrigatórios:
+
+```env
+# Obrigatório — o servidor não sobe sem esta variável
+SECRET_KEY=<gere com o comando abaixo>
+
+# Banco de dados — escolha UMA das formas:
+# Forma A: string de conexão única (Supabase, Railway, Render…)
+DATABASE_URL=postgresql://usuario:senha@host:5432/healthhub
+
+# Forma B: campos individuais (Docker local — padrão do projeto)
+DB_HOST=localhost
+DB_PORT=5433
+DB_USER=postgres
+DB_PASS=healthhub2026
+DB_NAME=healthhub
+
+# IA — sem esta chave as rotas de chat clínico e áudio retornam 503
+GROQ_API_KEY=<sua chave em console.groq.com>
+
+# Porta da API (opcional, padrão 3001)
+PORT=3001
+
+# Senhas para o seed (apenas desenvolvimento)
+SEED_MEDICO_EMAIL=medico@healthhub.com
+SEED_MEDICO_SENHA=<senha forte>
+SEED_RECEPCIONISTA_EMAIL=recepcionista@healthhub.com
+SEED_RECEPCIONISTA_SENHA=<senha forte>
+SEED_ENFERMEIRO_EMAIL=enfermeiro@healthhub.com
+SEED_ENFERMEIRO_SENHA=<senha forte>
+```
+
+Gerar `SECRET_KEY`:
+
+```bash
+node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+```
+
+---
+
+## Banco de dados com Docker
+
+O projeto inclui um `docker-compose.yml` que sobe o PostgreSQL 16 na porta **5433** (mapeada para 5432 dentro do container).
+
+### Subir o banco
+
+```bash
+docker compose up -d
+```
+
+### Verificar se está rodando
+
+```bash
+docker compose ps
+# ou
+docker logs healthhub-db
+```
+
+### Parar (mantém os dados no volume)
+
+```bash
+docker compose stop
+```
+
+### Destruir tudo (apaga o volume com os dados)
+
+```bash
+docker compose down -v
+```
+
+### Acessar o banco diretamente (psql)
+
+```bash
+docker exec -it healthhub-db psql -U postgres -d healthhub
+```
+
+### Conexão via GUI (TablePlus, DBeaver, pgAdmin)
+
+| Campo | Valor |
+|---|---|
+| Host | `localhost` |
+| Port | `5433` |
+| User | `postgres` |
+| Password | `healthhub2026` |
+| Database | `healthhub` |
+
+---
+
+## Instalação e execução
+
+```bash
+# 1. Instalar dependências
+npm install
+
+# 2. Subir o banco (se ainda não estiver rodando)
+docker compose up -d
+
+# 3. Rodar as migrations (cria todas as tabelas)
+npm run migration:run
+
+# 4. Criar os usuários de desenvolvimento (requer SEED_*_SENHA no .env)
+npm run seed
+
+# 5. Iniciar em modo desenvolvimento (hot-reload)
+npm run dev
+```
+
+A API estará disponível em **http://localhost:3001**
+
+---
+
+## Scripts disponíveis
+
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Inicia com hot-reload (`nest start --watch`) |
+| `npm run build` | Compila para `dist/` |
+| `npm run start:prod` | Executa o build compilado |
+| `npm run migration:run` | Aplica todas as migrations pendentes |
+| `npm run migration:generate` | Gera nova migration a partir das entidades |
+| `npm run migration:revert` | Reverte a última migration |
+| `npm run seed` | Cria os três usuários de desenvolvimento |
+
+---
+
+## Módulos e rotas principais
+
+| Módulo | Rotas | Papéis |
+|---|---|---|
+| `auth` | `POST /login` | público |
+| `patients` | `GET/POST /patients` · `GET/PUT /patients/:id` | todos / médico+enfermeiro |
+| `sinais-vitais` | `POST /sinais/:id` · `GET /patients/:id/vitals` | médico, enfermeiro |
+| `fila` | `GET/POST /fila` · `PUT/DELETE /fila/:id` | todos / médico+enfermeiro / médico |
+| `visitas` | `GET /patients/:id/visitas` · `PATCH /patients/:id/visitas/fechar` | autenticado |
+| `ai` | `POST /patients/:id/chat` · `POST /patients/:id/chat/audio` | médico, enfermeiro |
+| `chat` | `GET/POST /chat/conversations` · WebSocket | autenticado |
+
+---
+
+## Usuários criados pelo seed
+
+| E-mail | Papel |
+|---|---|
+| `medico@healthhub.com` | `medico` |
+| `recepcionista@healthhub.com` | `recepcionista` |
+| `enfermeiro@healthhub.com` | `enfermeiro` |
+
+Senhas definidas pelas variáveis `SEED_*_SENHA` no `.env`.
+
+---
+
+## Arquitetura
+
+```
+src/
+  config/          # typeorm.config.ts · env.validation.ts
+  database/
+    migrations/    # 6 migrations versionadas
+    seed.ts
+  modules/
+    auth/          # login · JWT
+    patients/      # CRUD de prontuário
+    sinais-vitais/ # medições seriadas
+    fila/          # esteira de cuidado (Kanban)
+    visitas/       # episódios de atendimento
+    ai/            # Groq chat clínico + Whisper áudio
+    chat/          # REST + WebSocket (Socket.IO)
+  shared/
+    guards/        # JwtAuthGuard · RolesGuard
+    decorators/    # @Public() · @Roles()
+```
+
+Cada módulo segue **Clean Architecture**: `domain → application → infrastructure → presentation`. A camada `application` nunca importa TypeORM diretamente.
