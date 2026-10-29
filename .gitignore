@@ -25,3 +25,6 @@ Thumbs.db
 
 # TypeScript
 *.tsbuildinfo
+
+# Saída do inspetor visual (taste-skill)
+.taste-skill/

@@ -11,18 +11,17 @@ import {
   IconUser, IconStethoscope, IconClipboardText,
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-import { useCare, type Gravidade, type FilaPaciente } from '../../context/CareContext';
+import { useCare, proximaSenha, type Gravidade, type FilaPaciente } from '../../context/CareContext';
+import { mensagemErro } from '../../utils/erro';
+import { AvisoErro } from '../../components/ui';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import type { Patient } from '../../types/patient';
 import { useForm as useMantineForm } from '@mantine/form';
 import { formatCPF, formatPhone, onlyDigits, stripMask } from '../../utils/formatters';
 
-// ── Senha counter local ────────────────────────────────────────────────────────
-let mobileCounter = 1;
-function gerarSenha(): string {
-  return `PR-${String(mobileCounter++).padStart(3, '0')}`;
-}
+// A senha segue a esteira (maior PR-NNN presente + 1), igual ao desktop: não há mais
+// contador local que reiniciava a cada recarga e repetia PR-001.
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const MANCHESTER_MOBILE = [
@@ -157,17 +156,20 @@ function FilaCard({
   isEnfermeiro,
   onAvancar,
   onRemover,
+  podeRemover,
 }: {
   patient: FilaPaciente;
   isEnfermeiro: boolean;
+  podeRemover: boolean;
   onAvancar: (id: string, status: FilaPaciente['status'], g?: Gravidade) => Promise<void>;
   onRemover: (id: string) => Promise<void>;
 }) {
   const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
 
   const act = async (fn: () => Promise<void>) => {
     setLoading(true);
-    try { await fn(); } finally { setLoading(false); }
+    try { await fn(); setErro(null); } catch (e) { setErro(mensagemErro(e)); } finally { setLoading(false); }
   };
 
   const showIniciarTriagem =
@@ -207,21 +209,25 @@ function FilaCard({
               {patient.idade ? `${patient.idade} anos` : '—'} · Chegada: {patient.chegada}
             </Text>
           </Box>
-          <ActionIcon
-            size="sm"
-            color="gray"
-            variant="subtle"
-            onClick={() => act(() => onRemover(patient.id))}
-            loading={loading}
-          >
-            <IconX size={12} />
-          </ActionIcon>
+          {podeRemover && (
+            <ActionIcon
+              size="sm"
+              color="gray"
+              variant="subtle"
+              aria-label="Remover da esteira"
+              onClick={() => act(() => onRemover(patient.id))}
+              loading={loading}
+            >
+              <IconX size={12} />
+            </ActionIcon>
+          )}
         </Group>
 
         {/* Badge de status */}
         <Badge size="xs" variant="light" color="slate" mt="xs">
           {patient.status}
         </Badge>
+        {erro && <Box mt="xs"><AvisoErro mensagem={erro} onFechar={() => setErro(null)} mb="0" /></Box>}
       </Box>
 
       {/* Ações do enfermeiro */}
@@ -245,7 +251,7 @@ function FilaCard({
 
             {showClassificar && (
               <Stack gap="xs">
-                <Text size="10px" fw={700} c="slate.5" tt="uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.06em' }}>
+                <Text size="10px" fw={700} c="slate.5" tt="uppercase" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '0.06em' }}>
                   Escala de Manchester:
                 </Text>
                 <Stack gap={6}>
@@ -287,9 +293,10 @@ function FilaView({
   const [refreshing, setRefreshing] = useState(false);
 
   const sorted = [...carePatients].sort((a, b) => {
-    const order = { Vermelho: 0, Amarelo: 1, Verde: 2 };
-    const aO = a.gravidade ? order[a.gravidade] : 3;
-    const bO = b.gravidade ? order[b.gravidade] : 3;
+    // Os 5 níveis de Manchester (faltavam Laranja e Azul, que caíam junto com quem não foi triado)
+    const order: Record<string, number> = { Vermelho: 0, Laranja: 1, Amarelo: 2, Verde: 3, Azul: 4 };
+    const aO = a.gravidade ? order[a.gravidade] ?? 5 : 5;
+    const bO = b.gravidade ? order[b.gravidade] ?? 5 : 5;
     return aO - bO;
   });
 
@@ -363,6 +370,7 @@ function FilaView({
                 isEnfermeiro={isEnfermeiro}
                 onAvancar={avançarFluxo}
                 onRemover={removerPaciente}
+                podeRemover={role === 'medico'}
               />
             ))}
           </Stack>
@@ -392,6 +400,7 @@ function CadastrarView() {
   const isRecepcionista = role === 'recepcionista';
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pessoais' | 'hospitalares' | 'anamnese'>('pessoais');
 
   const form = useMantineForm({
@@ -415,6 +424,7 @@ function CadastrarView() {
 
   const handleSubmit = async (values: typeof form.values, admitir: boolean) => {
     setLoading(true);
+    setErro(null);
     try {
       const res = await api.post('/patients', {
         nome_completo: values.nome_completo || undefined,
@@ -445,7 +455,7 @@ function CadastrarView() {
       if (admitir) {
         const jaEmFila = carePatients.some((p) => p.paciente_id === patientId);
         if (!jaEmFila) {
-          await admitirPaciente(res.data, gerarSenha());
+          await admitirPaciente(res.data, proximaSenha(carePatients));
         }
       }
 
@@ -455,6 +465,7 @@ function CadastrarView() {
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error('Erro ao salvar:', err);
+      setErro(mensagemErro(err, 'Não foi possível salvar o paciente.'));
     } finally {
       setLoading(false);
     }
@@ -480,9 +491,11 @@ function CadastrarView() {
           </Alert>
         )}
 
+        <AvisoErro mensagem={erro} onFechar={() => setErro(null)} mb="xs" />
+
         {isRecepcionista && (
           <Alert icon={<IconAlertCircle size={14} />} color="blue" variant="light" radius="md" mb="xs">
-            Todos os campos são opcionais. Em emergência, pode salvar em branco.
+            Obrigatórios: nome completo, CPF (11 dígitos), idade e sexo (M, F ou Outro).
           </Alert>
         )}
 
@@ -714,7 +727,7 @@ export function MobileTriage() {
   const filaIds = carePatients.map((p) => p.paciente_id);
 
   const handleAdmitir = async (patient: Patient) => {
-    await admitirPaciente(patient, gerarSenha());
+    await admitirPaciente(patient, proximaSenha(carePatients));
   };
 
   const handleLogout = () => {

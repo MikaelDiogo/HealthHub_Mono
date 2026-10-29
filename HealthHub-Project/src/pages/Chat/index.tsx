@@ -1,21 +1,23 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
-  Box, Text, Group, Stack, TextInput, ScrollArea, Avatar,
-  Badge, ActionIcon, Paper, Tooltip, UnstyledButton,
-  ThemeIcon, Divider, Indicator, Button,
+  Box, Text, Group, Stack, TextInput, Textarea, ScrollArea, Avatar,
+  ActionIcon, Tooltip, UnstyledButton, Indicator, Button, Modal, SegmentedControl, Title,
 } from '@mantine/core';
+import { useMediaQuery } from '@mantine/hooks';
 import {
   IconSearch, IconSend, IconAlertTriangle, IconUsers,
-  IconUser, IconMessageCircle, IconCircleFilled, IconArrowLeft, IconInfoCircle,
+  IconArrowLeft, IconInfoCircle, IconPlus, IconCheck, IconX,
 } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { HHMark, EmptyState } from '../../components/ui';
 import {
   chatService,
   type Conversation, type ChatMessage, type Contact, type Priority, type RoleChat,
 } from '../../services/chatService';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+// Cor por papel profissional: é dado (quem fala), por isso aparece só no avatar.
 const ROLE_COLOR: Record<RoleChat, string> = {
   medico: 'blue',
   enfermeiro: 'green',
@@ -28,6 +30,8 @@ const ROLE_LABEL: Record<RoleChat, string> = {
   recepcionista: 'Recepcionista',
 };
 
+type Filtro = 'todas' | 'diretas' | 'grupos';
+
 function getInitials(name: string) {
   return name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase();
 }
@@ -36,9 +40,19 @@ function formatTime(date: Date) {
   const now = new Date();
   const diffMin = Math.floor((now.getTime() - date.getTime()) / 60_000);
   if (diffMin < 1) return 'agora';
-  if (diffMin < 60) return `${diffMin}min`;
+  if (diffMin < 60) return `${diffMin} min`;
   if (diffMin < 1440) return date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
   return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
+function formatDayDivider(date: Date) {
+  const now = new Date();
+  const isSameDay = (a: Date, b: Date) =>
+    a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+  const ontem = new Date(now); ontem.setDate(now.getDate() - 1);
+  if (isSameDay(date, now)) return 'Hoje';
+  if (isSameDay(date, ontem)) return 'Ontem';
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
 // Mapeia role do AuthContext para o role do chatService
@@ -54,6 +68,24 @@ function buildMeContact(nome: string | null, role: string | null): Contact {
   return { id: realId || `user-${roleChat}`, name: nome ?? 'Você', role: roleChat, online: true };
 }
 
+// Avatar de pessoa (iniciais na cor do papel) ou de grupo (ícone neutro)
+function ConvAvatar({ conv, other, size = 40 }: { conv: Conversation; other?: Contact | null; size?: number }) {
+  if (conv.type === 'group') {
+    return (
+      <Avatar size={size} radius="md" color="slate" variant="light">
+        <IconUsers size={Math.round(size * 0.45)} />
+      </Avatar>
+    );
+  }
+  return (
+    <Indicator disabled={!other?.online} color="green" size={9} offset={4} position="bottom-end" withBorder>
+      <Avatar size={size} radius="md" color={other ? ROLE_COLOR[other.role] : 'slate'} variant="light" fw={600}>
+        {getInitials(other?.name ?? '?')}
+      </Avatar>
+    </Indicator>
+  );
+}
+
 // ─── Item da lista de conversas ───────────────────────────────────────────────
 function ConversationItem({
   conv, isActive, me, onClick,
@@ -63,68 +95,50 @@ function ConversationItem({
   const other = conv.type === 'direct'
     ? conv.participants.find(p => p.id !== me.id)
     : null;
+  const naoLidas = conv.unreadCount > 0;
+  const urgente = conv.lastMessage?.priority === 'urgente';
 
   return (
     <UnstyledButton
       w="100%"
       px="sm"
-      py={7}
+      py={10}
       onClick={onClick}
-      style={{
-        backgroundColor: isActive ? 'var(--mantine-color-slate-1)' : 'transparent',
-        borderBottom: '1px solid var(--mantine-color-slate-0)',
-        transition: 'background 120ms ease',
-      }}
-      onMouseEnter={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'var(--mantine-color-slate-0)'; }}
-      onMouseLeave={e => { if (!isActive) e.currentTarget.style.backgroundColor = 'transparent'; }}
+      className="hh-row"
+      aria-pressed={isActive}
+      style={{ borderRadius: 'var(--hh-radius-card)' }}
     >
       <Group gap="sm" wrap="nowrap">
-        {/* Avatar */}
-        {conv.type === 'group' ? (
-          <ThemeIcon size={34} radius="xl" variant="light" color="hub" style={{ flexShrink: 0 }}>
-            <IconUsers size={17} />
-          </ThemeIcon>
-        ) : (
-          <Indicator
-            disabled={!other?.online}
-            color="green"
-            size={8}
-            offset={3}
-            position="bottom-end"
-            style={{ flexShrink: 0 }}
-          >
-            <Avatar size={34} radius="xl" color={other ? ROLE_COLOR[other.role] : 'hub'}
-              variant="filled"
-              style={{ fontSize: 12, fontWeight: 700 }}>
-              {getInitials(other?.name ?? '?')}
-            </Avatar>
-          </Indicator>
-        )}
+        <ConvAvatar conv={conv} other={other} />
 
-        {/* Info */}
         <Box style={{ flex: 1, minWidth: 0 }}>
-          <Group justify="space-between" wrap="nowrap" gap={4}>
-            <Text size="sm" fw={600} truncate c="hub.9">
+          <Group justify="space-between" wrap="nowrap" gap={8}>
+            <Text size="sm" fw={naoLidas ? 700 : 600} truncate c="var(--hh-ink)">
               {conv.name}
             </Text>
             {conv.lastMessage && (
-              <Text size="10px" c="slate.4" style={{ fontFamily: "'IBM Plex Mono', monospace", flexShrink: 0 }}>
+              <Text size="xs" c={naoLidas ? 'var(--hh-accent)' : 'var(--hh-faint)'} fw={naoLidas ? 600 : 400} style={{ flexShrink: 0 }}>
                 {formatTime(conv.lastMessage.timestamp)}
               </Text>
             )}
           </Group>
 
-          <Group gap={4} mt={1} wrap="nowrap">
-            {conv.lastMessage?.priority === 'urgente' && (
-              <IconAlertTriangle size={11} color="var(--mantine-color-red-5)" style={{ flexShrink: 0 }} />
-            )}
-            <Text size="xs" truncate c="slate.5">
-              {conv.lastMessage?.content ?? 'Nenhuma mensagem'}
+          <Group gap={6} mt={2} wrap="nowrap">
+            <Text size="sm" truncate c={naoLidas ? 'var(--hh-ink)' : 'var(--hh-muted)'} style={{ flex: 1 }}>
+              {urgente && <Text span c="var(--hh-negative)" fw={600} inherit>Urgente · </Text>}
+              {conv.lastMessage?.content ?? 'Nenhuma mensagem ainda'}
             </Text>
-            {conv.unreadCount > 0 && (
-              <Badge size="xs" color="hub.6" radius="xl" style={{ flexShrink: 0, marginLeft: 'auto' }}>
+            {naoLidas && (
+              <Box
+                aria-label={`${conv.unreadCount} não lidas`}
+                style={{
+                  minWidth: 20, height: 20, padding: '0 6px', borderRadius: 10, flexShrink: 0,
+                  background: 'var(--hh-accent)', color: '#fff',
+                  fontSize: 12, fontWeight: 600, display: 'grid', placeItems: 'center',
+                }}
+              >
                 {conv.unreadCount}
-              </Badge>
+              </Box>
             )}
           </Group>
         </Box>
@@ -134,88 +148,155 @@ function ConversationItem({
 }
 
 // ─── Bolha de mensagem ────────────────────────────────────────────────────────
+// Minhas: tinta escura à direita. Dos outros: superfície branca à esquerda.
+// Mensagens seguidas do mesmo remetente formam um bloco (canto interno mais reto).
 function MessageBubble({
-  msg, isMe, showSender,
+  msg, isMe, showSender, lastOfBlock,
 }: {
-  msg: ChatMessage; isMe: boolean; showSender: boolean;
+  msg: ChatMessage; isMe: boolean; showSender: boolean; lastOfBlock: boolean;
 }) {
   const isUrgent = msg.priority === 'urgente';
+  const hora = msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  const r = 14;
+  const raioBolha = isMe
+    ? `${r}px ${showSender ? r : 4}px ${lastOfBlock ? r : 4}px ${r}px`
+    : `${showSender ? r : 4}px ${r}px ${r}px ${lastOfBlock ? r : 4}px`;
 
   return (
     <Box
+      className="hh-fade"
       style={{
         display: 'flex',
         flexDirection: isMe ? 'row-reverse' : 'row',
-        gap: 8,
+        gap: 10,
         alignItems: 'flex-end',
-        maxWidth: '80%',
+        maxWidth: 'min(72%, 640px)',
         marginLeft: isMe ? 'auto' : 0,
+        marginTop: showSender ? 10 : 0,
       }}
     >
-      {/* Avatar (só no primeiro de cada bloco) */}
       {!isMe && (
         <Avatar
-          size={28}
+          size={30}
           radius="md"
           color={ROLE_COLOR[msg.senderRole]}
-          variant="filled"
-          style={{ flexShrink: 0, fontSize: 11, fontWeight: 700,
-            visibility: showSender ? 'visible' : 'hidden' }}
+          variant="light"
+          fw={600}
+          style={{ flexShrink: 0, visibility: lastOfBlock ? 'visible' : 'hidden' }}
         >
           {getInitials(msg.senderName)}
         </Avatar>
       )}
 
-      <Box style={{ display: 'flex', flexDirection: 'column',
-        alignItems: isMe ? 'flex-end' : 'flex-start', gap: 2 }}>
-        {/* Nome + badge urgente (só no primeiro do bloco) */}
-        {showSender && !isMe && (
-          <Group gap={6} align="center">
-            <Text size="xs" fw={700} c="slate.7">{msg.senderName}</Text>
-            <Badge size="xs" color={ROLE_COLOR[msg.senderRole]} variant="light" radius="sm">
-              {ROLE_LABEL[msg.senderRole]}
-            </Badge>
+      <Box style={{ display: 'flex', flexDirection: 'column', alignItems: isMe ? 'flex-end' : 'flex-start', gap: 4, minWidth: 0 }}>
+        {showSender && (!isMe || isUrgent) && (
+          <Group gap={6} wrap="nowrap" px={2}>
+            {!isMe && <Text size="xs" fw={600} c="var(--hh-ink)">{msg.senderName}</Text>}
+            {!isMe && <Text size="xs" c="var(--hh-faint)">{ROLE_LABEL[msg.senderRole]}</Text>}
             {isUrgent && (
-              <Badge size="xs" color="red" variant="filled" radius="sm"
-                leftSection={<IconAlertTriangle size={9} />}>
-                URGENTE
-              </Badge>
+              <Group gap={4} wrap="nowrap">
+                <IconAlertTriangle size={12} color="var(--hh-negative)" />
+                <Text size="xs" fw={600} c="var(--hh-negative)">Urgente</Text>
+              </Group>
             )}
           </Group>
         )}
-        {showSender && isMe && isUrgent && (
-          <Badge size="xs" color="red" variant="filled" radius="sm"
-            leftSection={<IconAlertTriangle size={9} />}>
-            URGENTE
-          </Badge>
-        )}
 
-        {/* Bolha */}
-        <Paper
-          p="xs"
+        <Box
+          px={14}
+          py={9}
           style={{
-            background: isMe
-              ? 'var(--mantine-color-hub-1)'
-              : '#fff',
-            color: 'var(--mantine-color-slate-8)',
-            border: isUrgent ? '2px solid var(--mantine-color-red-5)' : 'none',
-            borderLeft: isUrgent && !isMe ? '4px solid var(--mantine-color-red-5)' : undefined,
-            borderRadius: 14,
-            boxShadow: '0 1px 2px rgba(15, 23, 42, 0.07)',
+            background: isMe ? 'var(--hh-ink)' : 'var(--hh-surface)',
+            color: isMe ? '#fff' : 'var(--hh-ink)',
+            border: isMe ? '1px solid var(--hh-ink)' : '1px solid var(--hh-border)',
+            boxShadow: isUrgent ? 'inset 3px 0 0 var(--hh-negative)' : undefined,
+            borderRadius: raioBolha,
             maxWidth: '100%',
           }}
         >
-          <Text size="sm" style={{ lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          <Text size="sm" style={{ lineHeight: 1.55, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }} c="inherit">
             {msg.content}
           </Text>
-        </Paper>
+        </Box>
 
-        {/* Hora */}
-        <Text size="10px" c="dimmed" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-          {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-        </Text>
+        {lastOfBlock && (
+          <Group gap={4} wrap="nowrap" px={2}>
+            <Text size="xs" c="var(--hh-faint)">{hora}</Text>
+            {isMe && <IconCheck size={13} color="var(--hh-faint)" aria-label="enviada" />}
+          </Group>
+        )}
       </Box>
     </Box>
+  );
+}
+
+// ─── Divisor de dia ───────────────────────────────────────────────────────────
+function DayDivider({ label }: { label: string }) {
+  return (
+    <Group gap="sm" my="md" wrap="nowrap" aria-label={label}>
+      <Box style={{ flex: 1, height: 1, background: 'var(--hh-border)' }} />
+      <Text size="xs" fw={500} c="var(--hh-faint)">{label}</Text>
+      <Box style={{ flex: 1, height: 1, background: 'var(--hh-border)' }} />
+    </Group>
+  );
+}
+
+// ─── Modal: Nova mensagem (inicia uma conversa direta) ────────────────────────
+function NovaMensagemModal({
+  opened, onClose, contacts, onSelect,
+}: {
+  opened: boolean; onClose: () => void; contacts: Contact[]; onSelect: (c: Contact) => void;
+}) {
+  const [query, setQuery] = useState('');
+  const filtered = contacts.filter(c => c.name.toLowerCase().includes(query.toLowerCase()));
+
+  return (
+    <Modal
+      opened={opened}
+      onClose={() => { onClose(); setQuery(''); }}
+      title="Nova mensagem"
+      centered
+      size="sm"
+    >
+      <TextInput
+        placeholder="Buscar colega"
+        aria-label="Buscar colega"
+        leftSection={<IconSearch size={14} />}
+        value={query}
+        onChange={e => setQuery(e.currentTarget.value)}
+        mb="sm"
+        data-autofocus
+      />
+      <Stack gap={2} mah={340} style={{ overflowY: 'auto' }} className="hh-stagger">
+        {filtered.length === 0 && (
+          <EmptyState message="Nenhum colega encontrado." />
+        )}
+        {filtered.map(c => (
+          <UnstyledButton
+            key={c.id}
+            onClick={() => { onSelect(c); onClose(); setQuery(''); }}
+            px="sm"
+            py={8}
+            className="hh-row"
+            style={{ borderRadius: 'var(--hh-radius-control)' }}
+          >
+            <Group gap="sm" wrap="nowrap">
+              <Indicator disabled={!c.online} color="green" size={8} offset={3} position="bottom-end" withBorder>
+                <Avatar size={34} radius="md" color={ROLE_COLOR[c.role]} variant="light" fw={600}>
+                  {getInitials(c.name)}
+                </Avatar>
+              </Indicator>
+              <Box style={{ flex: 1, minWidth: 0 }}>
+                <Text size="sm" fw={600} c="var(--hh-ink)" truncate>{c.name}</Text>
+                <Text size="xs" c="var(--hh-muted)">
+                  {ROLE_LABEL[c.role]}{c.online ? ' · online' : ''}
+                </Text>
+              </Box>
+            </Group>
+          </UnstyledButton>
+        ))}
+      </Stack>
+    </Modal>
   );
 }
 
@@ -224,18 +305,24 @@ export function Chat() {
   const { role, nome } = useAuth();
   const me = buildMeContact(nome, role);
   const navigate = useNavigate();
+  // No celular, lista e conversa ocupam a tela inteira, uma de cada vez
+  const isMobile = useMediaQuery('(max-width: 767px)') ?? false;
 
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [activeConvId, setActiveConvId] = useState<string>('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
   const [search, setSearch] = useState('');
+  const [filtro, setFiltro] = useState<Filtro>('todas');
   const [input, setInput] = useState('');
   const [priority, setPriority] = useState<Priority>('normal');
   const [sending, setSending] = useState(false);
   // Painel de detalhes fechado por padrão — abre só pelo ícone ⓘ
   const [showDetails, setShowDetails] = useState(false);
+  const [novaMensagemOpened, setNovaMensagemOpened] = useState(false);
+  const [mobileView, setMobileView] = useState<'lista' | 'conversa'>('lista');
   const bottomRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
 
   // Carrega contatos + conversas em paralelo
   useEffect(() => {
@@ -254,6 +341,7 @@ export function Chat() {
 
   // Carrega mensagens quando muda de conversa + marca como lida
   useEffect(() => {
+    if (!activeConvId) return;
     chatService.listMessages(activeConvId).then(msgs => {
       setMessages(msgs);
       setConversations(prev => prev.map(c =>
@@ -266,7 +354,8 @@ export function Chat() {
 
   // Auto-scroll ao chegar nova mensagem
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const reduz = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    bottomRef.current?.scrollIntoView({ behavior: reduz ? 'auto' : 'smooth' });
   }, [messages]);
 
   // Ouve novas mensagens em tempo real via WebSocket
@@ -297,374 +386,389 @@ export function Chat() {
       setPriority('normal');
     } finally {
       setSending(false);
+      composerRef.current?.focus();
     }
   }, [input, sending, activeConvId, priority, me]);
+
+  const abrirConversa = useCallback((id: string) => {
+    setActiveConvId(id);
+    setMobileView('conversa');
+  }, []);
+
+  // Inicia (ou abre) uma conversa direta com um colega a partir do modal "Nova mensagem"
+  const handleStartDM = useCallback(async (contact: Contact) => {
+    const existing = conversations.find(
+      c => c.type === 'direct' && c.participants.some(p => p.id === contact.id),
+    );
+    if (existing) {
+      abrirConversa(existing.id);
+      return;
+    }
+    const conv = await chatService.getOrCreateDM(contact.id);
+    setConversations(prev => [conv, ...prev]);
+    abrirConversa(conv.id);
+  }, [conversations, abrirConversa]);
 
   const activeConv = conversations.find(c => c.id === activeConvId);
   const otherParticipant = activeConv?.type === 'direct'
     ? activeConv.participants.find(p => p.id !== me.id)
     : null;
 
-  // Filtra conversas pelo search
-  const filteredConvs = conversations.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  // Filtra conversas pelo search + pela aba selecionada
+  const filteredConvs = conversations
+    .filter(c => c.name.toLowerCase().includes(search.toLowerCase()))
+    .filter(c => filtro === 'todas' ? true : filtro === 'grupos' ? c.type === 'group' : c.type === 'direct');
 
-  // Agrupa mensagens por remetente consecutivo
-  const groupedMessages = messages.reduce<{ msg: ChatMessage; showSender: boolean }[]>(
-    (acc, msg, i) => {
+  // Agrupa mensagens por remetente consecutivo + insere divisores de dia
+  const renderItems = useMemo(() => {
+    type Item = { kind: 'divider'; label: string } | { kind: 'msg'; msg: ChatMessage; showSender: boolean; lastOfBlock: boolean };
+    const items: Item[] = [];
+    let lastDay = '';
+    messages.forEach((msg, i) => {
+      const dayLabel = formatDayDivider(msg.timestamp);
+      if (dayLabel !== lastDay) {
+        items.push({ kind: 'divider', label: dayLabel });
+        lastDay = dayLabel;
+      }
       const prev = messages[i - 1];
-      const showSender = !prev || prev.senderId !== msg.senderId;
-      acc.push({ msg, showSender });
-      return acc;
-    },
-    [],
-  );
+      const next = messages[i + 1];
+      const showSender = !prev || prev.senderId !== msg.senderId || items[items.length - 1]?.kind === 'divider';
+      const lastOfBlock = !next || next.senderId !== msg.senderId || formatDayDivider(next.timestamp) !== dayLabel;
+      items.push({ kind: 'msg', msg, showSender, lastOfBlock });
+    });
+    return items;
+  }, [messages]);
+
+  const participantesDetalhe = activeConv?.type === 'group'
+    ? [me, ...allContacts]
+    : otherParticipant ? [otherParticipant] : [];
+
+  const mostrarLista = !isMobile || mobileView === 'lista';
+  const mostrarConversa = !isMobile || mobileView === 'conversa';
+  const urgente = priority === 'urgente';
 
   return (
-    <Box style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: '#fff' }}>
+    <Box style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: 'var(--hh-ground)' }}>
 
-      {/* ── Barra de navegação superior (clara, identidade HealthHub) ── */}
+      <NovaMensagemModal
+        opened={novaMensagemOpened}
+        onClose={() => setNovaMensagemOpened(false)}
+        contacts={allContacts}
+        onSelect={handleStartDM}
+      />
+
+      {/* ── Barra superior ── */}
       <Box
-        px="md"
+        px={{ base: 'sm', sm: 'md' }}
         style={{
-          height: 42,
+          height: 56,
           flexShrink: 0,
-          background: '#fff',
+          background: 'var(--hh-surface)',
           display: 'flex',
           alignItems: 'center',
           gap: 12,
-          borderBottom: '1px solid var(--mantine-color-slate-2)',
+          borderBottom: '1px solid var(--hh-border)',
         }}
       >
-        {/* Usuário logado à esquerda */}
-        <Group gap={8} wrap="nowrap">
-          <Indicator color="green" size={7} offset={2} position="bottom-end">
-            <Avatar size={26} radius="xl" color={ROLE_COLOR[me.role]} variant="filled"
-              style={{ fontSize: 10, fontWeight: 700 }}>
-              {getInitials(me.name)}
-            </Avatar>
-          </Indicator>
-          <Text size="xs" fw={600} c="hub.9" truncate maw={160}>{me.name}</Text>
-          <Badge size="xs" color={ROLE_COLOR[me.role]} variant="light" radius="sm">
-            {ROLE_LABEL[me.role]}
-          </Badge>
-        </Group>
-
-        <Divider orientation="vertical" color="var(--mantine-color-slate-2)" my={8} />
-
-        <Group gap={8}>
-          <IconMessageCircle size={15} color="var(--mantine-color-hub-6)" />
-          <Text fw={700} size="sm" c="hub.9" style={{ fontFamily: "'Manrope', sans-serif" }}>
-            Chat Interno
-          </Text>
-        </Group>
-
-        {/* Botão de voltar à direita */}
         <Button
-          leftSection={<IconArrowLeft size={14} />}
           variant="subtle"
-          color="hub.7"
+          color="slate"
           size="compact-sm"
-          radius="md"
+          leftSection={<IconArrowLeft size={16} />}
           onClick={() => navigate('/main')}
-          style={{ marginLeft: 'auto' }}
-          styles={{ root: { fontFamily: "'Manrope', sans-serif", fontWeight: 600 } }}
         >
-          Voltar ao Painel
+          Painel
         </Button>
+        <Box style={{ width: 1, height: 20, background: 'var(--hh-border)' }} />
+        <Group gap={10} wrap="nowrap">
+          <HHMark size={24} />
+          <Title order={1} size={16} fw={700} c="var(--hh-ink)">Mensagens</Title>
+        </Group>
+
+        <Group gap={10} wrap="nowrap" ml="auto" visibleFrom="sm">
+          <Box style={{ textAlign: 'right' }}>
+            <Text size="sm" fw={600} c="var(--hh-ink)" lh={1.2} truncate maw={200}>{me.name}</Text>
+            <Text size="xs" c="var(--hh-muted)" lh={1.2}>{ROLE_LABEL[me.role]}</Text>
+          </Box>
+          <Avatar size={32} radius="md" color={ROLE_COLOR[me.role]} variant="light" fw={600}>
+            {getInitials(me.name)}
+          </Avatar>
+        </Group>
       </Box>
 
-      {/* Layout de duas colunas — colado nas bordas, estilo WhatsApp */}
       <Box style={{ display: 'flex', flex: 1, minHeight: 0 }}>
 
         {/* ── Coluna esquerda: lista de conversas ── */}
-        <Box
-          style={{
-            width: 300,
-            flexShrink: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            borderRight: '1px solid var(--mantine-color-slate-2)',
-            background: '#fff',
-            overflow: 'hidden',
-          }}
-        >
-          {/* Header da lista (claro, busca estilo WhatsApp) */}
-          <Box px="sm" py={8} style={{ background: '#fff', borderBottom: '1px solid var(--mantine-color-slate-1)', flexShrink: 0 }}>
-            <TextInput
-              placeholder="Buscar conversa..."
-              size="xs"
-              radius="xl"
-              leftSection={<IconSearch size={13} color="var(--mantine-color-slate-4)" />}
-              value={search}
-              onChange={e => setSearch(e.currentTarget.value)}
-              styles={{
-                input: { background: 'var(--mantine-color-slate-1)', border: 'none', minHeight: 30, height: 30 },
-              }}
-            />
-          </Box>
+        {mostrarLista && (
+          <Box
+            style={{
+              width: isMobile ? '100%' : 340,
+              flexShrink: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              borderRight: isMobile ? undefined : '1px solid var(--hh-border)',
+              background: 'var(--hh-surface)',
+              overflow: 'hidden',
+            }}
+          >
+            <Box px="md" pt="md" pb="sm" style={{ flexShrink: 0 }}>
+              <Group justify="space-between" mb="md" wrap="nowrap">
+                <Text fw={700} size="lg" c="var(--hh-ink)">Conversas</Text>
+                <Button
+                  size="xs"
+                  variant="default"
+                  leftSection={<IconPlus size={14} />}
+                  onClick={() => setNovaMensagemOpened(true)}
+                >
+                  Nova mensagem
+                </Button>
+              </Group>
 
-          {/* Lista */}
-          <ScrollArea style={{ flex: 1 }}>
-            <Stack gap={0}>
-              {filteredConvs.map(conv => (
-                <ConversationItem
-                  key={conv.id}
-                  conv={conv}
-                  isActive={conv.id === activeConvId}
-                  me={me}
-                  onClick={() => setActiveConvId(conv.id)}
-                />
-              ))}
-              {filteredConvs.length === 0 && (
-                <Text size="xs" c="dimmed" ta="center" py="md">
-                  Nenhuma conversa encontrada
-                </Text>
-              )}
-            </Stack>
-          </ScrollArea>
+              <TextInput
+                placeholder="Buscar conversa"
+                aria-label="Buscar conversa"
+                leftSection={<IconSearch size={14} />}
+                value={search}
+                onChange={e => setSearch(e.currentTarget.value)}
+                mb="sm"
+              />
 
-        </Box>
-
-        {/* ── Coluna direita: janela de mensagens ── */}
-        <Box
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            background: '#fff',
-            overflow: 'hidden',
-            minWidth: 0,
-          }}
-        >
-          {activeConv ? (
-            <>
-              {/* Header da conversa (claro, estilo WhatsApp) */}
-              <Box
-                px="sm"
-                py={6}
-                style={{ background: '#fff', borderBottom: '1px solid var(--mantine-color-slate-2)', flexShrink: 0 }}
-              >
-                <Group gap="sm" wrap="nowrap">
-                  {activeConv.type === 'group' ? (
-                    <ThemeIcon size={28} radius="xl" variant="light" color="hub">
-                      <IconUsers size={15} />
-                    </ThemeIcon>
-                  ) : (
-                    <Avatar size={28} radius="xl" color={otherParticipant ? ROLE_COLOR[otherParticipant.role] : 'hub'}
-                      variant="filled" style={{ fontSize: 11, fontWeight: 700 }}>
-                      {getInitials(otherParticipant?.name ?? '?')}
-                    </Avatar>
-                  )}
-                  <Group gap={8} style={{ flex: 1, minWidth: 0 }} wrap="nowrap">
-                    <Text fw={700} size="sm" c="hub.9" truncate style={{ fontFamily: "'Manrope', sans-serif" }}>
-                      {activeConv.name}
-                    </Text>
-                    {activeConv.type === 'group' ? (
-                      <Text size="10px" c="slate.4" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-                        {allContacts.length + 1} participantes
-                      </Text>
-                    ) : otherParticipant ? (
-                      <>
-                        <Badge size="xs" color={ROLE_COLOR[otherParticipant.role]} variant="light" radius="sm">
-                          {ROLE_LABEL[otherParticipant.role]}
-                        </Badge>
-                        {otherParticipant.online && (
-                          <Group gap={4}>
-                            <IconCircleFilled size={7} color="var(--mantine-color-green-5)" />
-                            <Text size="10px" c="slate.4" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-                              online
-                            </Text>
-                          </Group>
-                        )}
-                      </>
-                    ) : null}
-                  </Group>
-                  <Tooltip label="Detalhes da conversa" withArrow>
-                    <ActionIcon variant="subtle" color="hub.7" radius="xl" onClick={() => setShowDetails(s => !s)}>
-                      <IconInfoCircle size={16} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
-              </Box>
-
-              {/* Área de mensagens — fundo cinza claro neutro */}
-              <ScrollArea style={{ flex: 1 }} p="md" bg="slate.0">
-                <Stack gap="xs">
-                  {groupedMessages.map(({ msg, showSender }) => (
-                    <MessageBubble
-                      key={msg.id}
-                      msg={msg}
-                      isMe={msg.senderId === me.id}
-                      showSender={showSender}
-                    />
-                  ))}
-                  <div ref={bottomRef} />
-                </Stack>
-              </ScrollArea>
-
-              {/* Input */}
-              <Box
-                px="md"
-                pt="sm"
-                pb={18}
-                style={{ borderTop: '1px solid var(--mantine-color-slate-2)', background: '#fff', flexShrink: 0 }}
-              >
-                {/* Toggle de prioridade */}
-                <Group gap="xs" mb="xs">
-                  <Text size="10px" c="dimmed" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-                    PRIORIDADE:
-                  </Text>
-                  {(['normal', 'urgente'] as Priority[]).map(p => (
-                    <UnstyledButton
-                      key={p}
-                      onClick={() => setPriority(p)}
-                      px={8}
-                      py={2}
-                      style={{
-                        borderRadius: 6,
-                        fontSize: 11,
-                        fontWeight: 700,
-                        fontFamily: "'IBM Plex Mono', monospace",
-                        border: `1.5px solid ${priority === p
-                          ? p === 'urgente' ? 'var(--mantine-color-red-5)' : 'var(--mantine-color-slate-5)'
-                          : 'oklch(0.88 0.01 220)'}`,
-                        background: priority === p
-                          ? p === 'urgente' ? 'var(--mantine-color-red-0)' : 'var(--mantine-color-slate-1)'
-                          : 'transparent',
-                        color: priority === p
-                          ? p === 'urgente' ? 'var(--mantine-color-red-7)' : 'var(--mantine-color-slate-7)'
-                          : 'var(--mantine-color-slate-4)',
-                      }}
-                    >
-                      {p === 'urgente' && '⚠ '}{p.toUpperCase()}
-                    </UnstyledButton>
-                  ))}
-                </Group>
-
-                <Group gap="xs" wrap="nowrap">
-                  <TextInput
-                    style={{ flex: 1 }}
-                    radius="md"
-                    placeholder="Escreva uma mensagem..."
-                    value={input}
-                    onChange={e => setInput(e.currentTarget.value)}
-                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                    disabled={sending}
-                    styles={{
-                      input: {
-                        background: '#fff',
-                        border: priority === 'urgente'
-                          ? '1.5px solid var(--mantine-color-red-4)'
-                          : '1px solid var(--mantine-color-slate-2)',
-                      },
-                    }}
-                  />
-                  <Tooltip label="Enviar (Enter)" withArrow>
-                    <ActionIcon
-                      size="lg"
-                      color="hub.6"
-                      variant="filled"
-                      radius="md"
-                      loading={sending}
-                      disabled={!input.trim()}
-                      onClick={handleSend}
-                    >
-                      <IconSend size={17} />
-                    </ActionIcon>
-                  </Tooltip>
-                </Group>
-              </Box>
-            </>
-          ) : (
-            <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-              <Stack align="center" gap="sm">
-                <ThemeIcon size={56} radius="xl" color="slate" variant="light">
-                  <IconMessageCircle size={28} />
-                </ThemeIcon>
-                <Text c="slate.5" size="sm">Selecione uma conversa</Text>
-              </Stack>
+              <SegmentedControl
+                fullWidth
+                size="xs"
+                value={filtro}
+                onChange={(v) => setFiltro(v as Filtro)}
+                aria-label="Filtrar conversas"
+                transitionDuration={180}
+                data={[
+                  { value: 'todas', label: 'Todas' },
+                  { value: 'diretas', label: 'Equipe' },
+                  { value: 'grupos', label: 'Grupos' },
+                ]}
+              />
             </Box>
-          )}
-        </Box>
 
-        {/* ── Painel de detalhes da conversa (inspirado no Freshchat) ── */}
-        {activeConv && showDetails && (
+            <ScrollArea style={{ flex: 1 }} type="hover">
+              <Stack gap={2} px="xs" pb="sm" className="hh-stagger" key={filtro}>
+                {filteredConvs.map(conv => (
+                  <ConversationItem
+                    key={conv.id}
+                    conv={conv}
+                    isActive={conv.id === activeConvId && !isMobile}
+                    me={me}
+                    onClick={() => abrirConversa(conv.id)}
+                  />
+                ))}
+                {filteredConvs.length === 0 && (
+                  <Box px="xs" pt="xs">
+                    <EmptyState message={search ? 'Nenhuma conversa com essa busca.' : 'Nenhuma conversa aqui ainda.'} />
+                  </Box>
+                )}
+              </Stack>
+            </ScrollArea>
+          </Box>
+        )}
+
+        {/* ── Coluna central: conversa ── */}
+        {mostrarConversa && (
+          <Box style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minWidth: 0 }}>
+            {activeConv ? (
+              <>
+                {/* Cabeçalho da conversa */}
+                <Group
+                  gap="sm"
+                  wrap="nowrap"
+                  px={{ base: 'sm', sm: 'lg' }}
+                  style={{ height: 64, flexShrink: 0, background: 'var(--hh-surface)', borderBottom: '1px solid var(--hh-border)' }}
+                >
+                  {isMobile && (
+                    <ActionIcon variant="subtle" color="slate" size="lg" aria-label="Voltar às conversas" onClick={() => setMobileView('lista')}>
+                      <IconArrowLeft size={18} />
+                    </ActionIcon>
+                  )}
+                  <ConvAvatar conv={activeConv} other={otherParticipant} size={38} />
+                  <Box style={{ flex: 1, minWidth: 0 }}>
+                    <Text fw={600} size="md" c="var(--hh-ink)" truncate lh={1.3}>{activeConv.name}</Text>
+                    <Text size="xs" c="var(--hh-muted)" truncate>
+                      {activeConv.type === 'group'
+                        ? `${allContacts.length + 1} participantes`
+                        : otherParticipant
+                          ? `${ROLE_LABEL[otherParticipant.role]} · ${otherParticipant.online ? 'online' : 'offline'}`
+                          : ''}
+                    </Text>
+                  </Box>
+                  <Tooltip label={showDetails ? 'Fechar detalhes' : 'Detalhes da conversa'}>
+                    <ActionIcon
+                      variant={showDetails ? 'light' : 'subtle'}
+                      color="slate"
+                      size="lg"
+                      onClick={() => setShowDetails(s => !s)}
+                      aria-label="Detalhes da conversa"
+                      aria-pressed={showDetails}
+                      visibleFrom="md"
+                    >
+                      <IconInfoCircle size={18} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
+
+                {/* Mensagens */}
+                {renderItems.length === 0 ? (
+                  <Box key={activeConvId} className="hh-fade" p="xl" style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                    <Text size="md" fw={600} c="var(--hh-ink)">Nenhuma mensagem ainda</Text>
+                    <Text size="sm" c="var(--hh-muted)" mt={4} maw={340}>
+                      Escreva a primeira mensagem para {activeConv.type === 'group' ? 'a equipe' : activeConv.name}. Use "Marcar como urgente" para o que não pode esperar.
+                    </Text>
+                  </Box>
+                ) : (
+                <ScrollArea style={{ flex: 1 }} type="hover">
+                  <Box key={activeConvId} px={{ base: 'sm', sm: 'xl' }} py="md" style={{ display: 'flex', flexDirection: 'column', gap: 3, maxWidth: 960, margin: '0 auto' }}>
+                    {renderItems.map((item, i) => item.kind === 'divider'
+                      ? <DayDivider key={`d-${i}`} label={item.label} />
+                      : (
+                        <MessageBubble
+                          key={item.msg.id}
+                          msg={item.msg}
+                          isMe={item.msg.senderId === me.id}
+                          showSender={item.showSender}
+                          lastOfBlock={item.lastOfBlock}
+                        />
+                      ))}
+                    <div ref={bottomRef} />
+                  </Box>
+                </ScrollArea>
+                )}
+
+                {/* Campo de escrita: um bloco só, com a marcação de urgência dentro */}
+                <Box px={{ base: 'sm', sm: 'xl' }} pt="xs" pb="md" style={{ flexShrink: 0 }}>
+                  <Box
+                    style={{
+                      maxWidth: 960,
+                      margin: '0 auto',
+                      background: 'var(--hh-surface)',
+                      border: `1px solid ${urgente ? 'var(--hh-negative)' : 'var(--hh-control)'}`,
+                      borderRadius: 'var(--hh-radius-card)',
+                      boxShadow: '0 1px 2px rgba(15, 23, 42, 0.05)',
+                      transition: 'border-color var(--hh-dur) var(--hh-ease)',
+                    }}
+                  >
+                    <Textarea
+                      ref={composerRef}
+                      variant="unstyled"
+                      autosize
+                      minRows={1}
+                      maxRows={5}
+                      px="md"
+                      pt={10}
+                      placeholder={urgente ? 'Mensagem urgente para ' + activeConv.name : 'Mensagem para ' + activeConv.name}
+                      aria-label="Escrever mensagem"
+                      value={input}
+                      onChange={e => setInput(e.currentTarget.value)}
+                      onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
+                      disabled={sending}
+                      styles={{ input: { fontSize: 14, lineHeight: 1.5 } }}
+                    />
+                    <Group justify="space-between" px="xs" pb={8} pt={2} wrap="nowrap">
+                      <UnstyledButton
+                        onClick={() => setPriority(urgente ? 'normal' : 'urgente')}
+                        aria-pressed={urgente}
+                        px={8}
+                        py={4}
+                        style={{
+                          borderRadius: 'var(--hh-radius-control)',
+                          background: urgente ? 'var(--hh-pill-negative-bg)' : 'transparent',
+                          transition: 'background-color var(--hh-dur) var(--hh-ease)',
+                        }}
+                        className={urgente ? undefined : 'hh-row'}
+                      >
+                        <Group gap={6} wrap="nowrap">
+                          {urgente
+                            ? <IconX size={14} color="var(--hh-pill-negative-ink)" />
+                            : <IconAlertTriangle size={14} color="var(--hh-muted)" />}
+                          <Text size="xs" fw={600} c={urgente ? 'var(--hh-pill-negative-ink)' : 'var(--hh-muted)'}>
+                            {urgente ? 'Urgente — toque para desmarcar' : 'Marcar como urgente'}
+                          </Text>
+                        </Group>
+                      </UnstyledButton>
+
+                      <Group gap="sm" wrap="nowrap">
+                        <Text size="xs" c="var(--hh-faint)" visibleFrom="sm">Enter envia · Shift+Enter quebra linha</Text>
+                        <ActionIcon
+                          size="lg"
+                          color={urgente ? 'red' : 'slate'}
+                          variant="filled"
+                          loading={sending}
+                          disabled={!input.trim()}
+                          onClick={handleSend}
+                          aria-label="Enviar mensagem"
+                        >
+                          <IconSend size={16} />
+                        </ActionIcon>
+                      </Group>
+                    </Group>
+                  </Box>
+                </Box>
+              </>
+            ) : (
+              <Box style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1 }} p="xl">
+                <Box style={{ textAlign: 'center' }} maw={320}>
+                  <Text size="md" fw={600} c="var(--hh-ink)">Nenhuma conversa aberta</Text>
+                  <Text size="sm" c="var(--hh-muted)" mt={4}>
+                    Escolha uma conversa à esquerda ou comece uma nova mensagem com um colega.
+                  </Text>
+                </Box>
+              </Box>
+            )}
+          </Box>
+        )}
+
+        {/* ── Painel de detalhes da conversa ── */}
+        {activeConv && showDetails && !isMobile && (
           <Box
             visibleFrom="md"
+            className="hh-fade"
             style={{
-              width: 240,
+              width: 280,
               flexShrink: 0,
-              borderLeft: '1px solid var(--mantine-color-slate-2)',
-              background: '#fff',
+              borderLeft: '1px solid var(--hh-border)',
+              background: 'var(--hh-surface)',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
             }}
           >
-            {/* Cabeçalho do contato */}
-            <Stack align="center" gap={6} p="md" style={{ borderBottom: '1px solid var(--mantine-color-slate-1)' }}>
-              {activeConv.type === 'group' ? (
-                <ThemeIcon size={56} radius="xl" variant="light" color="hub">
-                  <IconUsers size={28} />
-                </ThemeIcon>
-              ) : (
-                <Avatar size={56} radius="xl"
-                  color={otherParticipant ? ROLE_COLOR[otherParticipant.role] : 'hub'}
-                  variant="filled" style={{ fontSize: 20, fontWeight: 700 }}>
-                  {getInitials(otherParticipant?.name ?? '?')}
-                </Avatar>
-              )}
-              <Text fw={700} size="sm" c="hub.9" ta="center">{activeConv.name}</Text>
-              {activeConv.type === 'direct' && otherParticipant ? (
-                <Group justify="center" gap={6}>
-                  <Badge size="xs" color={ROLE_COLOR[otherParticipant.role]} variant="light" radius="sm">
-                    {ROLE_LABEL[otherParticipant.role]}
-                  </Badge>
-                  {otherParticipant.online && (
-                    <Badge size="xs" color="green" variant="dot" radius="sm">online</Badge>
-                  )}
-                </Group>
-              ) : (
-                <Text size="10px" c="slate.4" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-                  Canal geral da equipe
-                </Text>
-              )}
+            <Stack align="center" gap={6} p="lg" style={{ borderBottom: '1px solid var(--hh-border)' }}>
+              <ConvAvatar conv={activeConv} other={otherParticipant} size={56} />
+              <Text fw={600} size="md" c="var(--hh-ink)" ta="center" mt={4}>{activeConv.name}</Text>
+              <Text size="sm" c="var(--hh-muted)" ta="center">
+                {activeConv.type === 'direct' && otherParticipant
+                  ? `${ROLE_LABEL[otherParticipant.role]} · ${otherParticipant.online ? 'online' : 'offline'}`
+                  : 'Canal geral da equipe'}
+              </Text>
             </Stack>
 
-            {/* Participantes */}
-            <Box p="sm" style={{ flex: 1, overflow: 'auto' }}>
-              {(() => {
-                // Grupo: todos os contatos + eu. DM: só o peer.
-                const detailParticipants = activeConv.type === 'group'
-                  ? [me, ...allContacts]
-                  : otherParticipant ? [otherParticipant] : [];
-                return (
-                  <>
-                    <Text size="10px" fw={700} c="slate.4" tt="uppercase" mb={6} style={{ letterSpacing: '0.08em' }}>
-                      {detailParticipants.length} {detailParticipants.length === 1 ? 'participante' : 'participantes'}
-                    </Text>
-                    <Stack gap={6}>
-                      {detailParticipants.map(p => (
-                        <Group key={p.id} gap={8} wrap="nowrap">
-                          <Avatar size={24} radius="xl" color={ROLE_COLOR[p.role]} variant="filled"
-                            style={{ fontSize: 9, fontWeight: 700 }}>
-                            {getInitials(p.name)}
-                          </Avatar>
-                          <Text size="xs" c="slate.7" truncate style={{ flex: 1 }}>
-                            {p.name}{p.id === me.id ? ' (você)' : ''}
-                          </Text>
-                          <Badge size="xs" color={ROLE_COLOR[p.role]} variant="light" radius="sm">
-                            {ROLE_LABEL[p.role]}
-                          </Badge>
-                        </Group>
-                      ))}
-                    </Stack>
-                  </>
-                );
-              })()}
-            </Box>
+            <ScrollArea style={{ flex: 1 }} type="hover">
+              <Box p="md">
+                <Text size="sm" fw={600} c="var(--hh-ink)" mb="sm">
+                  {participantesDetalhe.length} {participantesDetalhe.length === 1 ? 'participante' : 'participantes'}
+                </Text>
+                <Stack gap={10}>
+                  {participantesDetalhe.map(p => (
+                    <Group key={p.id} gap={10} wrap="nowrap">
+                      <Avatar size={30} radius="md" color={ROLE_COLOR[p.role]} variant="light" fw={600}>
+                        {getInitials(p.name)}
+                      </Avatar>
+                      <Box style={{ flex: 1, minWidth: 0 }}>
+                        <Text size="sm" c="var(--hh-ink)" truncate>
+                          {p.name}{p.id === me.id ? ' (você)' : ''}
+                        </Text>
+                        <Text size="xs" c="var(--hh-muted)">{ROLE_LABEL[p.role]}</Text>
+                      </Box>
+                    </Group>
+                  ))}
+                </Stack>
+              </Box>
+            </ScrollArea>
           </Box>
         )}
 

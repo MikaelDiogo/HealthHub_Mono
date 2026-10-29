@@ -1,5 +1,5 @@
-import { Card, Text, Avatar, Button, Group, Box, SimpleGrid, ThemeIcon } from '@mantine/core';
-import { IconHeartRateMonitor, IconActivity, IconEye, IconPencil, IconTemperature } from '@tabler/icons-react';
+import { Paper, Text, Avatar, Button, Group, Box } from '@mantine/core';
+
 interface CardPatientProps {
   patientName: string;
   patientAge: number;
@@ -7,11 +7,15 @@ interface CardPatientProps {
   temp?: string;
   bpm?: string;
   spo2?: string;
-  /** Cor da barra superior — deve ser a cor Manchester da triagem (manchesterCSSColor) */
+  /** Cor da faixa superior — a cor Manchester da triagem (manchesterCSSColor) */
   topColor?: string;
   onView?: () => void;
   onClickView?: () => void;
   onEdit?: () => void;
+  /** Paciente com alta: troca "Editar" por "Readmitir" */
+  onReadmit?: () => void;
+  /** Linha de contexto abaixo dos sinais (ex.: "Alta há 3 dias · 2 visitas") */
+  rodape?: string;
 }
 
 function getInitials(name: string) {
@@ -19,70 +23,73 @@ function getInitials(name: string) {
   return name.split(' ').filter(Boolean).map((n) => n[0]).join('').slice(0, 2).toUpperCase();
 }
 
+const AUSENTE = '--';
+
+// Cartão de paciente: a faixa superior é a categoria de risco (dado). Os sinais
+// vitais levam rótulo em texto (antes só havia ícone) e valor ausente vira traço cinza.
 const CardPatient = ({
   patientName, patientAge, patientGender,
-  onView, onClickView, onEdit,
-  temp = '--', bpm = '--', spo2 = '--',
-  topColor = 'var(--mantine-color-slate-3)',
+  onView, onClickView, onEdit, onReadmit, rodape,
+  temp = AUSENTE, bpm = AUSENTE, spo2 = AUSENTE,
+  topColor = 'var(--hh-control)',
 }: CardPatientProps) => {
   const handleViewAction = onView || onClickView;
 
   const vitals = [
-    { label: temp, icon: IconTemperature },
-    { label: bpm,  icon: IconHeartRateMonitor },
-    { label: spo2, icon: IconActivity },
+    { rotulo: 'Temp.', valor: temp },
+    { rotulo: 'FC', valor: bpm },
+    { rotulo: 'SpO₂', valor: spo2 },
   ];
 
   return (
-    <Card radius="md" p={0} h="100%" style={{ display: 'flex', flexDirection: 'column', border: '1px solid var(--mantine-color-slate-2)' }}>
-      {/* Barra de status — mesma cor da bolinha no gráfico */}
-      <Box style={{ height: 4, backgroundColor: topColor }} />
+    <Paper withBorder p={0} h="100%" className="hh-interactive" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <Box style={{ height: 3, backgroundColor: topColor }} />
 
       <Box p="md" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: 16 }}>
         <Box>
-          <Group mb="sm" wrap="nowrap">
-            <Avatar size={40} radius="md" color="slate" variant="light">
+          <Group mb="md" wrap="nowrap">
+            <Avatar size={36} radius="md" color="slate" variant="light">
               {getInitials(patientName)}
             </Avatar>
             <Box style={{ minWidth: 0 }}>
-              <Text fw={700} size="sm" c="slate.8" truncate>{patientName}</Text>
-              <Text size="xs" c="slate.5">
+              <Text fw={600} size="sm" c="var(--hh-ink)" truncate>{patientName}</Text>
+              <Text size="xs" c="var(--hh-muted)">
                 {patientAge} anos · {patientGender}
               </Text>
             </Box>
           </Group>
 
-          <SimpleGrid cols={3} spacing="xs">
-            {vitals.map(({ label, icon: Icon }) => (
-              <Box
-                key={label}
-                p="xs"
-                style={{
-                  textAlign: 'center',
-                  borderRadius: 8,
-                  backgroundColor: 'var(--mantine-color-slate-0)',
-                  border: '1px solid var(--mantine-color-slate-2)',
-                }}
-              >
-                <ThemeIcon size="sm" radius="sm" color="slate" variant="light" mx="auto" mb={4}>
-                  <Icon size={13} />
-                </ThemeIcon>
-                <Text fw={600} size="xs" c="slate.7" truncate>{label}</Text>
+          <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+            {vitals.map(({ rotulo, valor }) => (
+              <Box key={rotulo}>
+                <Text size="xs" c="var(--hh-muted)">{rotulo}</Text>
+                <Text size="sm" fw={600} c={valor === AUSENTE ? 'var(--hh-faint)' : 'var(--hh-ink)'} truncate>
+                  {valor === AUSENTE ? '—' : valor}
+                </Text>
               </Box>
             ))}
-          </SimpleGrid>
+          </Box>
+          {rodape && (
+            <Text size="xs" c="var(--hh-faint)" mt="sm" truncate>{rodape}</Text>
+          )}
         </Box>
 
-        <Group grow pt="sm" style={{ borderTop: '1px solid var(--mantine-color-slate-1)' }}>
-          <Button variant="subtle" color="slate" size="xs" leftSection={<IconEye size={13} />} onClick={handleViewAction}>
+        <Group grow pt="sm" style={{ borderTop: '1px solid var(--hh-rule)' }}>
+          <Button variant="default" size="xs" onClick={handleViewAction}>
             Visualizar
           </Button>
-          <Button variant="filled" color="slate" size="xs" leftSection={<IconPencil size={13} />} onClick={onEdit}>
-            Editar
-          </Button>
+          {onReadmit ? (
+            <Button size="xs" onClick={onReadmit}>
+              Readmitir
+            </Button>
+          ) : onEdit ? (
+            <Button variant="default" size="xs" onClick={onEdit}>
+              Editar
+            </Button>
+          ) : null}
         </Group>
       </Box>
-    </Card>
+    </Paper>
   );
 };
 

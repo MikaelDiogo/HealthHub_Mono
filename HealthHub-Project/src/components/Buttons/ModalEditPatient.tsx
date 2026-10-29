@@ -11,7 +11,6 @@ import {
   Box,
   LoadingOverlay,
   Title,
-  ThemeIcon,
   ActionIcon,
 } from '@mantine/core';
 import { useForm } from '@mantine/form';
@@ -28,9 +27,10 @@ import {
 } from '@tabler/icons-react';
 import api from '../../services/api';
 import type { Patient } from '../../types/patient';
-import { useCare } from '../../context/CareContext';
 import { formatCPF, formatPhone, onlyDigits, stripMask } from '../../utils/formatters';
 import { dispatchVitalsUpdated } from '../../utils/vitalStatus';
+import { mensagemErro } from '../../utils/erro';
+import { AvisoErro } from '../ui';
 
 interface ModalEditProps {
   opened: boolean;
@@ -41,7 +41,7 @@ interface ModalEditProps {
 
 export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalEditProps) => {
   const [loading, setLoading] = useState(false);
-  const { isInObservation } = useCare();
+  const [erro, setErro] = useState<string | null>(null);
 
   const form = useForm({
     initialValues: {
@@ -87,60 +87,36 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
     }
   }, [opened, patient]);
 
+  useEffect(() => { if (opened) setErro(null); }, [opened]);
+
   const handleUpdate = async (values: typeof form.values) => {
     if (!patient) return;
     setLoading(true);
+    setErro(null);
     try {
-      const inObservation = isInObservation(patient.id);
+      // O endpoint PUT /patients/:id só aceita campos cadastrais — sinais vitais
+      // vivem numa tabela própria e precisam ser enviados via POST /sinais/:id.
+      await api.put(`/patients/${patient.id}`, {
+        nome_completo: values.nome_completo,
+        rg: values.rg,
+        cpf: values.cpf ? stripMask(values.cpf) : undefined,
+        idade: Number(values.idade),
+        sexo: values.sexo,
+        telefone: values.telefone ? stripMask(values.telefone) : undefined,
+        endereco: values.endereco,
+        alergias: values.alergias,
+        medicamentos_em_uso: values.medicamentos_em_uso,
+        anamnese: values.anamnese,
+      });
 
-      if (inObservation) {
-        // Paciente em Ala de Observação: salva dados cadastrais sem sobrescrever sinais,
-        // depois cria um NOVO registro de sinais vitais para acumular histórico de amostras.
-        await api.put(`/patients/${patient.id}`, {
-          nome_completo: values.nome_completo,
-          rg: values.rg,
-          cpf: values.cpf ? stripMask(values.cpf) : undefined,
-          idade: Number(values.idade),
-          sexo: values.sexo,
-          telefone: values.telefone ? stripMask(values.telefone) : undefined,
-          endereco: values.endereco,
-          alergias: values.alergias,
-          medicamentos_em_uso: values.medicamentos_em_uso,
-          anamnese: values.anamnese,
-          // sem campos vitais → o PUT não toca no registro existente de sinais
-        });
+      const temSinais =
+        values.temperatura ||
+        values.frequencia_cardiaca ||
+        values.saturacao_oxigenio ||
+        values.pressao_arterial;
 
-        const temSinais =
-          values.temperatura ||
-          values.frequencia_cardiaca ||
-          values.saturacao_oxigenio ||
-          values.pressao_arterial;
-
-        if (temSinais) {
-          await api.post(`/sinais/${patient.id}`, {
-            temperatura: values.temperatura ? Number(values.temperatura) : undefined,
-            frequencia_cardiaca: values.frequencia_cardiaca
-              ? Number(values.frequencia_cardiaca)
-              : undefined,
-            saturacao_oxigenio: values.saturacao_oxigenio
-              ? Number(values.saturacao_oxigenio)
-              : undefined,
-            pressao_arterial: values.pressao_arterial || undefined,
-          });
-        }
-      } else {
-        // Fora da esteira: comportamento normal, atualiza o registro mais recente de sinais.
-        await api.put(`/patients/${patient.id}`, {
-          nome_completo: values.nome_completo,
-          rg: values.rg,
-          cpf: values.cpf ? stripMask(values.cpf) : undefined,
-          idade: Number(values.idade),
-          sexo: values.sexo,
-          telefone: values.telefone ? stripMask(values.telefone) : undefined,
-          endereco: values.endereco,
-          alergias: values.alergias,
-          medicamentos_em_uso: values.medicamentos_em_uso,
-          anamnese: values.anamnese,
+      if (temSinais) {
+        await api.post(`/sinais/${patient.id}`, {
           temperatura: values.temperatura ? Number(values.temperatura) : undefined,
           frequencia_cardiaca: values.frequencia_cardiaca
             ? Number(values.frequencia_cardiaca)
@@ -157,37 +133,27 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
       onUpdated?.();
     } catch (error) {
       console.error(error);
+      setErro(mensagemErro(error, 'Não foi possível salvar as alterações.'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Modal opened={opened} onClose={onClose} withCloseButton={false} centered size="lg" radius="lg" padding={0}>
+    <Modal opened={opened} onClose={onClose} withCloseButton={false} centered size="lg" padding={0}>
       <Box pos="relative">
         <LoadingOverlay visible={loading} />
 
         <form onSubmit={form.onSubmit(handleUpdate)}>
-          <Box p="lg" style={{ background: 'oklch(0.24 0.02 240)' }}>
-            <Group justify="space-between">
-              <Group gap="md">
-                <ThemeIcon size="xl" radius="md" variant="light" color="gray">
-                  <IconUser size={24} />
-                </ThemeIcon>
-                <Box>
-                  <Title order={4} c="white" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                    Editar Prontuário
-                  </Title>
-                  <Text size="xs" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>
-                    {patient?.nome_completo}
-                  </Text>
-                </Box>
-              </Group>
-              <ActionIcon variant="subtle" color="gray" onClick={onClose}>
-                <IconX size={18} />
-              </ActionIcon>
-            </Group>
-          </Box>
+          <Group justify="space-between" wrap="nowrap" p="lg" style={{ borderBottom: '1px solid var(--hh-border)' }}>
+            <Box style={{ minWidth: 0 }}>
+              <Title order={4} c="var(--hh-ink)">Editar prontuário</Title>
+              <Text size="sm" c="var(--hh-muted)" truncate>{patient?.nome_completo}</Text>
+            </Box>
+            <ActionIcon variant="subtle" color="slate" onClick={onClose} aria-label="Fechar edição">
+              <IconX size={18} />
+            </ActionIcon>
+          </Group>
 
           <Box p="lg" mih={300} mah="65vh" style={{ overflowY: 'auto' }}>
             <Tabs color="slate" defaultValue="pessoais" variant="pills">
@@ -283,7 +249,11 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
             </Tabs>
           </Box>
 
-          <Group justify="flex-end" p="md" style={{ borderTop: '1px solid oklch(0.90 0.01 220)', backgroundColor: 'var(--mantine-color-slate-0)' }}>
+          <Box px="lg">
+            <AvisoErro mensagem={erro} onFechar={() => setErro(null)} />
+          </Box>
+
+          <Group justify="flex-end" p="md" style={{ borderTop: '1px solid var(--hh-border)', backgroundColor: 'var(--hh-ground)' }}>
             <Button variant="subtle" color="gray" onClick={onClose}>
               Cancelar
             </Button>

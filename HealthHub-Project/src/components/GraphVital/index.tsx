@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
-import { Paper, Title, Box, Center, Loader, Text, Group, Badge, Stack, ThemeIcon } from '@mantine/core';
+import { Paper, Title, Box, Text, Group, Stack, Skeleton } from '@mantine/core';
 import { LineChart } from '@mantine/charts';
-import { IconActivity, IconAlertCircle, IconTimeline } from '@tabler/icons-react';
+import { EmptyState, ErrorState } from '../ui';
 import api from '../../services/api';
 
 interface HistoryChartProps {
@@ -22,6 +22,7 @@ export const HistoryChart = ({ patientId, patientName, refreshKey = 0 }: History
   const [rawData, setRawData] = useState<VitalRecord[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [tentativa, setTentativa] = useState(0);
 
   useEffect(() => {
     async function fetchVitalsHistory() {
@@ -41,7 +42,7 @@ export const HistoryChart = ({ patientId, patientName, refreshKey = 0 }: History
     }
     fetchVitalsHistory();
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patientId, refreshKey]);
+  }, [patientId, refreshKey, tentativa]);
 
   const chartData = useMemo(
     () =>
@@ -51,8 +52,12 @@ export const HistoryChart = ({ patientId, patientName, refreshKey = 0 }: History
           const bpm = parseFloat(String(item.frequencia_cardiaca));
           const spo2 = parseFloat(String(item.saturacao_oxigenio));
           const temp = parseFloat(String(item.temperatura));
+          // Leituras de outro dia levam a data junto, para o eixo não misturar dias só pela hora
+          const quando = new Date(item.created_at);
+          const hoje = new Date().toDateString() === quando.toDateString();
+          const hhmm = quando.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
           return {
-            hora: new Date(item.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+            hora: hoje ? hhmm : `${quando.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} ${hhmm}`,
             BPM: bpm > 0 ? bpm : null,
             SpO2: spo2 > 0 ? spo2 : null,
             Temp: temp > 0 ? temp : null,
@@ -62,51 +67,30 @@ export const HistoryChart = ({ patientId, patientName, refreshKey = 0 }: History
   );
 
   return (
-    <Paper p="xl" radius="md" withBorder style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-      <Group justify="space-between" mb="xl">
+    <Paper p={20} withBorder style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+      <Group justify="space-between" mb="lg" wrap="nowrap">
         <Stack gap={2}>
-          <Group gap="xs">
-            <IconTimeline size={18} />
-            <Title order={4} c="slate.9">
-              Histórico de Sinais Vitais
-            </Title>
-          </Group>
-          <Text size="xs" c="slate.5">
-            Linha temporal de: <Text span fw={600} c="slate.7" inherit>{patientName}</Text>
+          <Title order={2} size={16} fw={600} c="var(--hh-ink)">
+            Histórico de sinais vitais
+          </Title>
+          <Text size="sm" c="var(--hh-muted)">
+            Paciente: <Text span fw={500} c="var(--hh-ink)" inherit>{patientName || '—'}</Text>
           </Text>
         </Stack>
         {chartData.length > 0 && (
-          <Badge color="slate" variant="light">
-            {chartData.length} amostras
-          </Badge>
+          <Text size="sm" c="var(--hh-muted)">
+            {chartData.length} {chartData.length === 1 ? 'leitura' : 'leituras'}
+          </Text>
         )}
       </Group>
 
       <Box style={{ flex: 1, minHeight: 0 }}>
         {loading ? (
-          <Center h="100%">
-            <Loader size="sm" color="slate" />
-          </Center>
+          <Skeleton h="100%" mih={160} />
         ) : error ? (
-          <Center h="100%">
-            <Stack align="center" gap={6}>
-              <ThemeIcon color="red" variant="light" size="xl">
-                <IconAlertCircle size={24} />
-              </ThemeIcon>
-              <Text size="xs" c="red" fw={600}>
-                Erro ao carregar telemetria
-              </Text>
-            </Stack>
-          </Center>
+          <ErrorState message="Não foi possível carregar o histórico de sinais vitais." onRetry={() => setTentativa((t) => t + 1)} />
         ) : chartData.length === 0 ? (
-          <Center h="100%">
-            <Stack align="center" gap={6}>
-              <IconActivity size={28} color="var(--mantine-color-slate-3)" />
-              <Text size="xs" c="slate.5">
-                Nenhuma leitura para este prontuário.
-              </Text>
-            </Stack>
-          </Center>
+          <EmptyState message="Nenhuma leitura de sinais vitais registrada para este prontuário." />
         ) : (
           <LineChart
             h="100%"
@@ -115,15 +99,16 @@ export const HistoryChart = ({ patientId, patientName, refreshKey = 0 }: History
             withLegend
             legendProps={{ verticalAlign: 'bottom', height: 30 }}
             series={[
-              { name: 'BPM', color: 'red.5', label: 'Frequência Cardíaca (BPM)' },
-              { name: 'SpO2', color: 'cyan.6', label: 'Saturação (SpO2 %)' },
+              { name: 'BPM', color: 'red.5', label: 'Frequência cardíaca (bpm)' },
+              { name: 'SpO2', color: 'cyan.6', label: 'Saturação (SpO₂ %)' },
               { name: 'Temp', color: 'orange.5', label: 'Temperatura (°C)' },
             ]}
-            curveType="monotone"
+            // Segmentos retos: uma curva suavizada inventaria valores entre as leituras
+            curveType="linear"
             tickLine="none"
-            gridAxis="xy"
-            strokeWidth={2.5}
-            withDots={chartData.length < 45}
+            gridAxis="x"
+            strokeWidth={2}
+            withDots={false}
           />
         )}
       </Box>

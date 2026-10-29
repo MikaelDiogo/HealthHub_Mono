@@ -13,6 +13,8 @@ import ReactMarkdown from 'react-markdown';
 import api from '../../services/api';
 import { PageShell } from '../../components/PageShell';
 import type { Patient } from '../../types/patient';
+import { chatService } from '../../services/chatService';
+import { parseAiReply } from '../../utils/aiResponse';
 
 type RecordingState = 'idle' | 'recording' | 'transcribing';
 
@@ -38,9 +40,16 @@ export const Monitoring = () => {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
 
-  useEffect(() => {
-    api.get('/patients').then((r) => setPatients(Array.isArray(r.data) ? r.data : []));
-  }, []);
+  const loadPatients = () => {
+    // Pacientes que já receberam alta somem daqui — voltam ao readmitir na esteira
+    api.get('/patients', { params: { ativo: true } })
+      .then((r) => setPatients(Array.isArray(r.data) ? r.data : []));
+  };
+
+  useEffect(loadPatients, []);
+
+  // Alta/readmissão em outra sessão muda quem aparece aqui — mantém sincronizado
+  useEffect(() => chatService.onFilaChanged(loadPatients), []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -66,7 +75,7 @@ export const Monitoring = () => {
     setTimeout(() => {
       if (ultima) {
         setAiSummary(
-          `**Parecer para ${patientData?.nome_completo}:**\n` +
+          `Parecer para ${patientData?.nome_completo}:\n` +
           `SpO₂ ${ultima.saturacao_oxigenio ?? '--'}% · FC ${ultima.frequencia_cardiaca ?? '--'} bpm · ` +
           `Temp ${ultima.temperatura ?? '--'}°C · PA ${ultima.pressao_arterial ?? '--'}.`,
         );
@@ -98,12 +107,11 @@ export const Monitoring = () => {
         },
         history: messages.slice(-4).map((m) => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text })),
       });
-      if (response.data?.reply) {
-        setMessages((prev) => [...prev, {
-          id: Date.now() + 1, sender: 'ai', text: response.data.reply,
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        }]);
-      }
+      const parsed = parseAiReply(response.data);
+      setMessages((prev) => [...prev, {
+        id: Date.now() + 1, sender: 'ai', text: parsed.ok ? parsed.reply : parsed.error,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      }]);
     } catch {
       setMessages((prev) => [...prev, { id: Date.now() + 2, sender: 'ai', text: 'Erro ao conectar com o assistente.', time: '' }]);
     } finally {
@@ -165,7 +173,7 @@ export const Monitoring = () => {
           <Stack gap="md">
 
             {/* Análise IA */}
-            <Paper radius="lg" style={{ border: '1px solid oklch(0.90 0.01 220)', overflow: 'hidden' }}>
+            <Paper radius="md" style={{ border: '1px solid oklch(0.90 0.01 220)', overflow: 'hidden' }}>
               <Box
                 p="sm"
                 style={{ background: 'oklch(0.24 0.02 240)', borderBottom: '3px solid oklch(0.30 0.02 240)' }}
@@ -190,9 +198,9 @@ export const Monitoring = () => {
             </Paper>
 
             {/* Última leitura de vitais */}
-            <Paper radius="lg" style={{ border: '1px solid oklch(0.90 0.01 220)', overflow: 'hidden' }}>
+            <Paper radius="md" style={{ border: '1px solid oklch(0.90 0.01 220)', overflow: 'hidden' }}>
               <Box p="sm" style={{ borderBottom: '1px solid oklch(0.90 0.01 220)', background: 'oklch(0.24 0.02 240)' }}>
-                <Text fw={700} size="sm" c="white" style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+                <Text fw={700} size="sm" c="white" style={{ fontFamily: "'Manrope', sans-serif", fontSize: 11, letterSpacing: '0.08em', textTransform: 'uppercase' }}>
                   Última Leitura de Triagem
                 </Text>
               </Box>
@@ -213,7 +221,7 @@ export const Monitoring = () => {
                       <Group gap="xs">
                         <Icon size={16} color="oklch(0.60 0.03 230)" />
                         <Box>
-                          <Text size="10px" c="dimmed" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{label}</Text>
+                          <Text size="10px" c="dimmed" style={{ fontFamily: "'Manrope', sans-serif" }}>{label}</Text>
                           <Text fw={700} size="sm" c="slate.8">{value}</Text>
                         </Box>
                       </Group>
@@ -229,7 +237,7 @@ export const Monitoring = () => {
         {/* ── Painel direito: Chat ── */}
         <Grid.Col span={{ base: 12, lg: 7 }} style={{ display: 'flex', flexDirection: 'column' }}>
           <Paper
-            radius="lg"
+            radius="md"
             style={{
               display: 'flex', flexDirection: 'column', flex: 1,
               minHeight: 480, overflow: 'hidden',
@@ -246,7 +254,7 @@ export const Monitoring = () => {
                   <Text fw={700} size="sm" c="white" style={{ fontFamily: "'Manrope', sans-serif" }}>
                     Assistente de Caso Clínico
                   </Text>
-                  <Text size="10px" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>
+                  <Text size="10px" style={{ fontFamily: "'Manrope', sans-serif", color: 'oklch(0.65 0.03 230)' }}>
                     IA · Análise Clínica
                   </Text>
                 </Box>

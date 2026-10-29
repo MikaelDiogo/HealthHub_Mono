@@ -19,5 +19,6 @@ export interface Patient {
   alergias: string;
   medicamentos_em_uso: string;
   anamnese: string;
+  ativo?: boolean;
   sinaisVitais?: SinalVital[];
 }

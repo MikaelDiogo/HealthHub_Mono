@@ -112,6 +112,7 @@ import { io, type Socket } from 'socket.io-client';
 class RealChatService implements IChatService {
   private socket:    Socket | null = null;
   private listeners: ((msg: ChatMessage) => void)[] = [];
+  private filaListeners: (() => void)[] = [];
   private seenIds  = new Set<string>();   // evita duplicata ACK + message:new
   private _myId    = '';
 
@@ -149,6 +150,10 @@ class RealChatService implements IChatService {
       this.listeners.forEach(cb => cb(msg));
     });
 
+    this.socket.on('fila:changed', () => {
+      this.filaListeners.forEach(cb => cb());
+    });
+
     this.socket.on('connect_error', (err: Error) => {
       console.warn('[Chat WS] erro de conexão:', err.message);
     });
@@ -162,6 +167,15 @@ class RealChatService implements IChatService {
   reconnect() {
     this._myId = decodeJwtId();
     this.connect();
+  }
+
+  // Encerra a conexão (chamado no logout, evita socket autenticado como o usuário anterior)
+  disconnect() {
+    this.socket?.removeAllListeners();
+    this.socket?.disconnect();
+    this.socket = null;
+    this._myId = '';
+    this.seenIds.clear();
   }
 
   // ── IChatService ─────────────────────────────────────────────────────────────
@@ -216,6 +230,12 @@ class RealChatService implements IChatService {
   onNewMessage(cb: (msg: ChatMessage) => void): () => void {
     this.listeners.push(cb);
     return () => { this.listeners = this.listeners.filter(l => l !== cb); };
+  }
+
+  /** Dispara sempre que a esteira de atendimento muda em qualquer sessão conectada. */
+  onFilaChanged(cb: () => void): () => void {
+    this.filaListeners.push(cb);
+    return () => { this.filaListeners = this.filaListeners.filter(l => l !== cb); };
   }
 
   async markRead(conversationId: string): Promise<void> {

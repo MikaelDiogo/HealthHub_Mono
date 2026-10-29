@@ -10,12 +10,11 @@ import {
   TextInput,
   Textarea,
   Stack,
-  ThemeIcon,
   Alert,
   Badge,
 } from '@mantine/core';
 import { NavLink as RouterLink, useLocation, useNavigate } from 'react-router-dom';
-import { IconHeartRateMonitor, IconLogout2, IconPlus, IconAlertCircle } from '@tabler/icons-react';
+import { IconLogout2, IconPlus, IconAlertCircle } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useForm } from '@mantine/form';
 import api from '../../services/api';
@@ -25,6 +24,8 @@ import type { Patient } from '../../types/patient';
 import { useAuth } from '../../context/AuthContext';
 import { formatCPF, formatPhone, onlyDigits, stripMask } from '../../utils/formatters';
 import { dispatchVitalsUpdated } from '../../utils/vitalStatus';
+import { mensagemErro } from '../../utils/erro';
+import { AvisoErro } from '../ui';
 
 interface SidebarLinkProps {
   to: string;
@@ -45,9 +46,9 @@ export const ButtonLogOut = ({ to, icon }: SidebarLinkProps) => {
   };
 
   return (
-    <UnstyledButton onClick={handleLogout} style={{ display: 'flex', alignItems: 'center' }}>
+    <UnstyledButton onClick={handleLogout} aria-label="Sair" title="Sair" style={{ display: 'flex', alignItems: 'center' }}>
       {icon ?? (
-        <Group gap={6} px="xs" py={6} style={{ border: '1px solid var(--mantine-color-slate-3)', borderRadius: 8 }}>
+        <Group gap={6} px="xs" py={6} style={{ border: '1px solid var(--hh-control)', borderRadius: 'var(--hh-radius-control)' }}>
           <Text size="sm" fw={500}>
             Sair
           </Text>
@@ -66,41 +67,36 @@ export const SideBarLink = ({ to, label, icon, textLabel, badge, onClick }: Side
     <UnstyledButton
       component={RouterLink}
       to={to}
+      title={textLabel || undefined}
       w="100%"
       px="sm"
-      py={5}
       onClick={onClick}
       style={{
-        borderRadius: 8,
-        border: isActive
-          ? '1.5px solid oklch(0.82 0.07 235)'
-          : '1.5px solid transparent',
-        backgroundColor: isActive ? 'oklch(0.96 0.025 235)' : 'transparent',
-        transition: 'background-color 150ms ease, border-color 150ms ease',
+        minHeight: 36,
+        display: 'flex',
+        alignItems: 'center',
+        borderRadius: 'var(--hh-radius-control)',
+        backgroundColor: isActive ? 'var(--hh-active)' : 'transparent',
+        transition: 'background-color 120ms ease',
       }}
       onMouseEnter={(e) => {
-        if (!isActive) e.currentTarget.style.backgroundColor = 'var(--mantine-color-slate-0)';
+        if (!isActive) e.currentTarget.style.backgroundColor = 'var(--hh-raised)';
       }}
       onMouseLeave={(e) => {
         if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
       }}
     >
-      <Group gap={8} justify="space-between" w="100%">
-        <Group gap={8}>
-          <div style={{ color: isActive ? 'oklch(0.52 0.14 235)' : 'var(--mantine-color-slate-5)', display: 'flex' }}>
+      <Group gap={10} justify="space-between" w="100%" wrap="nowrap">
+        <Group gap={10} wrap="nowrap">
+          <div style={{ color: isActive ? 'var(--hh-ink)' : 'var(--hh-faint)', display: 'flex' }}>
             {icon}
           </div>
-          <Stack gap={0} align="flex-start">
-            <Text size="sm" fw={600} style={{ color: isActive ? 'oklch(0.28 0.10 235)' : 'var(--mantine-color-slate-7)' }}>
-              {label}
-            </Text>
-            <Text size="xs" c="slate.5">
-              {textLabel}
-            </Text>
-          </Stack>
+          <Text size="sm" fw={isActive ? 600 : 500} c="var(--hh-ink)">
+            {label}
+          </Text>
         </Group>
         {badge && (
-          <Badge size="xs" color="slate" variant="filled" style={{ flexShrink: 0 }}>
+          <Badge size="xs" color="slate" variant="light" style={{ flexShrink: 0 }}>
             {badge}
           </Badge>
         )}
@@ -116,6 +112,7 @@ interface ButtonAddPatientProps {
 export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) => {
   const [opened, { open, close }] = useDisclosure(false);
   const [loading, setLoading] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
   const { role } = useAuth();
   const isRecepcionista = role === 'recepcionista';
 
@@ -140,6 +137,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
 
   const handleSubmit = async (values: typeof form.values) => {
     setLoading(true);
+    setErro(null);
     try {
       const response = await api.post('/patients', {
         nome_completo: values.nome_completo || undefined,
@@ -172,6 +170,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
       onPatientCreated?.();
     } catch (error) {
       console.error('Erro ao salvar:', error);
+      setErro(mensagemErro(error, 'Não foi possível salvar o paciente.'));
     } finally {
       setLoading(false);
     }
@@ -179,31 +178,25 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
 
   return (
     <>
-      <Button color="slate" size="sm" radius="md" leftSection={<IconPlus size={15} />} onClick={open}>
+      <Button color="slate" size="sm" radius="md" leftSection={<IconPlus size={15} />} onClick={() => { setErro(null); open(); }}>
         Adicionar Paciente
       </Button>
 
-      <Modal opened={opened} onClose={close} withCloseButton={false} centered size="lg" radius="lg" padding={0}>
-        <Box p="lg" style={{ background: 'oklch(0.24 0.02 240)' }}>
-          <Group gap="sm">
-            <ThemeIcon size="lg" radius="md" variant="light" color="gray">
-              <IconHeartRateMonitor size={20} />
-            </ThemeIcon>
-            <Box>
-              <Title order={3} c="white" size="lg" style={{ fontFamily: "'Manrope', sans-serif" }}>
-                Novo Paciente
-              </Title>
-              <Text size="xs" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>
-                {isRecepcionista
-                  ? 'Todos os campos são opcionais — emergências podem ser admitidas em branco.'
-                  : 'Dados cadastrais, triagem e anamnese do paciente.'}
-              </Text>
-            </Box>
-          </Group>
+      <Modal opened={opened} onClose={close} withCloseButton={false} centered size="lg" padding={0}>
+        <Box p="lg" style={{ borderBottom: '1px solid var(--hh-border)' }}>
+          <Title order={4} c="var(--hh-ink)">
+            Novo paciente
+          </Title>
+          <Text size="sm" c="var(--hh-muted)" mt={2}>
+            {isRecepcionista
+              ? 'Cadastro mínimo: nome, CPF, idade e sexo são obrigatórios.'
+              : 'Dados cadastrais, triagem e anamnese do paciente.'}
+          </Text>
         </Box>
 
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Box p="lg" bg="white">
+            <AvisoErro mensagem={erro} onFechar={() => setErro(null)} />
             {isRecepcionista ? (
               <>
                 <Alert
@@ -212,9 +205,9 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
                   variant="light"
                   radius="md"
                   mb="md"
-                  title="Todos os campos são opcionais"
+                  title="Dados obrigatórios"
                 >
-                  Em situações de emergência, o paciente pode ser admitido sem dados preenchidos.
+                  Informe nome completo, CPF (11 dígitos), idade e sexo (M, F ou Outro). O restante pode ser completado depois.
                 </Alert>
                 <Stack gap="md">
                   <TextInput label="Nome Completo" placeholder="Ex: Maria Silva Santos" radius="md" maxLength={100} {...form.getInputProps('nome_completo')} />
@@ -252,7 +245,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
               </>
             ) : (
               <Tabs color="slate" defaultValue="pessoais" variant="pills">
-                <Tabs.List grow mb="xl" style={{ backgroundColor: 'var(--mantine-color-slate-0)', padding: 4, borderRadius: 12 }}>
+                <Tabs.List grow mb="xl" style={{ backgroundColor: 'var(--hh-raised)', padding: 4, borderRadius: 'var(--hh-radius-card)' }}>
                   <Tabs.Tab value="pessoais" leftSection={<IconUser size={16} />}>
                     Pessoais
                   </Tabs.Tab>
@@ -302,9 +295,9 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
 
                 <Tabs.Panel value="hospitalares">
                   <Stack gap="md">
-                    <Box p="md" style={{ backgroundColor: 'var(--mantine-color-slate-0)', borderRadius: 12, border: '1px solid var(--mantine-color-slate-1)' }}>
-                      <Text size="xs" fw={700} c="slate.5" tt="uppercase" mb="sm">
-                        Sinais Vitais de Triagem
+                    <Box p="md" style={{ backgroundColor: 'var(--hh-raised)', borderRadius: 'var(--hh-radius-card)', border: '1px solid var(--hh-border)' }}>
+                      <Text size="sm" fw={600} c="var(--hh-muted)" mb="sm">
+                        Sinais vitais de triagem
                       </Text>
                       <Group grow mb="md">
                         <TextInput
@@ -352,7 +345,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
               </Tabs>
             )}
 
-            <Group justify="flex-end" mt="xl" pt="md" style={{ borderTop: '1px solid var(--mantine-color-slate-1)' }}>
+            <Group justify="flex-end" mt="xl" pt="md" style={{ borderTop: '1px solid var(--hh-border)' }}>
               <Button variant="subtle" color="gray" onClick={close}>
                 Cancelar
               </Button>
@@ -384,9 +377,7 @@ export const ButtonEnter = ({ onClick, type = 'button' }: ButtonEnterProps) => (
     styles={{
       root: {
         backgroundColor: 'var(--mantine-color-slate-9)',
-        fontFamily: "'Inter', sans-serif",
         fontWeight: 600,
-        letterSpacing: '0.02em',
         '&:hover': { backgroundColor: 'var(--mantine-color-slate-8)' },
       },
     }}

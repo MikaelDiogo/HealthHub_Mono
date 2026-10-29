@@ -9,7 +9,7 @@ import { healthHubTheme } from './theme'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MantineProvider theme={healthHubTheme} defaultColorScheme="light">
+    <MantineProvider theme={healthHubTheme} defaultColorScheme="light" forceColorScheme="light">
       <App />
     </MantineProvider>
   </StrictMode>,

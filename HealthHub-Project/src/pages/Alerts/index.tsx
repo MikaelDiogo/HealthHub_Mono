@@ -1,21 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import {
   Grid, Paper, Text, Group, Badge, Button, Stack,
-  ThemeIcon, Box, ScrollArea, Modal, TextInput, Textarea,
-  Loader, Center, ActionIcon, Tooltip, Divider,
+  Box, ScrollArea, Modal, Textarea,
+  ActionIcon, Tooltip, Divider,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
-  IconUserPlus, IconStethoscope, IconHeartRateMonitor, IconBed,
-  IconArrowRight, IconClock, IconRefresh, IconSearch, IconPlus,
-  IconX, IconDownload, IconClipboardText,
+  IconUserPlus, IconHeartRateMonitor, IconBed,
+  IconArrowRight, IconRefresh,
+  IconX, IconDownload,
 } from '@tabler/icons-react';
 import { PageShell } from '../../components/PageShell';
-import api from '../../services/api';
-import type { Patient } from '../../types/patient';
+import { AdmitirModal } from '../../components/AdmitirModal';
+import { AvisoErro, EmptyState, LoadingState, useAviso } from '../../components/ui';
+import { mensagemErro } from '../../utils/erro';
 import { useCare } from '../../context/CareContext';
 import type { Gravidade, FilaPaciente } from '../../context/CareContext';
 import { useAuth } from '../../context/AuthContext';
+import { useAgora, useHistoricoPacientes } from '../../hooks/useMetricas';
+import { formatDuracao, ordinal } from '../../services/metricas';
 import jsPDF from 'jspdf';
 
 type Role = 'Recepcionista' | 'Enfermeiro' | 'Médico';
@@ -27,12 +30,6 @@ const ROLE_MAP: Record<string, Role> = {
 };
 
 const COLUMN_HEIGHT = 'calc(100dvh - 220px)';
-
-let senhaCounter = 1;
-function gerarSenha(prefix: string): string {
-  const num = String(senhaCounter++).padStart(3, '0');
-  return `${prefix}-${num}`;
-}
 
 // ─── PDF: Guia de Alta / Prescrição ───────────────────────────────────────────
 function gerarPDFAltaMedica(patient: FilaPaciente, prescricao: string, orientacoes: string, medicoNome: string) {
@@ -90,28 +87,17 @@ function gerarPDFAltaMedica(patient: FilaPaciente, prescricao: string, orientaco
   doc.save(`guia_alta_${(patient.nome || 'paciente').replace(/\s+/g, '_')}.pdf`);
 }
 
-// ─── Coluna do Kanban ─────────────────────────────────────────────────────────
-function WorkflowColumn({ title, count, color, icon, children }: {
-  title: string; count: number; color: string; icon: React.ReactNode; children: React.ReactNode;
+// ─── Coluna da esteira ────────────────────────────────────────────────────────
+function WorkflowColumn({ title, count, children }: {
+  title: string; count: number; children: React.ReactNode;
 }) {
   return (
-    <Paper withBorder radius="lg" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%', border: '1px solid oklch(0.90 0.01 220)' }}>
-      <Box
-        p="sm"
-        style={{
-          background: 'oklch(0.24 0.02 240)',
-          borderBottom: '3px solid oklch(0.32 0.02 240)',
-        }}
-      >
-        <Group justify="space-between">
-          <Group gap="xs">
-            <ThemeIcon color={color} size="sm" radius="md" variant="light">{icon}</ThemeIcon>
-            <Text fw={700} size="sm" c="white" style={{ fontFamily: "'Manrope', sans-serif" }}>{title}</Text>
-          </Group>
-          <Badge color={color} size="sm" variant="light" radius="md">{count}</Badge>
-        </Group>
-      </Box>
-      <ScrollArea style={{ flex: 1, height: COLUMN_HEIGHT }} p="sm" bg="slate.0">
+    <Paper withBorder style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <Group justify="space-between" px="md" py="sm" style={{ borderBottom: '1px solid var(--hh-border)' }}>
+        <Text fw={600} size="sm" component="h2" c="var(--hh-ink)">{title}</Text>
+        <Text size="sm" c="var(--hh-muted)" aria-label={`${count} paciente(s)`}>{count}</Text>
+      </Group>
+      <ScrollArea style={{ flex: 1, height: COLUMN_HEIGHT }} p="sm" bg="var(--hh-raised)">
         {children}
       </ScrollArea>
     </Paper>
@@ -119,114 +105,48 @@ function WorkflowColumn({ title, count, color, icon, children }: {
 }
 
 // ─── Card de paciente ─────────────────────────────────────────────────────────
-function PatientCard({ patient, borderColor, footer }: {
-  patient: FilaPaciente; borderColor: string; footer: React.ReactNode;
+// A faixa lateral é a categoria de risco (dado); sem categoria, fica neutra.
+// Espera ao vivo: só conta para quem está aguardando (triagem ou médico).
+const AGUARDANDO = new Set(['Aguardando Triagem', 'Aguardando Atendimento']);
+
+function PatientCard({ patient, borderColor, footer, agora, visita }: {
+  patient: FilaPaciente; borderColor: string; footer: React.ReactNode; agora: Date; visita?: number;
 }) {
+  const desde = patient.created_at
+    ? Math.max(0, Math.round((agora.getTime() - new Date(patient.created_at).getTime()) / 60_000))
+    : null;
+  const aguarda = AGUARDANDO.has(patient.status);
+  const longa = aguarda && desde !== null && desde >= 30;
   return (
-    <Paper
-      radius="md"
-      style={{
-        border: '1px solid oklch(0.90 0.01 220)',
-        background: '#fff',
-      }}
-    >
+    <Paper withBorder className="hh-interactive" style={{ borderLeft: `3px solid ${borderColor}`, background: 'var(--hh-surface)' }}>
       <Box p="sm">
-        <Group justify="space-between" mb={6}>
-          <Box>
-            <Text fw={700} size="sm" c="slate.8">
-              {patient.nome || <Text span c="dimmed" fs="italic">Sem nome</Text>}
+        <Group justify="space-between" mb={6} wrap="nowrap" align="flex-start">
+          <Box style={{ minWidth: 0 }}>
+            <Text fw={600} size="sm" c="var(--hh-ink)" truncate>
+              {patient.nome || <Text span c="var(--hh-faint)" fs="italic">Sem nome</Text>}
             </Text>
-            <Text size="xs" c="dimmed">
-              {patient.idade ? `${patient.idade} anos` : '—'} · Senha:{' '}
-              <Text span ff="monospace" fw={700} c="slate.7">{patient.senha}</Text>
+            <Text size="xs" c="var(--hh-muted)">
+              {patient.idade ? `${patient.idade} anos` : '—'} · Senha{' '}
+              <Text span ff="monospace" fw={600} c="var(--hh-ink)" style={{ whiteSpace: 'nowrap' }}>{patient.senha}</Text>
             </Text>
           </Box>
-          <Badge size="xs" variant="light" color="slate" radius="sm">{patient.status}</Badge>
+          <Badge size="sm" variant="light" color="slate" style={{ flexShrink: 0 }}>{patient.status}</Badge>
         </Group>
-        <Group gap={4} pt="xs" style={{ borderTop: '1px solid oklch(0.94 0.005 220)' }}>
-          <IconClock size={11} color="oklch(0.65 0.02 230)" />
-          <Text size="10px" c="dimmed">Chegada: {patient.chegada}</Text>
+        <Group justify="space-between" gap="xs" pt="xs" wrap="nowrap" style={{ borderTop: '1px solid var(--hh-rule)' }}>
+          <Text size="xs" c={longa ? 'var(--hh-warning)' : 'var(--hh-muted)'} fw={longa ? 600 : 400} truncate>
+            {desde === null
+              ? `Chegada ${patient.chegada}`
+              : `${aguarda ? 'Aguardando há' : 'Na esteira há'} ${formatDuracao(desde)}`}
+          </Text>
+          {visita && visita > 1 && (
+            <Text size="xs" c="var(--hh-muted)" style={{ whiteSpace: 'nowrap' }}>
+              Retorno · {ordinal(visita)} visita
+            </Text>
+          )}
         </Group>
       </Box>
       <Box px="sm" pb="sm">{footer}</Box>
     </Paper>
-  );
-}
-
-// ─── Modal: Admitir Paciente ──────────────────────────────────────────────────
-function AdmitirModal({ opened, onClose, onAdmit, filaIds }: {
-  opened: boolean; onClose: () => void; onAdmit: (patient: Patient) => void; filaIds: string[];
-}) {
-  const [dbPatients, setDbPatients] = useState<Patient[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [query, setQuery] = useState('');
-
-  useEffect(() => {
-    if (!opened) return;
-    setLoading(true);
-    api.get('/patients').then((res) => setDbPatients(res.data as Patient[])).catch(() => {}).finally(() => setLoading(false));
-  }, [opened]);
-
-  const filtered = dbPatients.filter(
-    (p) => !filaIds.includes(p.id) && (p.nome_completo || '').toLowerCase().includes(query.toLowerCase()),
-  );
-
-  return (
-    <Modal
-      opened={opened}
-      onClose={onClose}
-      title={
-        <Group gap="xs">
-          <ThemeIcon size="sm" color="slate" variant="light" radius="md"><IconUserPlus size={13} /></ThemeIcon>
-          <Text fw={700} size="sm">Admitir Paciente na Esteira</Text>
-        </Group>
-      }
-      centered radius="lg" size="md"
-    >
-      <TextInput
-        placeholder="Buscar por nome..."
-        leftSection={<IconSearch size={14} />}
-        value={query}
-        onChange={(e) => setQuery(e.currentTarget.value)}
-        mb="sm"
-        radius="md"
-      />
-      {loading ? (
-        <Center py="xl"><Loader size="sm" color="slate" type="dots" /></Center>
-      ) : filtered.length === 0 ? (
-        <Text size="xs" c="dimmed" ta="center" py="xl">
-          {dbPatients.length === 0 ? 'Nenhum paciente cadastrado.' : 'Todos já estão na esteira ou não encontrados.'}
-        </Text>
-      ) : (
-        <Stack gap="xs" mah={340} style={{ overflowY: 'auto' }}>
-          {filtered.map((p) => (
-            <Group
-              key={p.id}
-              justify="space-between"
-              px="sm"
-              py={8}
-              style={{
-                border: '1px solid oklch(0.90 0.01 220)',
-                borderRadius: 10,
-                background: 'var(--mantine-color-slate-0)',
-              }}
-            >
-              <Box>
-                <Text fw={600} size="sm" c="slate.8">
-                  {p.nome_completo || <Text span c="dimmed" fs="italic">Sem nome</Text>}
-                </Text>
-                <Text size="xs" c="dimmed">
-                  {[p.idade ? `${p.idade} anos` : null, p.sexo].filter(Boolean).join(' · ')}
-                </Text>
-              </Box>
-              <Button size="xs" color="slate" leftSection={<IconPlus size={12} />} onClick={() => { onAdmit(p); onClose(); }}>
-                Admitir
-              </Button>
-            </Group>
-          ))}
-        </Stack>
-      )}
-    </Modal>
   );
 }
 
@@ -252,30 +172,20 @@ function AltaModal({ patient, opened, onClose, onConfirm, medicoNome }: {
   };
 
   return (
-    <Modal opened={opened} onClose={onClose} withCloseButton={false} centered size="lg" radius="lg" padding={0}>
-      <Box
-        p="lg"
-        style={{ background: 'oklch(0.24 0.02 240)' }}
-      >
-        <Group gap="sm">
-          <ThemeIcon size="lg" radius="md" variant="light" color="gray">
-            <IconClipboardText size={20} />
-          </ThemeIcon>
-          <Box>
-            <Text fw={700} c="white" size="lg" style={{ fontFamily: "'Manrope', sans-serif" }}>Alta do Paciente</Text>
-            <Text size="xs" style={{ color: 'oklch(0.65 0.03 230)', fontFamily: "'IBM Plex Mono', monospace" }}>
-              {patient?.nome || 'Paciente'} · Senha: {patient?.senha}
-            </Text>
-          </Box>
-        </Group>
+    <Modal opened={opened} onClose={onClose} withCloseButton={false} centered size="lg" padding={0}>
+      <Box p="lg" style={{ borderBottom: '1px solid var(--hh-border)' }}>
+        <Text fw={600} size="lg" c="var(--hh-ink)">Alta do paciente</Text>
+        <Text size="sm" c="var(--hh-muted)">
+          {patient?.nome || 'Paciente'} · Senha <Text span ff="monospace" inherit>{patient?.senha}</Text>
+        </Text>
       </Box>
 
-      <Box p="lg" bg="white">
+      <Box p="lg">
         <Stack gap="md">
           <Textarea
             label="Medicamentos e Orientações ao Paciente"
             description="Prescrição para uso domiciliar após a alta"
-            placeholder="Ex: Paracetamol 500mg — 1 comprimido de 8/8h por 5 dias..."
+            placeholder="Ex: Paracetamol 500mg, 1 comprimido de 8/8h por 5 dias..."
             minRows={4}
             radius="md"
             value={prescricao}
@@ -291,10 +201,10 @@ function AltaModal({ patient, opened, onClose, onConfirm, medicoNome }: {
             onChange={(e) => setOrientacoes(e.currentTarget.value)}
           />
         </Stack>
-        <Divider my="md" color="oklch(0.92 0.01 220)" />
+        <Divider my="md" color="var(--hh-border)" />
         <Group justify="flex-end" gap="xs">
           <Button variant="subtle" color="gray" onClick={onClose} disabled={saving}>Cancelar</Button>
-          <Button variant="outline" color="slate" loading={saving} onClick={() => handleConfirm(false)}>
+          <Button variant="default" loading={saving} onClick={() => handleConfirm(false)}>
             Dar Alta sem PDF
           </Button>
           <Button color="slate" leftSection={<IconDownload size={14} />} loading={saving} onClick={() => handleConfirm(true)}>
@@ -310,16 +220,21 @@ function AltaModal({ patient, opened, onClose, onConfirm, medicoNome }: {
 export const Alerts = () => {
   const { role, nome } = useAuth();
   const currentRole: Role = ROLE_MAP[role ?? ''] ?? 'Recepcionista';
-  const { carePatients: patients, loading, admitirPaciente, avançarFluxo, removerPaciente } = useCare();
+  const { carePatients: patients, loading, avançarFluxo: avançarCtx, removerPaciente: removerCtx } = useCare();
+  const [aviso, mostrarAviso] = useAviso();
+  // Toda ação da esteira mostra na tela o motivo quando o backend recusa (antes o erro ficava só no console)
+  const avançarFluxo: typeof avançarCtx = async (...a) => {
+    try { await avançarCtx(...a); mostrarAviso(null); } catch (e) { mostrarAviso(mensagemErro(e)); }
+  };
+  const removerPaciente: typeof removerCtx = async (...a) => {
+    try { await removerCtx(...a); mostrarAviso(null); } catch (e) { mostrarAviso(mensagemErro(e)); }
+  };
   const [admitirOpened, { open: openAdmitir, close: closeAdmitir }] = useDisclosure(false);
   const [altaTarget, setAltaTarget] = useState<FilaPaciente | null>(null);
-
-  const filaIds = patients.map((p) => p.paciente_id);
-
-  const handleAdmitir = async (dbPatient: Patient) => {
-    const senha = gerarSenha('PR');
-    await admitirPaciente(dbPatient, senha);
-  };
+  const agora = useAgora();
+  const { historico } = useHistoricoPacientes();
+  // A visita atual já conta no histórico (é criada na admissão)
+  const visitaDe = (p: FilaPaciente) => historico[p.paciente_id]?.total;
 
   const handleAltaConfirm = async () => {
     if (altaTarget) await avançarFluxo(altaTarget.id, 'Alta');
@@ -347,16 +262,13 @@ export const Alerts = () => {
     MANCHESTER.find((m) => m.g === g)?.mantine ?? 'gray';
 
   const riskBorderColor = (g?: Gravidade) =>
-    MANCHESTER.find((m) => m.g === g)?.oklch ?? 'var(--mantine-color-slate-3)';
+    MANCHESTER.find((m) => m.g === g)?.oklch ?? 'var(--hh-control)';
 
   if (loading) {
     return (
-      <Center style={{ height: '60vh' }}>
-        <Stack align="center" gap="xs">
-          <Loader color="slate" type="dots" />
-          <Text size="xs" c="dimmed">Carregando esteira...</Text>
-        </Stack>
-      </Center>
+      <PageShell title="Esteira de Cuidado" description="Carregando a esteira…">
+        <LoadingState rows={4} rowHeight={72} />
+      </PageShell>
     );
   }
 
@@ -364,24 +276,19 @@ export const Alerts = () => {
     <PageShell
       title="Esteira de Cuidado"
       description="Recepção → Triagem → Atendimento Médico → Observação"
-      icon={<IconHeartRateMonitor size={24} />}
+      icon={<IconHeartRateMonitor size={22} />}
       actions={
         <Group gap="xs">
-          <Paper withBorder px="sm" py={6} radius="md" style={{ border: '1px solid oklch(0.90 0.01 220)' }}>
-            <Group gap="xs">
-              <Text size="xs" fw={700} c="slate.5" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.06em' }}>
-                VISÃO:
-              </Text>
-              <Badge color="slate" size="sm" variant="light" radius="sm">{currentRole}</Badge>
-            </Group>
-          </Paper>
-          <Button size="sm" color="slate" leftSection={<IconUserPlus size={16} />} radius="md" onClick={openAdmitir}>
+          <Text size="sm" c="var(--hh-muted)">
+            Visão: <Text span fw={600} c="var(--hh-ink)" inherit>{currentRole}</Text>
+          </Text>
+          <Button size="sm" color="slate" leftSection={<IconUserPlus size={16} />} onClick={openAdmitir}>
             Admitir Paciente
           </Button>
         </Group>
       }
     >
-      <AdmitirModal opened={admitirOpened} onClose={closeAdmitir} onAdmit={handleAdmitir} filaIds={filaIds} />
+      <AdmitirModal opened={admitirOpened} onClose={closeAdmitir} />
       <AltaModal
         patient={altaTarget}
         opened={!!altaTarget}
@@ -390,23 +297,27 @@ export const Alerts = () => {
         medicoNome={nome ?? 'Médico'}
       />
 
+      <AvisoErro flutuante mensagem={aviso} onFechar={() => mostrarAviso(null)} mb="0" />
+
       <Grid gutter="md" style={{ flex: 1, minHeight: 0 }}>
 
         {/* ── Coluna 1: Recepção & Triagem ── */}
         <Grid.Col span={{ base: 12, lg: 4 }}>
-          <WorkflowColumn title="1. Recepção & Triagem" count={aguardandoTriagem.length} color="blue" icon={<IconUserPlus size={14} />}>
-            <Stack gap="xs">
+          <WorkflowColumn title="Recepção e triagem" count={aguardandoTriagem.length}>
+            <Stack gap="xs" className="hh-stagger">
               {aguardandoTriagem.map((p) => (
                 <PatientCard
                   key={p.id}
                   patient={p}
-                  borderColor="oklch(0.55 0.13 235)"
+                  agora={agora}
+                  visita={visitaDe(p)}
+                  borderColor="var(--hh-control)"
                   footer={
                     <Group gap={4} justify="space-between" w="100%">
                       <Box>
                         {p.status === 'Aguardando Triagem' && currentRole === 'Enfermeiro' && (
                           <Button
-                            size="xs" color="blue" variant="light" radius="md"
+                            size="xs" variant="default"
                             rightSection={<IconRefresh size={12} />}
                             onClick={() => avançarFluxo(p.id, 'Em Triagem (Enfermeiro)')}
                           >
@@ -415,9 +326,7 @@ export const Alerts = () => {
                         )}
                         {p.status === 'Em Triagem (Enfermeiro)' && currentRole === 'Enfermeiro' && (
                           <Stack gap={6}>
-                            <Text size="10px" c="slate.5" fw={700} style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.06em' }}>
-                              ESCALA DE MANCHESTER:
-                            </Text>
+                            <Text size="xs" c="var(--hh-muted)">Classificar risco (Manchester)</Text>
                             <Stack gap={4}>
                               {MANCHESTER.map(({ g, label, mantine, tempo }) => (
                                 <Button
@@ -425,10 +334,9 @@ export const Alerts = () => {
                                   size="xs"
                                   color={mantine}
                                   variant="filled"
-                                  radius="md"
                                   justify="space-between"
                                   rightSection={
-                                    <Text size="9px" style={{ opacity: 0.8 }}>{tempo}</Text>
+                                    <Text size="xs" style={{ opacity: 0.9 }}>{tempo}</Text>
                                   }
                                   onClick={() => avançarFluxo(p.id, 'Aguardando Atendimento', g)}
                                   fullWidth
@@ -440,17 +348,20 @@ export const Alerts = () => {
                           </Stack>
                         )}
                       </Box>
-                      <Tooltip label="Remover da esteira" withArrow>
-                        <ActionIcon size="xs" color="gray" variant="subtle" onClick={() => removerPaciente(p.id)}>
-                          <IconX size={12} />
-                        </ActionIcon>
-                      </Tooltip>
+                      {/* Só o médico pode remover da esteira (o backend recusa os outros perfis) */}
+                      {currentRole === 'Médico' && (
+                        <Tooltip label="Remover da esteira" withArrow>
+                          <ActionIcon size="sm" color="slate" variant="subtle" aria-label="Remover da esteira" onClick={() => removerPaciente(p.id)}>
+                            <IconX size={12} />
+                          </ActionIcon>
+                        </Tooltip>
+                      )}
                     </Group>
                   }
                 />
               ))}
               {aguardandoTriagem.length === 0 && (
-                <Text size="xs" c="dimmed" ta="center" py="xl">Nenhum paciente nesta etapa.</Text>
+                <EmptyState message="Nenhum paciente nesta etapa." />
               )}
             </Stack>
           </WorkflowColumn>
@@ -458,24 +369,26 @@ export const Alerts = () => {
 
         {/* ── Coluna 2: Atendimento Médico ── */}
         <Grid.Col span={{ base: 12, lg: 4 }}>
-          <WorkflowColumn title="2. Atendimento Médico" count={aguardandoMedico.length} color="teal" icon={<IconStethoscope size={14} />}>
-            <Stack gap="xs">
+          <WorkflowColumn title="Atendimento médico" count={aguardandoMedico.length}>
+            <Stack gap="xs" className="hh-stagger">
               {aguardandoMedico.map((p) => (
                 <PatientCard
                   key={p.id}
                   patient={p}
+                  agora={agora}
+                  visita={visitaDe(p)}
                   borderColor={riskBorderColor(p.gravidade)}
                   footer={
                     <Group gap={4} justify="space-between" w="100%">
                       <Box>
                         {p.gravidade && (
-                          <Badge size="xs" color={badgeColor(p.gravidade)} mb={4} radius="sm">
+                          <Badge size="sm" color={badgeColor(p.gravidade)} mb={4}>
                             Risco: {p.gravidade}
                           </Badge>
                         )}
                         {p.status === 'Aguardando Atendimento' && currentRole === 'Médico' && (
                           <Button
-                            size="xs" color="teal" radius="md"
+                            size="xs" variant="default"
                             rightSection={<IconArrowRight size={12} />}
                             onClick={() => avançarFluxo(p.id, 'Em Consulta (Médico)')}
                           >
@@ -485,14 +398,14 @@ export const Alerts = () => {
                         {p.status === 'Em Consulta (Médico)' && currentRole === 'Médico' && (
                           <Group gap="xs">
                             <Button
-                              size="xs" variant="light" color="blue" radius="md"
+                              size="xs" variant="default"
                               leftSection={<IconBed size={12} />}
                               onClick={() => avançarFluxo(p.id, 'Em Observação')}
                             >
                               Observação
                             </Button>
                             <Button
-                              size="xs" color="teal" radius="md"
+                              size="xs" variant="default"
                               leftSection={<IconDownload size={12} />}
                               onClick={() => setAltaTarget(p)}
                             >
@@ -501,17 +414,20 @@ export const Alerts = () => {
                           </Group>
                         )}
                       </Box>
-                      <Tooltip label="Remover da esteira" withArrow>
-                        <ActionIcon size="xs" color="gray" variant="subtle" onClick={() => removerPaciente(p.id)}>
-                          <IconX size={12} />
-                        </ActionIcon>
-                      </Tooltip>
+                      {/* Só o médico pode remover da esteira (o backend recusa os outros perfis) */}
+                      {currentRole === 'Médico' && (
+                        <Tooltip label="Remover da esteira" withArrow>
+                          <ActionIcon size="sm" color="slate" variant="subtle" aria-label="Remover da esteira" onClick={() => removerPaciente(p.id)}>
+                            <IconX size={12} />
+                          </ActionIcon>
+                        </Tooltip>
+                      )}
                     </Group>
                   }
                 />
               ))}
               {aguardandoMedico.length === 0 && (
-                <Text size="xs" c="dimmed" ta="center" py="xl">Nenhum paciente nesta etapa.</Text>
+                <EmptyState message="Nenhum paciente nesta etapa." />
               )}
             </Stack>
           </WorkflowColumn>
@@ -519,17 +435,20 @@ export const Alerts = () => {
 
         {/* ── Coluna 3: Ala de Observação ── */}
         <Grid.Col span={{ base: 12, lg: 4 }}>
-          <WorkflowColumn title="3. Ala de Observação" count={emObservacao.length} color="indigo" icon={<IconBed size={14} />}>
-            <Stack gap="xs">
+          <WorkflowColumn title="Ala de observação" count={emObservacao.length}>
+            <Stack gap="xs" className="hh-stagger">
               {emObservacao.map((p) => (
                 <PatientCard
                   key={p.id}
                   patient={p}
-                  borderColor="var(--mantine-color-indigo-5)"
+                  agora={agora}
+                  visita={visitaDe(p)}
+                  borderColor="var(--hh-control)"
                   footer={
-                    (currentRole === 'Médico' || currentRole === 'Enfermeiro') ? (
+                    // Alta clínica: só o médico (PATCH /fila/:id/alta é restrito a esse perfil no backend)
+                    currentRole === 'Médico' ? (
                       <Button
-                        size="xs" color="indigo" variant="light" radius="md"
+                        size="xs" variant="default"
                         onClick={() => avançarFluxo(p.id, 'Alta')}
                       >
                         Liberar Alta
@@ -539,7 +458,7 @@ export const Alerts = () => {
                 />
               ))}
               {emObservacao.length === 0 && (
-                <Text size="xs" c="dimmed" ta="center" py="xl">Nenhum paciente nesta etapa.</Text>
+                <EmptyState message="Nenhum paciente nesta etapa." />
               )}
             </Stack>
           </WorkflowColumn>

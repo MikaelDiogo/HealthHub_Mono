@@ -1,17 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
   Box, Text, Group, SimpleGrid, Modal, Stack, Paper, Badge,
-  Avatar, Skeleton, ScrollArea, ThemeIcon, ActionIcon,
-  Pagination, Center, Alert, TextInput, Divider, Tabs,
-  Timeline,
+  Avatar, ScrollArea, ActionIcon, Pagination, TextInput, Tabs, Timeline, Title, Skeleton,
+  SegmentedControl,
 } from '@mantine/core';
+import { AdmitirModal } from '../../components/AdmitirModal';
+import { useHistoricoPacientes } from '../../hooks/useMetricas';
+import { formatDuracao, tempoAtras } from '../../services/metricas';
 import { useDisclosure } from '@mantine/hooks';
 import {
-  IconThermometer, IconHeartRateMonitor, IconDroplet,
-  IconUser, IconAlertCircle, IconStethoscope, IconCapsule,
-  IconActivity, IconId, IconPhone, IconMapPin, IconX,
-  IconBed, IconClock, IconUserPlus, IconUsers, IconSearch,
-  IconHistory, IconCalendar, IconArrowRight,
+  IconUsers, IconSearch, IconX, IconHistory, IconUser, IconCalendar,
 } from '@tabler/icons-react';
 import { ButtonAddPatient } from '../../components/Buttons';
 import CardPatient from '../../components/CardPatient';
@@ -19,9 +17,13 @@ import api from '../../services/api';
 import { manchesterCSSColor } from '../../utils/vitalStatus';
 import { ModalEditPatient } from '../../components/Buttons/ModalEditPatient';
 import { PageShell } from '../../components/PageShell';
+import { EmptyState, ErrorState } from '../../components/ui';
 import type { Patient } from '../../types/patient';
 import { useCare, type FilaPaciente } from '../../context/CareContext';
+import { chatService } from '../../services/chatService';
+import { useAuth } from '../../context/AuthContext';
 
+// Cores de dado (categoria de risco e etapa do cuidado) — significado clínico, não decoração
 const STATUS_COLOR: Record<string, string> = {
   'Aguardando Triagem': 'blue',
   'Em Triagem (Enfermeiro)': 'cyan',
@@ -30,16 +32,13 @@ const STATUS_COLOR: Record<string, string> = {
   'Em Observação': 'indigo',
 };
 
-const STATUS_ICON: Record<string, React.ReactNode> = {
-  'Aguardando Triagem': <IconClock size={16} />,
-  'Em Triagem (Enfermeiro)': <IconActivity size={16} />,
-  'Aguardando Atendimento': <IconUserPlus size={16} />,
-  'Em Consulta (Médico)': <IconStethoscope size={16} />,
-  'Em Observação': <IconBed size={16} />,
-};
-
 const GRAVIDADE_COLOR: Record<string, string> = {
   Vermelho: 'red', Laranja: 'orange', Amarelo: 'yellow', Verde: 'green', Azul: 'blue',
+};
+
+const DESFECHO_COLOR: Record<string, string> = {
+  'Em Atendimento': 'blue', Alta: 'green', Internacao: 'orange',
+  Transferencia: 'violet', 'Saida Voluntaria': 'gray',
 };
 
 function getInitials(name: string) {
@@ -47,31 +46,69 @@ function getInitials(name: string) {
   return name.split(' ').filter(Boolean).map((n) => n[0]).join('').slice(0, 2).toUpperCase();
 }
 
+function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
+  return (
+    <Box>
+      <Text fw={600} size="sm" c="var(--hh-ink)" mb="xs">{titulo}</Text>
+      {children}
+    </Box>
+  );
+}
+
+function Campo({ rotulo, valor }: { rotulo: string; valor?: string | number | null }) {
+  const ausente = valor === undefined || valor === null || valor === '';
+  return (
+    <Box style={{ minWidth: 0 }}>
+      <Text size="xs" c="var(--hh-muted)">{rotulo}</Text>
+      <Text size="sm" fw={500} c={ausente ? 'var(--hh-faint)' : 'var(--hh-ink)'} truncate>
+        {ausente ? 'Não informado' : valor}
+      </Text>
+    </Box>
+  );
+}
+
 export const Patients = () => {
   const { carePatients } = useCare();
+  const { role } = useAuth();
+  // O backend só aceita edição de prontuário por médico e enfermeiro (recepção recebe 403)
+  const podeEditar = role === 'medico' || role === 'enfermeiro';
   const [patients, setPatients] = useState<Patient[]>([]);
   const [searchFilter, setSearchFilter] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [opened, { open, close }] = useDisclosure(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
   const [editOpened, { open: openEdit, close: closeEdit }] = useDisclosure(false);
   const [patientToEdit, setPatientToEdit] = useState<Patient | null>(null);
   const [visitas, setVisitas] = useState<any[]>([]);
   const [loadingVisitas, setLoadingVisitas] = useState(false);
+  // Ativos: na esteira ou nunca atendidos. Com alta: saíram e podem ser readmitidos.
+  const [aba, setAba] = useState<'ativos' | 'alta'>('ativos');
+  const [readmitirId, setReadmitirId] = useState<string | null>(null);
+  const { historico } = useHistoricoPacientes();
 
   const PAGE_SIZE = 8;
 
   const loadPatients = useCallback(() => {
     setIsLoading(true);
     api
-      .get('/patients')
-      .then((res) => setPatients(Array.isArray(res.data) ? res.data : []))
-      .catch((err) => console.error('Erro na API:', err))
+      .get('/patients', { params: { ativo: aba === 'ativos' } })
+      .then((res) => {
+        setPatients(Array.isArray(res.data) ? res.data : []);
+        setLoadError(false);
+      })
+      .catch((err) => {
+        console.error('Erro na API:', err);
+        setLoadError(true);
+      })
       .finally(() => setIsLoading(false));
-  }, []);
+  }, [aba]);
 
   useEffect(() => { loadPatients(); }, [loadPatients]);
+
+  // Alta/readmissão em outra sessão muda quem aparece aqui — mantém sincronizado
+  useEffect(() => chatService.onFilaChanged(loadPatients), [loadPatients]);
 
   const filteredPatients = patients.filter(
     (p) =>
@@ -102,265 +139,167 @@ export const Patients = () => {
     open();
   }
 
-  const MANCHESTER_COLOR: Record<string, string> = {
-    Vermelho: 'red', Laranja: 'orange', Amarelo: 'yellow', Verde: 'green', Azul: 'blue',
-  };
-  const DESFECHO_COLOR: Record<string, string> = {
-    'Em Atendimento': 'blue', Alta: 'green', Internacao: 'orange',
-    Transferencia: 'violet', 'Saida Voluntaria': 'gray',
-  };
-
   return (
     <PageShell
       title="Pacientes"
       description="Histórico clínico, sinais vitais e gestão de prontuários"
-      icon={<IconUsers size={24} />}
+      icon={<IconUsers size={22} />}
     >
       {/* Modal: Visualizar paciente */}
-      <Modal
-        opened={opened}
-        onClose={close}
-        withCloseButton={false}
-        size="xl"
-        centered
-        radius="lg"
-        padding={0}
-      >
+      <Modal opened={opened} onClose={close} withCloseButton={false} size="xl" centered padding={0}>
         {selectedPatient && (() => {
           const cuidado: FilaPaciente | undefined = carePatients.find(
             (c) => c.paciente_id === selectedPatient.id,
           );
+          const ultima = selectedPatient.sinaisVitais?.[0];
+          const sinais = [
+            { rotulo: 'Temperatura', valor: ultima?.temperatura, unidade: '°C' },
+            { rotulo: 'Pressão arterial', valor: ultima?.pressao_arterial, unidade: '' },
+            { rotulo: 'Frequência cardíaca', valor: ultima?.frequencia_cardiaca, unidade: ' bpm' },
+            { rotulo: 'SpO₂', valor: ultima?.saturacao_oxigenio, unidade: '%' },
+          ];
           return (
             <Box>
-              {/* Header */}
-              <Box p="lg" style={{ background: 'oklch(0.24 0.02 240)' }}>
-                <Group justify="space-between" wrap="nowrap">
-                  <Group gap="md" wrap="nowrap">
-                    <Avatar
-                      size={52}
-                      radius="md"
-                      color="slate"
-                      variant="light"
-                      style={{ fontSize: 18, fontWeight: 800 }}
-                    >
-                      {getInitials(selectedPatient.nome_completo)}
-                    </Avatar>
-                    <Box>
-                      <Text fw={800} size="lg" c="white" style={{ fontFamily: "'Manrope', sans-serif", lineHeight: 1.2 }}>
-                        {selectedPatient.nome_completo}
-                      </Text>
-                      <Group gap="xs" mt={4}>
-                        {selectedPatient.idade && (
-                          <Text size="xs" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>
-                            {selectedPatient.idade} anos
-                          </Text>
-                        )}
-                        {selectedPatient.sexo && (
-                          <Text size="xs" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>
-                            · {selectedPatient.sexo}
-                          </Text>
-                        )}
-                      </Group>
-                    </Box>
-                  </Group>
-                  <ActionIcon variant="subtle" color="gray" size="lg" onClick={close}>
-                    <IconX size={18} />
-                  </ActionIcon>
+              <Group justify="space-between" wrap="nowrap" p="lg" style={{ borderBottom: '1px solid var(--hh-border)' }}>
+                <Group gap="md" wrap="nowrap">
+                  <Avatar size={44} radius="md" color="slate" variant="light">
+                    {getInitials(selectedPatient.nome_completo)}
+                  </Avatar>
+                  <Box>
+                    <Title order={3} size={18} fw={600} c="var(--hh-ink)" lh={1.2}>
+                      {selectedPatient.nome_completo}
+                    </Title>
+                    <Text size="sm" c="var(--hh-muted)">
+                      {[selectedPatient.idade ? `${selectedPatient.idade} anos` : null, selectedPatient.sexo].filter(Boolean).join(' · ')}
+                    </Text>
+                  </Box>
                 </Group>
-              </Box>
+                <ActionIcon variant="subtle" color="slate" size="lg" onClick={close} aria-label="Fechar prontuário">
+                  <IconX size={18} />
+                </ActionIcon>
+              </Group>
 
-              {/* Corpo com abas */}
               <Tabs defaultValue="dados" color="slate">
-                <Tabs.List px="lg" pt="sm" style={{ borderBottom: '1px solid var(--mantine-color-slate-2)' }}>
-                  <Tabs.Tab value="dados" leftSection={<IconUser size={14} />}>Dados Clínicos</Tabs.Tab>
+                <Tabs.List px="lg">
+                  <Tabs.Tab value="dados" leftSection={<IconUser size={14} />}>Dados clínicos</Tabs.Tab>
                   <Tabs.Tab
                     value="historico"
                     leftSection={<IconHistory size={14} />}
                     rightSection={visitas.length > 0
-                      ? <Badge size="xs" color="slate" radius="xl">{visitas.length}</Badge>
+                      ? <Badge size="xs" color="slate" variant="light">{visitas.length}</Badge>
                       : undefined}
                   >
-                    Histórico de Visitas
+                    Histórico de visitas
                   </Tabs.Tab>
                 </Tabs.List>
 
-                {/* Aba: Dados Clínicos */}
                 <Tabs.Panel value="dados">
-              <Box style={{ maxHeight: '55vh', overflowY: 'auto' }}>
-                <Stack gap="xl" p="lg">
-
-                  {/* Status na esteira */}
-                  {cuidado && (
-                    <Alert
-                      icon={STATUS_ICON[cuidado.status] ?? <IconActivity size={16} />}
-                      color={STATUS_COLOR[cuidado.status] ?? 'gray'}
-                      variant="light"
-                      radius="md"
-                      title={cuidado.status}
-                    >
-                      <Group gap="md" mt={4} wrap="wrap">
-                        <Text size="sm">Chegada: <Text span fw={700}>{cuidado.chegada}</Text></Text>
-                        <Text size="sm" c="dimmed">·</Text>
-                        <Text size="sm">Senha: <Text span fw={700} ff="monospace">{cuidado.senha}</Text></Text>
-                        {cuidado.gravidade && (
-                          <Badge color={GRAVIDADE_COLOR[cuidado.gravidade] ?? 'gray'} variant="filled" radius="sm" ml="auto">
-                            Risco: {cuidado.gravidade}
-                          </Badge>
-                        )}
-                      </Group>
-                    </Alert>
-                  )}
-
-                  {/* Dados pessoais */}
-                  <Box>
-                    <Group gap="xs" mb="sm">
-                      <ThemeIcon size="sm" radius="md" color="slate" variant="light">
-                        <IconUser size={12} />
-                      </ThemeIcon>
-                      <Text size="xs" fw={700} c="slate.5" tt="uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.1em' }}>
-                        Informações do Cadastro
-                      </Text>
-                    </Group>
-                    <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="sm">
-                      {[
-                        { label: 'CPF', value: selectedPatient.cpf, icon: IconId },
-                        { label: 'RG', value: selectedPatient.rg, icon: IconId },
-                        { label: 'Telefone', value: selectedPatient.telefone, icon: IconPhone },
-                        { label: 'Endereço', value: selectedPatient.endereco, icon: IconMapPin },
-                      ].map(({ label, value, icon: Icon }) => (
-                        <Paper
-                          key={label}
-                          p="sm"
-                          radius="md"
-                          style={{ border: '1px solid oklch(0.90 0.01 220)', background: 'var(--mantine-color-slate-0)' }}
-                        >
-                          <Group gap="sm" wrap="nowrap">
-                            <Icon size={18} color="oklch(0.52 0.14 235)" />
-                            <Box style={{ minWidth: 0 }}>
-                              <Text size="10px" c="dimmed" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{label}</Text>
-                              <Text size="sm" fw={600} truncate>{value || 'Não informado'}</Text>
-                            </Box>
+                  <ScrollArea.Autosize mah="55vh">
+                    <Stack gap="xl" p="lg">
+                      {cuidado && (
+                        <Paper withBorder p="sm">
+                          <Group gap="md" wrap="wrap">
+                            <Badge color={STATUS_COLOR[cuidado.status] ?? 'gray'} variant="light">{cuidado.status}</Badge>
+                            <Text size="sm" c="var(--hh-muted)">Chegada <Text span fw={600} c="var(--hh-ink)">{cuidado.chegada}</Text></Text>
+                            <Text size="sm" c="var(--hh-muted)">Senha <Text span fw={600} c="var(--hh-ink)" ff="monospace">{cuidado.senha}</Text></Text>
+                            {cuidado.gravidade && (
+                              <Badge color={GRAVIDADE_COLOR[cuidado.gravidade] ?? 'gray'} variant="filled" ml="auto">
+                                Risco {cuidado.gravidade}
+                              </Badge>
+                            )}
                           </Group>
                         </Paper>
-                      ))}
-                    </SimpleGrid>
-                  </Box>
+                      )}
 
-                  {/* Sinais vitais */}
-                  <Box>
-                    <Group gap="xs" mb="sm">
-                      <ThemeIcon size="sm" radius="md" color="slate" variant="light">
-                        <IconHeartRateMonitor size={12} />
-                      </ThemeIcon>
-                      <Text size="xs" fw={700} c="slate.5" tt="uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.1em' }}>
-                        Última Triagem
-                      </Text>
-                    </Group>
-                    <SimpleGrid cols={{ base: 2, sm: 4 }} spacing="sm">
-                      {[
-                        { label: 'Temperatura', value: selectedPatient.sinaisVitais?.[0]?.temperatura, suffix: '°C', icon: IconThermometer },
-                        { label: 'P. Arterial', value: selectedPatient.sinaisVitais?.[0]?.pressao_arterial, suffix: '', icon: IconActivity },
-                        { label: 'F. Cardíaca', value: selectedPatient.sinaisVitais?.[0]?.frequencia_cardiaca, suffix: ' bpm', icon: IconHeartRateMonitor },
-                        { label: 'SpO₂', value: selectedPatient.sinaisVitais?.[0]?.saturacao_oxigenio, suffix: '%', icon: IconDroplet },
-                      ].map(({ label, value, suffix = '', icon: Icon }) => (
-                        <Paper
-                          key={label}
-                          p="md"
-                          radius="md"
-                          style={{ border: '1px solid oklch(0.90 0.01 220)', textAlign: 'center', borderTop: '3px solid oklch(0.24 0.02 240)' }}
-                        >
-                          <ThemeIcon mx="auto" mb="xs" color="slate" variant="light" radius="md">
-                            <Icon size={16} />
-                          </ThemeIcon>
-                          <Text size="10px" c="dimmed" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>{label}</Text>
-                          <Text fw={800} size="lg" c="slate.8">{value ? `${value}${suffix}` : '--'}</Text>
+                      <Secao titulo="Cadastro">
+                        <SimpleGrid cols={{ base: 1, sm: 2, md: 4 }} spacing="md">
+                          <Campo rotulo="CPF" valor={selectedPatient.cpf} />
+                          <Campo rotulo="RG" valor={selectedPatient.rg} />
+                          <Campo rotulo="Telefone" valor={selectedPatient.telefone} />
+                          <Campo rotulo="Endereço" valor={selectedPatient.endereco} />
+                        </SimpleGrid>
+                      </Secao>
+
+                      <Secao titulo="Última triagem">
+                        <Paper withBorder style={{ overflow: 'hidden' }}>
+                          <Box style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 1, background: 'var(--hh-border)' }}>
+                            {sinais.map(({ rotulo, valor, unidade }) => (
+                              <Box key={rotulo} p="md" style={{ background: 'var(--hh-surface)' }}>
+                                <Text size="xs" c="var(--hh-muted)">{rotulo}</Text>
+                                {valor ? (
+                                  <Text fw={600} size="xl" c="var(--hh-ink)" lh={1.2}>{valor}{unidade}</Text>
+                                ) : (
+                                  <Text fw={600} size="xl" c="var(--hh-faint)" lh={1.2} aria-label="sem valor">—</Text>
+                                )}
+                              </Box>
+                            ))}
+                          </Box>
                         </Paper>
-                      ))}
-                    </SimpleGrid>
-                  </Box>
+                      </Secao>
 
-                  {/* Clínico */}
-                  {[
-                    { title: 'Alergias', value: selectedPatient.alergias, icon: IconAlertCircle },
-                    { title: 'Medicamentos em Uso', value: selectedPatient.medicamentos_em_uso, icon: IconCapsule },
-                    { title: 'Anamnese', value: selectedPatient.anamnese, icon: IconStethoscope },
-                  ].map(({ title, value, icon: Icon }) => value ? (
-                    <Box key={title}>
-                      <Group gap="xs" mb="sm">
-                        <ThemeIcon size="sm" radius="md" color="slate" variant="light">
-                          <Icon size={12} />
-                        </ThemeIcon>
-                        <Text size="xs" fw={700} c="slate.5" tt="uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.1em' }}>
-                          {title}
-                        </Text>
-                      </Group>
-                      <Paper p="md" radius="md" style={{ border: '1px solid oklch(0.90 0.01 220)', background: 'var(--mantine-color-slate-0)' }}>
-                        <Text size="sm" c="slate.7" style={{ lineHeight: 1.7 }}>{value}</Text>
-                      </Paper>
-                    </Box>
-                  ) : null)}
-
-                </Stack>
-              </Box>
+                      {[
+                        { titulo: 'Alergias', valor: selectedPatient.alergias },
+                        { titulo: 'Medicamentos em uso', valor: selectedPatient.medicamentos_em_uso },
+                        { titulo: 'Anamnese', valor: selectedPatient.anamnese },
+                      ].map(({ titulo, valor }) => valor ? (
+                        <Secao key={titulo} titulo={titulo}>
+                          <Paper p="md" bg="var(--hh-raised)">
+                            <Text size="sm" c="var(--hh-ink)" style={{ lineHeight: 1.6 }}>{valor}</Text>
+                          </Paper>
+                        </Secao>
+                      ) : null)}
+                    </Stack>
+                  </ScrollArea.Autosize>
                 </Tabs.Panel>
 
-                {/* Aba: Histórico de Visitas */}
                 <Tabs.Panel value="historico">
-                  <Box style={{ maxHeight: '55vh', overflowY: 'auto' }} p="lg">
-                    {loadingVisitas ? (
-                      <Center py="xl"><Skeleton height={120} radius="md" /></Center>
-                    ) : visitas.length === 0 ? (
-                      <Center py="xl">
-                        <Stack align="center" gap="xs">
-                          <ThemeIcon size={48} radius="xl" color="slate" variant="light">
-                            <IconHistory size={24} />
-                          </ThemeIcon>
-                          <Text c="dimmed" size="sm">Nenhuma visita registrada.</Text>
-                          <Text c="dimmed" size="xs">O histórico aparece automaticamente ao admitir o paciente na esteira.</Text>
+                  <ScrollArea.Autosize mah="55vh">
+                    <Box p="lg">
+                      {loadingVisitas ? (
+                        <Stack gap="xs">
+                          {[0, 1, 2].map((i) => <Skeleton key={i} h={56} />)}
                         </Stack>
-                      </Center>
-                    ) : (
-                      <Timeline active={0} bulletSize={20} lineWidth={2} color="slate">
-                        {visitas.map((v, i) => (
-                          <Timeline.Item
-                            key={v.id}
-                            bullet={<IconCalendar size={10} />}
-                            title={
-                              <Group gap="xs" wrap="nowrap">
-                                <Text size="sm" fw={700}>
-                                  Visita #{visitas.length - i}
-                                </Text>
-                                {v.gravidade_manchester && (
-                                  <Badge size="xs" color={MANCHESTER_COLOR[v.gravidade_manchester] ?? 'gray'} variant="filled">
-                                    {v.gravidade_manchester}
+                      ) : visitas.length === 0 ? (
+                        <EmptyState message="Nenhuma visita registrada. O histórico aparece ao admitir o paciente na esteira." />
+                      ) : (
+                        <Timeline active={0} bulletSize={20} lineWidth={2} color="slate">
+                          {visitas.map((v, i) => (
+                            <Timeline.Item
+                              key={v.id}
+                              bullet={<IconCalendar size={10} />}
+                              title={
+                                <Group gap="xs" wrap="nowrap">
+                                  <Text size="sm" fw={600}>Visita {visitas.length - i}</Text>
+                                  {v.gravidade_manchester && (
+                                    <Badge size="xs" color={GRAVIDADE_COLOR[v.gravidade_manchester] ?? 'gray'} variant="filled">
+                                      {v.gravidade_manchester}
+                                    </Badge>
+                                  )}
+                                  <Badge size="xs" color={DESFECHO_COLOR[v.desfecho] ?? 'gray'} variant="light">
+                                    {v.desfecho}
                                   </Badge>
-                                )}
-                                <Badge size="xs" color={DESFECHO_COLOR[v.desfecho] ?? 'gray'} variant="light">
-                                  {v.desfecho}
-                                </Badge>
-                              </Group>
-                            }
-                          >
-                            <Text size="xs" c="dimmed" mt={4}>
-                              <IconArrowRight size={10} style={{ marginRight: 4 }} />
-                              Chegada: {new Date(v.chegada).toLocaleString('pt-BR')}
-                            </Text>
-                            {v.alta && (
-                              <Text size="xs" c="dimmed">
-                                <IconArrowRight size={10} style={{ marginRight: 4 }} />
-                                Alta: {new Date(v.alta).toLocaleString('pt-BR')}
-                                {' · '}
-                                {Math.round((new Date(v.alta).getTime() - new Date(v.chegada).getTime()) / 60000)}min
+                                </Group>
+                              }
+                            >
+                              <Text size="xs" c="var(--hh-muted)" mt={4}>
+                                Chegada: {new Date(v.chegada).toLocaleString('pt-BR')}
                               </Text>
-                            )}
-                            {v.motivo_visita && (
-                              <Text size="xs" c="slate.6" mt={2}>Motivo: {v.motivo_visita}</Text>
-                            )}
-                          </Timeline.Item>
-                        ))}
-                      </Timeline>
-                    )}
-                  </Box>
+                              {v.alta && (
+                                <Text size="xs" c="var(--hh-muted)">
+                                  Alta: {new Date(v.alta).toLocaleString('pt-BR')}
+                                  {' · '}
+                                  {formatDuracao(Math.round((new Date(v.alta).getTime() - new Date(v.chegada).getTime()) / 60000))}
+                                </Text>
+                              )}
+                              {v.motivo_visita && (
+                                <Text size="xs" c="var(--hh-ink)" mt={2}>Motivo: {v.motivo_visita}</Text>
+                              )}
+                            </Timeline.Item>
+                          ))}
+                        </Timeline>
+                      )}
+                    </Box>
+                  </ScrollArea.Autosize>
                 </Tabs.Panel>
               </Tabs>
             </Box>
@@ -375,118 +314,118 @@ export const Patients = () => {
         onUpdated={loadPatients}
       />
 
-      {/* ── Barra de busca + ação ── */}
+      <AdmitirModal
+        opened={readmitirId !== null}
+        onClose={() => setReadmitirId(null)}
+        pacienteInicialId={readmitirId}
+      />
+
+      {/* Busca + ação principal */}
       <Box mb="lg" style={{ flexShrink: 0 }}>
-        <Group gap="md">
+        <Group gap="md" wrap="wrap">
+          <SegmentedControl
+            value={aba}
+            onChange={(v) => { setAba(v as 'ativos' | 'alta'); setCurrentPage(1); }}
+            data={[
+              { value: 'ativos', label: 'Ativos' },
+              { value: 'alta', label: 'Com alta' },
+            ]}
+            aria-label="Filtrar pacientes por situação"
+            transitionDuration={180}
+            transitionTimingFunction="cubic-bezier(0.2, 0.8, 0.2, 1)"
+          />
           <TextInput
-            style={{ flex: 1 }}
-            size="sm"
-            radius="md"
-            placeholder="Pesquisar por nome ou CPF..."
-            leftSection={<IconSearch size={14} color="oklch(0.65 0.03 230)" />}
+            style={{ flex: 1, minWidth: 220 }}
+            placeholder="Pesquisar por nome ou CPF"
+            aria-label="Pesquisar paciente por nome ou CPF"
+            leftSection={<IconSearch size={14} />}
             value={searchFilter}
             onChange={(e) => handleSearchChange(e.currentTarget.value)}
-            styles={{
-              input: {
-                border: '1.5px solid oklch(0.88 0.01 220)',
-                background: '#fff',
-                '&:focus': { borderColor: 'oklch(0.52 0.14 235)' },
-              },
-            }}
           />
           <ButtonAddPatient onPatientCreated={loadPatients} />
         </Group>
 
-        {/* Contadores */}
-        {!isLoading && (
-          <Group gap="xs" mt="sm">
-            <Text size="xs" c="dimmed" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
-              {filteredPatients.length} paciente{filteredPatients.length !== 1 ? 's' : ''}
-              {searchFilter && ` · filtrado${filteredPatients.length !== 1 ? 's' : ''}`}
-            </Text>
-            {searchFilter && filteredPatients.length === 0 && (
-              <Text size="xs" c="hub.6" fw={600}>— tente outro termo</Text>
-            )}
-          </Group>
+        {!isLoading && !loadError && (
+          <Text size="sm" c="var(--hh-muted)" mt="sm">
+            {filteredPatients.length} paciente{filteredPatients.length !== 1 ? 's' : ''}
+            {aba === 'alta' ? ' com alta' : filteredPatients.length !== 1 ? ' ativos' : ' ativo'}
+            {searchFilter && `, busca "${searchFilter}"`}
+          </Text>
         )}
       </Box>
 
-      {/* ── Grade de pacientes ── */}
+      {/* Grade de pacientes */}
       <ScrollArea style={{ flex: 1 }} offsetScrollbars>
-        <SimpleGrid cols={{ base: 1, sm: 2, md: 3, xl: 4 }} spacing="md">
-          {isLoading
-            ? Array.from({ length: 8 }).map((_, i) => (
-                <Paper key={i} radius="lg" style={{ overflow: 'hidden', border: '1px solid oklch(0.90 0.01 220)' }}>
-                  <Box h={5} style={{ background: 'oklch(0.88 0.04 235)' }} />
-                  <Box p="lg">
-                    <Group mb="md">
-                      <Skeleton height={48} circle />
+        {loadError ? (
+          <ErrorState message="Não foi possível carregar os pacientes." onRetry={loadPatients} />
+        ) : (
+          <SimpleGrid key={`${aba}-${currentPage}`} className="hh-stagger" cols={{ base: 1, sm: 2, md: 3, xl: 4 }} spacing="md">
+            {isLoading
+              ? Array.from({ length: 8 }).map((_, i) => (
+                  <Paper key={i} withBorder p="md">
+                    <Group mb="md" wrap="nowrap">
+                      <Skeleton h={36} w={36} />
                       <Box style={{ flex: 1 }}>
-                        <Skeleton height={14} mb={6} />
-                        <Skeleton height={11} w="60%" />
+                        <Skeleton h={14} mb={6} />
+                        <Skeleton h={12} w="60%" />
                       </Box>
                     </Group>
-                    <Skeleton height={64} radius="md" mb="md" />
-                    <Group grow>
-                      <Skeleton height={36} radius="md" />
-                      <Skeleton height={36} radius="md" />
-                    </Group>
-                  </Box>
-                </Paper>
-              ))
-            : paginatedPatients.length > 0
-              ? paginatedPatients.map((patient) => {
-                  const v = patient.sinaisVitais?.[0];
-                  return (
-                    <CardPatient
-                      key={patient.id}
-                      patientName={patient.nome_completo}
-                      patientAge={patient.idade}
-                      patientGender={patient.sexo}
-                      temp={v?.temperatura ? `${v.temperatura}°C` : '--'}
-                      bpm={v?.frequencia_cardiaca ? `${v.frequencia_cardiaca} bpm` : '--'}
-                      spo2={v?.saturacao_oxigenio ? `${v.saturacao_oxigenio}%` : '--'}
-                      topColor={manchesterCSSColor(
-                        carePatients.find(c => c.paciente_id === patient.id)?.gravidade
-                      )}
-                      onView={() => openPatientModal(patient)}
-                      onEdit={() => { setPatientToEdit(patient); openEdit(); }}
-                    />
-                  );
-                })
-              : (
-                  <Box py="xl" style={{ gridColumn: '1 / -1' }}>
-                    <Center>
-                      <Stack align="center" gap="md">
-                        <ThemeIcon size={72} radius="xl" color="slate" variant="light">
-                          <IconUsers size={36} />
-                        </ThemeIcon>
-                        <Box ta="center">
-                          <Text fw={700} size="lg" c="slate.7" mb={4}>
-                            {searchFilter ? 'Nenhum paciente encontrado' : 'Nenhum paciente cadastrado'}
-                          </Text>
-                          <Text size="sm" c="dimmed" maw={280} mx="auto">
-                            {searchFilter
-                              ? `Não encontramos resultados para "${searchFilter}". Tente outro nome ou CPF.`
-                              : 'Cadastre o primeiro paciente clicando no botão "Adicionar Paciente".'}
-                          </Text>
-                        </Box>
-                      </Stack>
-                    </Center>
-                  </Box>
-                )}
-        </SimpleGrid>
+                    <Skeleton h={36} mb="md" />
+                    <Skeleton h={30} />
+                  </Paper>
+                ))
+              : paginatedPatients.length > 0
+                ? paginatedPatients.map((patient) => {
+                    const v = patient.sinaisVitais?.[0];
+                    const h = historico[patient.id];
+                    const rodape = h
+                      ? [
+                          h.total === 1 ? '1 visita' : `${h.total} visitas`,
+                          h.ultima.alta ? `alta ${tempoAtras(h.ultima.alta)}` : `chegada ${tempoAtras(h.ultima.chegada)}`,
+                        ].join(' · ')
+                      : 'Nenhuma visita registrada';
+                    return (
+                      <CardPatient
+                        key={patient.id}
+                        patientName={patient.nome_completo}
+                        patientAge={patient.idade}
+                        patientGender={patient.sexo}
+                        temp={v?.temperatura ? `${v.temperatura}°C` : '--'}
+                        bpm={v?.frequencia_cardiaca ? `${v.frequencia_cardiaca} bpm` : '--'}
+                        spo2={v?.saturacao_oxigenio ? `${v.saturacao_oxigenio}%` : '--'}
+                        topColor={manchesterCSSColor(
+                          carePatients.find(c => c.paciente_id === patient.id)?.gravidade
+                        )}
+                        onView={() => openPatientModal(patient)}
+                        onEdit={podeEditar ? () => { setPatientToEdit(patient); openEdit(); } : undefined}
+                        onReadmit={aba === 'alta' ? () => setReadmitirId(patient.id) : undefined}
+                        rodape={rodape}
+                      />
+                    );
+                  })
+                : (
+                    <Box style={{ gridColumn: '1 / -1' }}>
+                      <EmptyState
+                        message={searchFilter
+                          ? `Nenhum paciente encontrado para "${searchFilter}". Tente outro nome ou CPF.`
+                          : aba === 'alta'
+                            ? 'Nenhum paciente com alta. Quem recebe alta na esteira aparece aqui para ser readmitido.'
+                            : 'Nenhum paciente ativo. Cadastre um paciente ou readmita alguém pela aba "Com alta".'}
+                      />
+                    </Box>
+                  )}
+          </SimpleGrid>
+        )}
 
-        {!isLoading && totalPages > 1 && (
-          <Center mt="xl" mb="sm">
+        {!isLoading && !loadError && totalPages > 1 && (
+          <Group justify="center" mt="xl" mb="sm">
             <Pagination
               value={currentPage}
               onChange={setCurrentPage}
               total={totalPages}
-              radius="md"
               color="slate"
             />
-          </Center>
+          </Group>
         )}
       </ScrollArea>
     </PageShell>

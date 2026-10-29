@@ -23,8 +23,6 @@ import {
   IconDatabase,
   IconUserShield,
 } from '@tabler/icons-react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
 import { gerarPDFPolitica } from '../../utils/gerarPDFPolitica';
 
 const VERSAO_TERMOS = '1.0';
@@ -109,7 +107,7 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
         pt="xl"
         pb="md"
         style={{
-          background: 'linear-gradient(135deg, var(--mantine-color-teal-7) 0%, var(--mantine-color-teal-9) 100%)',
+          background: 'var(--hh-ink)',
           borderRadius: 'var(--mantine-radius-lg) var(--mantine-radius-lg) 0 0',
           flexShrink: 0,
         }}

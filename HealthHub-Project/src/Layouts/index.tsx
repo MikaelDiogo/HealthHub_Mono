@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppShell, Box, Burger } from '@mantine/core';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
 import SideBar from '../components/SideBar';
-import { ChatBubble } from '../components/ChatBubble';
 import { TermosUsoModal, useTermosAceitos } from '../components/TermosUsoModal';
 import { useAuth } from '../context/AuthContext';
 
@@ -16,6 +15,7 @@ export function DashboardLayout() {
   const isMobile = useMediaQuery('(max-width: 768px)') ?? false;
   const { clearAuth } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     if (termosAceitos) setModalAberto(false);
@@ -41,13 +41,13 @@ export function DashboardLayout() {
         padding={0}
         styles={{
           main: {
-            backgroundColor: 'oklch(0.985 0.006 210)',
+            backgroundColor: 'var(--hh-ground)',
             height: '100dvh',
             overflow: 'hidden',
           },
           navbar: {
-            backgroundColor: '#ffffff',
-            borderRight: '1px solid oklch(0.92 0.01 220)',
+            backgroundColor: 'var(--hh-surface)',
+            borderRight: '1px solid var(--hh-border)',
           },
         }}
       >
@@ -63,20 +63,20 @@ export function DashboardLayout() {
                 top: 10,
                 left: 10,
                 zIndex: 300,
-                background: 'oklch(0.24 0.02 240)',
-                borderRadius: 8,
+                background: 'var(--hh-surface)', border: '1px solid var(--hh-control)',
+                borderRadius: 'var(--hh-radius-control)',
                 display: 'flex',
                 alignItems: 'center',
                 padding: '4px 6px',
               }}
             >
-              <Burger opened={navOpened} onClick={toggleNav} size="sm" color="white" aria-label="Abrir menu" />
+              <Burger opened={navOpened} onClick={toggleNav} size="sm" color="var(--hh-ink)" aria-label={navOpened ? 'Fechar menu' : 'Abrir menu'} />
             </Box>
           )}
 
           <Box
             h="100%"
-            p={{ base: 'sm', md: 'xl' }}
+            p={{ base: 'md', md: 'xl' }}
             style={{
               display: 'flex',
               flexDirection: 'column',
@@ -85,13 +85,13 @@ export function DashboardLayout() {
               paddingTop: isMobile ? 52 : undefined,
             }}
           >
-            <Outlet />
+            {/* A chave por rota reinicia a animação de entrada a cada troca de tela */}
+            <Box key={location.pathname} className="hh-page" style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+              <Outlet />
+            </Box>
           </Box>
         </AppShell.Main>
       </AppShell>
-
-      {/* Bolinha flutuante de chat — visível em todas as telas do /main */}
-      <ChatBubble />
     </>
   );
 }

@@ -17,14 +17,14 @@ export function getVitalStatus(sinaisVitais?: SinalVital[]): VitalStatus {
 
   if (
     (hasSpo2 && spo2 < 92)  ||
-    (hasFc   && fc   > 100) ||
+    (hasFc   && (fc > 100 || fc < 60)) ||
     (hasTemp && temp > 38.5)
   ) return 'critical';
 
   if (
     (hasSpo2 && spo2 < 95)  ||
     (hasFc   && fc   > 90)  ||
-    (hasTemp && temp > 37.8)
+    (hasTemp && temp >= 37.8)
   ) return 'warning';
 
   if (hasSpo2 || hasFc || hasTemp) return 'normal';
@@ -65,14 +65,16 @@ export function spo2Status(v: number): VitalStatus {
 }
 export function fcStatus(v: number): VitalStatus {
   if (v <= 0) return 'unknown';
-  if (v > 100) return 'critical';
+  // Bradicardia (<60) é tão clinicamente relevante quanto taquicardia (>100) — faltava esse lado.
+  if (v > 100 || v < 60) return 'critical';
   if (v > 90)  return 'warning';
   return 'normal';
 }
 export function tempStatus(v: number): VitalStatus {
   if (v <= 0)   return 'unknown';
   if (v > 38.5) return 'critical';
-  if (v > 37.8) return 'warning';
+  // >= 37.8, não > 37.8 — o limiar em si já conta como febre/alerta.
+  if (v >= 37.8) return 'warning';
   return 'normal';
 }
 
@@ -84,6 +86,15 @@ const MANCHESTER_MAP: Record<string, string> = {
   Verde:    'oklch(0.68 0.14 150)',
   Azul:     'oklch(0.55 0.13 240)',
 };
+/** Os 5 níveis em ordem de prioridade, com o tempo-alvo de atendimento. */
+export const NIVEIS_MANCHESTER = [
+  { nivel: 'Vermelho', mantine: 'red',    tempo: 'Imediato' },
+  { nivel: 'Laranja',  mantine: 'orange', tempo: '10 min' },
+  { nivel: 'Amarelo',  mantine: 'yellow', tempo: '60 min' },
+  { nivel: 'Verde',    mantine: 'green',  tempo: '120 min' },
+  { nivel: 'Azul',     mantine: 'blue',   tempo: '240 min' },
+] as const;
+
 /** Converte gravidade Manchester em cor CSS (cinza se não triado) */
 export function manchesterCSSColor(gravidade?: string | null): string {
   if (!gravidade) return 'var(--mantine-color-slate-3)';

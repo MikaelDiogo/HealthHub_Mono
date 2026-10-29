@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../services/api';
 import type { Patient } from '../types/patient';
+import { chatService } from '../services/chatService';
+import { horarioBrasilia } from '../utils/datetime';
 
 export type PatientStatus =
   | 'Aguardando Triagem'
@@ -21,12 +23,23 @@ export interface FilaPaciente {
   chegada: string;
   status: PatientStatus;
   gravidade?: Gravidade;
+  /** Momento real da admissão (base do tempo de espera ao vivo) */
+  created_at?: string;
+}
+
+/** Próxima senha a partir das que já estão na esteira — não repete após recarregar a página. */
+export function proximaSenha(fila: FilaPaciente[], prefixo = 'PR'): string {
+  const maior = fila.reduce((max, f) => {
+    const m = new RegExp(`^${prefixo}-(\\d+)$`).exec(f.senha ?? '');
+    return m ? Math.max(max, Number(m[1])) : max;
+  }, 0);
+  return `${prefixo}-${String(maior + 1).padStart(3, '0')}`;
 }
 
 interface CareContextValue {
   carePatients: FilaPaciente[];
   loading: boolean;
-  admitirPaciente: (patient: Patient, senha: string) => Promise<void>;
+  admitirPaciente: (patient: Patient, senha: string, motivo?: string) => Promise<void>;
   avançarFluxo: (filaId: string, novoStatus: PatientStatus, gravidade?: Gravidade) => Promise<void>;
   removerPaciente: (filaId: string) => Promise<void>;
   isInObservation: (pacienteId: string) => boolean;
@@ -42,10 +55,6 @@ const CareContext = createContext<CareContextValue>({
   isInObservation: () => false,
   recarregar: async () => {},
 });
-
-function horaAtual(): string {
-  return new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-}
 
 export function CareProvider({ children }: { children: React.ReactNode }) {
   const [carePatients, setCarePatients] = useState<FilaPaciente[]>([]);
@@ -69,16 +78,19 @@ export function CareProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     carregar();
+    // Mantém a esteira sincronizada quando outra sessão altera a fila (triagem, alta, etc.)
+    return chatService.onFilaChanged(() => { carregar(); });
   }, []);
 
-  const admitirPaciente = async (patient: Patient, senha: string) => {
+  const admitirPaciente = async (patient: Patient, senha: string, motivo?: string) => {
     const body = {
       paciente_id: patient.id,
       nome: patient.nome_completo?.trim() || 'Paciente não identificado',
       idade: patient.idade ?? 0,
       senha,
-      chegada: horaAtual(),
+      chegada: horarioBrasilia(),
       status: 'Aguardando Triagem',
+      ...(motivo?.trim() ? { motivo_visita: motivo.trim() } : {}),
     };
     const res = await api.post<FilaPaciente>('/fila', body);
     setCarePatients((prev) => [...prev, res.data]);
@@ -86,7 +98,8 @@ export function CareProvider({ children }: { children: React.ReactNode }) {
 
   const avançarFluxo = async (filaId: string, novoStatus: PatientStatus, gravidade?: Gravidade) => {
     if (novoStatus === 'Alta') {
-      await api.delete(`/fila/${filaId}`);
+      // Fecha a visita e inativa o paciente (some da listagem até ser resgatado)
+      await api.patch(`/fila/${filaId}/alta`);
       setCarePatients((prev) => prev.filter((p) => p.id !== filaId));
       return;
     }

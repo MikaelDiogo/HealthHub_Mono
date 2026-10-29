@@ -1,3 +1,45 @@
+/* Tokens de design do HealthHub — fonte única de cor, borda e forma.
+   Valores documentados em /DESIGN.md. Telas ainda não migradas continuam
+   funcionando com seus valores antigos; as migradas usam só estas variáveis. */
+:root {
+  /* superfícies */
+  --hh-ground: #f9fafb;
+  --hh-surface: #ffffff;
+  --hh-raised: #f3f5f7;
+  --hh-active: #eef1f4;
+
+  /* linhas em três degraus: cartão, linha de lista, controle */
+  --hh-border: #e5e7eb;
+  --hh-rule: #f1f5f9;
+  --hh-control: #d1d5db;
+
+  /* texto em três níveis — todos ≥ 4,5:1 sobre branco e sobre --hh-ground */
+  --hh-ink: #0f172a;
+  --hh-muted: #475569;
+  --hh-faint: #64748b;
+
+  /* acento: dados, links, foco e no máximo um controle por tela */
+  --hh-accent: #1b5fcc;
+
+  /* status (texto) e pares pálidos (selos) */
+  --hh-positive: #247b50;
+  --hh-negative: #c4242a;
+  --hh-warning: #9a4508;
+  --hh-pill-positive-bg: #dcfae5;
+  --hh-pill-positive-ink: #04250e;
+  --hh-pill-negative-bg: #ffedea;
+  --hh-pill-negative-ink: #831c1e;
+  --hh-pill-warning-bg: #fffbeb;
+  --hh-pill-warning-ink: #92400e;
+
+  /* forma */
+  --hh-radius-card: 8px;
+  --hh-radius-control: 6px;
+  --hh-radius-chip: 4px;
+  --hh-gap: 16px;
+  --hh-card-pad: 20px;
+}
+
 *,
 *::before,
 *::after {
@@ -13,6 +55,145 @@ body,
 }
 
 body {
-  background-color: #ffffff;
+  background-color: var(--hh-ground);
+  color: var(--hh-ink);
   -webkit-font-smoothing: antialiased;
+  /* números alinham dígito a dígito (sinais vitais, horários, contagens) */
+  font-variant-numeric: tabular-nums;
+}
+
+/* Foco visível para quem navega por teclado */
+:focus-visible {
+  outline: 2px solid var(--hh-accent);
+  outline-offset: 2px;
+}
+
+/* Grade do painel: bloco principal (2/3) + lateral (1/3); empilha abaixo de 1200px */
+.hh-grid-main {
+  display: grid;
+  gap: var(--hh-gap);
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1200px) {
+  .hh-grid-main { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); }
+}
+
+/* Setas entre etapas só quando as 5 cabem numa linha */
+@media (max-width: 1199px) {
+  .hh-seta-etapa { display: none; }
+}
+
+/* Lista + detalhe (modal de admissão): empilha no celular */
+.hh-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+.hh-split > * { max-height: 46dvh; }
+@media (min-width: 768px) {
+  .hh-split {
+    grid-template-columns: 300px minmax(0, 1fr);
+    height: min(640px, calc(100dvh - 180px));
+  }
+  .hh-split > * { max-height: none; }
+}
+@media (max-width: 767px) {
+  .hh-split-list { border-right: 0 !important; border-bottom: 1px solid var(--hh-border); }
+}
+
+/* ── Movimento ─────────────────────────────────────────────────────────────
+   Curto e só em transform/opacity: entrada de tela, entrada escalonada de
+   listas curtas, retorno ao toque. Nada fica se mexendo em repouso. */
+:root {
+  --hh-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --hh-dur: 180ms;
+}
+
+@keyframes hh-enter {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes hh-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* troca de rota */
+.hh-page {
+  animation: hh-enter 200ms var(--hh-ease) both;
+}
+
+/* listas curtas: cada item entra 30ms depois do anterior (até o 8º) */
+.hh-stagger > * {
+  animation: hh-enter var(--hh-dur) var(--hh-ease) both;
+}
+.hh-stagger > *:nth-child(2) { animation-delay: 30ms; }
+.hh-stagger > *:nth-child(3) { animation-delay: 60ms; }
+.hh-stagger > *:nth-child(4) { animation-delay: 90ms; }
+.hh-stagger > *:nth-child(5) { animation-delay: 120ms; }
+.hh-stagger > *:nth-child(6) { animation-delay: 150ms; }
+.hh-stagger > *:nth-child(n + 7) { animation-delay: 180ms; }
+
+.hh-fade {
+  animation: hh-fade var(--hh-dur) var(--hh-ease) both;
+}
+
+/* superfícies clicáveis: borda escurece e o cartão sobe 1px; afunda ao pressionar */
+.hh-interactive {
+  transition:
+    transform var(--hh-dur) var(--hh-ease),
+    border-color var(--hh-dur) var(--hh-ease),
+    background-color var(--hh-dur) var(--hh-ease);
+}
+@media (hover: hover) {
+  .hh-interactive:hover {
+    border-color: var(--hh-control);
+    transform: translateY(-1px);
+  }
+}
+.hh-interactive:active {
+  transform: translateY(0) scale(0.99);
+}
+
+/* linhas de lista clicáveis: só o fundo muda */
+.hh-row {
+  transition: background-color var(--hh-dur) var(--hh-ease);
+}
+@media (hover: hover) {
+  .hh-row:hover { background-color: var(--hh-raised); }
+}
+.hh-row[aria-pressed='true'],
+.hh-row[aria-selected='true'] {
+  background-color: var(--hh-active);
+}
+
+/* barras de dado crescem a partir da base ao montar */
+@keyframes hh-grow-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+.hh-bar {
+  transform-origin: left center;
+  animation: hh-grow-x 420ms var(--hh-ease) both;
+}
+
+/* ponto "ao vivo": um pulso discreto de opacidade, só ele se move em repouso */
+@keyframes hh-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+.hh-live {
+  animation: hh-pulse 2.4s ease-in-out infinite;
+}
+
+/* Quem pede menos movimento não recebe transições */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -66,7 +66,7 @@ function ConvRow({ conv, me, onClick }: { conv: Conversation; me: Contact; onCli
                 <Badge size="xs" color="red" radius="xl">{conv.unreadCount}</Badge>
               )}
               {conv.lastMessage && (
-                <Text size="10px" c="dimmed" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                <Text size="10px" c="dimmed" style={{ fontFamily: "'Manrope', sans-serif" }}>
                   {fmt(conv.lastMessage.timestamp)}
                 </Text>
               )}
@@ -168,7 +168,7 @@ function QuickReply({
                     </Text>
                   </Box>
                   <Text size="9px" c="dimmed" ta={isMe ? 'right' : 'left'} mt={1}
-                    style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+                    style={{ fontFamily: "'Manrope', sans-serif" }}>
                     {msg.timestamp.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </Text>
                 </Box>
@@ -190,7 +190,7 @@ function QuickReply({
               py={2}
               style={{
                 borderRadius: 5, fontSize: 10, fontWeight: 700,
-                fontFamily: "'IBM Plex Mono', monospace",
+                fontFamily: "'Manrope', sans-serif",
                 border: `1.5px solid ${priority === p
                   ? p === 'urgente' ? 'var(--mantine-color-red-5)' : 'var(--mantine-color-slate-5)'
                   : 'oklch(0.88 0.01 220)'}`,
@@ -374,7 +374,7 @@ export function ChatBubble() {
               onMouseEnter={e => { e.currentTarget.style.background = 'var(--mantine-color-slate-0)'; }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
             >
-              <Text size="xs" fw={600} c="slate.6" style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+              <Text size="xs" fw={600} c="slate.6" style={{ fontFamily: "'Manrope', sans-serif" }}>
                 ABRIR CHAT COMPLETO →
               </Text>
             </UnstyledButton>

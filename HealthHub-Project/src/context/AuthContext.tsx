@@ -1,4 +1,5 @@
 import { createContext, useContext, useState } from 'react';
+import { chatService } from '../services/chatService';
 
 export type UserRole = 'medico' | 'recepcionista' | 'enfermeiro';
 
@@ -28,6 +29,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('nome', newNome);
     setRole(newRole);
     setNome(newNome);
+    // Sem isto, o socket só conecta num refresh manual da página —
+    // é o que fazia a fila não atualizar em tempo real após login.
+    chatService.reconnect();
   };
 
   const clearAuth = () => {
@@ -36,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('nome');
     setRole(null);
     setNome(null);
+    chatService.disconnect();
   };
 
   return (

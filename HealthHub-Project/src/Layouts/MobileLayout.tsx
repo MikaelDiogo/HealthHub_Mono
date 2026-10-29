@@ -1,24 +1,11 @@
-import { AppShell, Box, Group, Text, Badge, ThemeIcon } from '@mantine/core';
+import { AppShell, Box, Group, Text } from '@mantine/core';
 import { Outlet } from 'react-router-dom';
-import { IconHeartRateMonitor } from '@tabler/icons-react';
 import { useAuth } from '../context/AuthContext';
-
-const ROLE_LABEL: Record<string, string> = {
-  medico: 'Médico',
-  enfermeiro: 'Enfermeiro',
-  recepcionista: 'Recepcionista',
-};
-
-const ROLE_COLOR: Record<string, string> = {
-  medico: 'teal',
-  enfermeiro: 'blue',
-  recepcionista: 'violet',
-};
+import { roleLabel } from '../utils/roles';
+import { HHMark } from '../components/ui';
 
 export function MobileLayout() {
   const { role, nome } = useAuth();
-  const roleLabel = ROLE_LABEL[role ?? ''] ?? '';
-  const roleColor = ROLE_COLOR[role ?? ''] ?? 'gray';
 
   return (
     <AppShell
@@ -26,26 +13,24 @@ export function MobileLayout() {
       padding={0}
       styles={{
         main: {
-          backgroundColor: 'var(--mantine-color-slate-0)',
+          backgroundColor: 'var(--hh-ground)',
           height: '100dvh',
           overflow: 'hidden',
         },
         header: {
-          backgroundColor: 'var(--mantine-color-slate-9)',
-          borderBottom: 'none',
+          backgroundColor: 'var(--hh-surface)',
+          borderBottom: '1px solid var(--hh-border)',
         },
       }}
     >
       <AppShell.Header>
-        <Group h="100%" px="md" justify="space-between">
-          <Group gap="xs">
-            <ThemeIcon color="teal" variant="light" size="sm" radius="sm">
-              <IconHeartRateMonitor size={14} />
-            </ThemeIcon>
-            <Text fw={700} c="white" size="sm">HealthHub</Text>
-            <Badge color={roleColor} size="xs" variant="light">{roleLabel}</Badge>
+        <Group h="100%" px="md" justify="space-between" wrap="nowrap">
+          <Group gap="xs" wrap="nowrap">
+            <HHMark size={28} />
+            <Text fw={700} size="sm" c="var(--hh-ink)">HealthHub</Text>
+            {role && <Text size="xs" c="var(--hh-muted)">{roleLabel(role)}</Text>}
           </Group>
-          <Text size="xs" c="slate.4" truncate maw={140}>{nome}</Text>
+          <Text size="xs" c="var(--hh-muted)" truncate maw={140}>{nome}</Text>
         </Group>
       </AppShell.Header>
 

@@ -8,65 +8,57 @@ interface PageShellProps {
   actions?: ReactNode;
   children: ReactNode;
   titleOrder?: TitleOrder;
+  /** Conteúdo mais alto que a tela rola dentro da área (cabeçalho fica fixo) */
+  scroll?: boolean;
 }
 
+// Cabeçalho padrão de tela: um substantivo como título (24px), uma linha de
+// contexto em cinza e as ações reais à direita.
 export function PageShell({
   title,
   description,
   icon,
   actions,
   children,
-  titleOrder = 2,
+  titleOrder = 1,
+  scroll = false,
 }: PageShellProps) {
   return (
     <Box h="100%" style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
       <Box
         pb="md"
         mb="lg"
-        style={{ borderBottom: '1px solid oklch(0.90 0.01 220)', flexShrink: 0 }}
+        style={{ borderBottom: '1px solid var(--hh-border)', flexShrink: 0 }}
       >
         <Box
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
+            flexWrap: 'wrap',
             gap: 16,
           }}
         >
           <Stack gap={4}>
             <Title
               order={titleOrder}
-              fw={800}
+              size={24}
+              fw={700}
+              lh={1.25}
               style={{
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
-                color: 'oklch(0.24 0.02 240)',
+                color: 'var(--hh-ink)',
               }}
             >
-              {/* Hub-blue accent dot */}
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: 6,
-                  height: 6,
-                  borderRadius: '50%',
-                  backgroundColor: 'oklch(0.52 0.14 235)',
-                  flexShrink: 0,
-                  marginBottom: 2,
-                }}
-              />
-              {icon}
+              {icon && (
+                <span style={{ display: 'inline-flex', color: 'var(--hh-faint)' }}>{icon}</span>
+              )}
               {title}
             </Title>
             {description && (
-              <Text
-                style={{
-                  fontFamily: "'IBM Plex Mono', monospace",
-                  fontSize: 11,
-                  color: 'oklch(0.58 0.02 240)',
-                }}
-              >
+              <Text size="sm" c="var(--hh-muted)">
                 {description}
               </Text>
             )}
@@ -78,9 +70,12 @@ export function PageShell({
         style={{
           flex: 1,
           minHeight: 0,
-          overflow: 'hidden',
+          overflowX: 'hidden',
+          overflowY: scroll ? 'auto' : 'hidden',
           display: 'flex',
           flexDirection: 'column',
+          // espaço para o anel de foco e para a rolagem não cortar a última borda
+          ...(scroll ? { paddingBottom: 4, marginInline: -4, paddingInline: 4 } : {}),
         }}
       >
         {children}

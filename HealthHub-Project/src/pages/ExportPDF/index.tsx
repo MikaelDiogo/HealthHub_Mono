@@ -57,7 +57,7 @@ function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string })
   return (
     <Group gap="xs" mb="sm">
       <ThemeIcon size="sm" radius="md" color="slate" variant="light">{icon}</ThemeIcon>
-      <Text fw={700} size="xs" c="slate.6" tt="uppercase" style={{ fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.1em' }}>{title}</Text>
+      <Text fw={700} size="xs" c="slate.6" tt="uppercase" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '0.1em' }}>{title}</Text>
     </Group>
   );
 }
@@ -123,7 +123,6 @@ function gerarPDF(patient: PatientWithVitals) {
 
   const teal    = [13, 148, 136] as [number, number, number];
   const tealBg  = [204, 251, 241] as [number, number, number];
-  const white   = [255, 255, 255] as [number, number, number];
   const slate50 = [248, 250, 252] as [number, number, number];
   const dark    = [15, 23, 42] as [number, number, number];
   const mid     = [100, 116, 139] as [number, number, number];
@@ -281,7 +280,6 @@ function gerarPDF(patient: PatientWithVitals) {
 function gerarPDFAtestado(patient: PatientWithVitals, dias: number, crm: string, medicoNome: string) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
   const pageW = 210;
-  const pageH = 297;
   const margin = 20;
   const contentW = pageW - margin * 2;
 
@@ -362,7 +360,6 @@ function gerarPDFPrescricao(
 
   const teal    = [13, 148, 136] as [number, number, number];
   const tealBg  = [204, 251, 241] as [number, number, number];
-  const white   = [255, 255, 255] as [number, number, number];
   const slate50 = [248, 250, 252] as [number, number, number];
   const dark    = [15, 23, 42] as [number, number, number];
   const mid     = [100, 116, 139] as [number, number, number];
@@ -516,7 +513,7 @@ function PrescricaoModal({
     <Modal opened={opened} onClose={onClose} title={<Group gap="xs"><IconPill size={18} /><Text fw={700}>Guia de Alta / Prescrição</Text></Group>} centered radius="md" size="lg" padding={0}>
       <Box p="lg" style={{ background: 'oklch(0.24 0.02 240)' }}>
         <Text fw={700} c="white" style={{ fontFamily: "'Manrope', sans-serif" }}>{patient?.nome_completo || 'Paciente'}</Text>
-        <Text size="xs" style={{ fontFamily: "'IBM Plex Mono', monospace", color: 'oklch(0.65 0.03 230)' }}>Prescrição e orientações ao paciente e à equipe de enfermagem</Text>
+        <Text size="xs" style={{ fontFamily: "'Manrope', sans-serif", color: 'oklch(0.65 0.03 230)' }}>Prescrição e orientações ao paciente e à equipe de enfermagem</Text>
       </Box>
       <Box p="lg">
         <Stack gap="md">
