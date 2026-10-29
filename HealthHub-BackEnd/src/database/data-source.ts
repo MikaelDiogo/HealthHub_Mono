@@ -9,6 +9,7 @@ import { User } from '../modules/auth/domain/user.entity';
 import { Conversation } from '../modules/chat/domain/conversation.entity';
 import { ConversationParticipant } from '../modules/chat/domain/conversation-participant.entity';
 import { Message } from '../modules/chat/domain/message.entity';
+import { Visita } from '../modules/visitas/domain/visita.entity';
 
 // Usado apenas pela CLI do TypeORM (migrations) e pelo seed.
 // A aplicação NestJS usa src/config/typeorm.config.ts.
@@ -30,7 +31,7 @@ export const AppDataSource = new DataSource({
       }),
   synchronize: false,
   logging: process.env.NODE_ENV !== 'production',
-  entities: [Paciente, SinaisVitais, FilaPaciente, User, Conversation, ConversationParticipant, Message],
+  entities: [Paciente, SinaisVitais, FilaPaciente, User, Conversation, ConversationParticipant, Message, Visita],
   migrations: ['src/database/migrations/*.{ts,js}'],
   subscribers: [],
 });

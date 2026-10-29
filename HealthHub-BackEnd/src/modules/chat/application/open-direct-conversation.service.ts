@@ -1,6 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { Conversation } from '../domain/conversation.entity';
-import { CHAT_REPOSITORY, IChatRepository } from '../domain/chat-repository.interface';
+import { CHAT_REPOSITORY, ConversationSummary, IChatRepository } from '../domain/chat-repository.interface';
 
 @Injectable()
 export class OpenDirectConversationService {
@@ -10,7 +9,7 @@ export class OpenDirectConversationService {
   ) {}
 
   /** Retorna a conversa direta existente entre os dois usuários, ou cria uma nova. */
-  async execute(currentUserId: string, targetUserId: string): Promise<Conversation> {
+  async execute(currentUserId: string, targetUserId: string): Promise<ConversationSummary> {
     if (currentUserId === targetUserId) {
       throw new BadRequestException({ error: 'Não é possível abrir conversa consigo mesmo.' });
     }
@@ -22,8 +21,10 @@ export class OpenDirectConversationService {
     }
 
     const existing = await this.chatRepository.findDirectConversation(currentUserId, targetUserId);
-    if (existing) return existing;
+    const conversation = existing ?? await this.chatRepository.createDirectConversation(currentUserId, targetUserId);
 
-    return this.chatRepository.createDirectConversation(currentUserId, targetUserId);
+    // Formato ConversationSummary (com `peer`) — mesmo shape usado na listagem,
+    // necessário pro frontend saber com quem é a conversa recém-criada.
+    return this.chatRepository.buildSummary(conversation, currentUserId);
   }
 }

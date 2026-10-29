@@ -6,7 +6,8 @@ export interface IPatientsRepository {
   findByCpf(cpf: string): Promise<Paciente | null>;
   findById(id: string): Promise<Paciente | null>;
   findByIdWithVitals(id: string): Promise<Paciente | null>;
-  findAllWithVitals(): Promise<Paciente[]>;
+  findAllWithVitals(ativo?: boolean): Promise<Paciente[]>;
   createAndSave(data: Partial<Paciente>): Promise<Paciente>;
   save(paciente: Paciente): Promise<Paciente>;
+  setAtivo(id: string, ativo: boolean): Promise<void>;
 }

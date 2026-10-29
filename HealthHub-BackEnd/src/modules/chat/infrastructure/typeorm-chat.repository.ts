@@ -77,7 +77,7 @@ export class TypeormChatRepository implements IChatRepository {
     ];
   }
 
-  private async buildSummary(conversation: Conversation, userId: string): Promise<ConversationSummary> {
+  async buildSummary(conversation: Conversation, userId: string): Promise<ConversationSummary> {
     const lastMessage = await this.messages.findOne({
       where: { conversation_id: conversation.id },
       order: { created_at: 'DESC' },

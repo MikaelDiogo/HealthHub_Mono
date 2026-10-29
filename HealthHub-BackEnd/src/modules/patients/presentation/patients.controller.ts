@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Put, Query } from '@nestjs/common';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { CreatePatientService } from '../application/create-patient.service';
 import { ListPatientsService } from '../application/list-patients.service';
@@ -16,11 +16,13 @@ export class PatientsController {
     private readonly updatePatient: UpdatePatientService,
   ) {}
 
-  // Listagem restrita a profissionais autenticados
+  // Listagem restrita a profissionais autenticados.
+  // ?ativo=true|false filtra pacientes ativos (na esteira ou nunca atendidos) ou
+  // que já receberam alta (usado na tela de "resgatar" um paciente antigo).
   @Get()
   @Roles('medico', 'enfermeiro', 'recepcionista')
-  index() {
-    return this.listPatients.execute();
+  index(@Query('ativo') ativo?: string) {
+    return this.listPatients.execute(ativo === undefined ? undefined : ativo === 'true');
   }
 
   @Post()

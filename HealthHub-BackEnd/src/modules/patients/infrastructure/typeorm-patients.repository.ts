@@ -23,8 +23,9 @@ export class TypeormPatientsRepository implements IPatientsRepository {
     return this.repo.findOne({ where: { id }, relations: ['sinaisVitais'] });
   }
 
-  findAllWithVitals(): Promise<Paciente[]> {
+  findAllWithVitals(ativo?: boolean): Promise<Paciente[]> {
     return this.repo.find({
+      where: ativo === undefined ? {} : { ativo },
       relations: ['sinaisVitais'],
       order: { sinaisVitais: { created_at: 'DESC' } },
     });
@@ -38,5 +39,9 @@ export class TypeormPatientsRepository implements IPatientsRepository {
 
   save(paciente: Paciente): Promise<Paciente> {
     return this.repo.save(paciente);
+  }
+
+  async setAtivo(id: string, ativo: boolean): Promise<void> {
+    await this.repo.update({ id }, { ativo });
   }
 }

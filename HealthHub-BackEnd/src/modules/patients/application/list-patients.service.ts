@@ -9,7 +9,7 @@ export class ListPatientsService {
     private readonly patientsRepository: IPatientsRepository,
   ) {}
 
-  execute(): Promise<Paciente[]> {
-    return this.patientsRepository.findAllWithVitals();
+  execute(ativo?: boolean): Promise<Paciente[]> {
+    return this.patientsRepository.findAllWithVitals(ativo);
   }
 }

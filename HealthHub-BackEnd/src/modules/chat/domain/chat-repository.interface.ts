@@ -19,6 +19,7 @@ export interface IChatRepository {
   findDirectConversation(userA: string, userB: string): Promise<Conversation | null>;
   createDirectConversation(userA: string, userB: string): Promise<Conversation>;
   listUserConversations(userId: string): Promise<ConversationSummary[]>;
+  buildSummary(conversation: Conversation, userId: string): Promise<ConversationSummary>;
   isParticipant(conversationId: string, userId: string): Promise<boolean>;
   listMessages(conversationId: string, limit: number): Promise<Message[]>;
   saveMessage(data: Partial<Message>): Promise<Message>;

@@ -36,6 +36,11 @@ export class Paciente {
   @Column('text', { nullable: true })
   anamnese?: string;
 
+  // Falso quando o paciente recebeu alta e ainda não foi readmitido na esteira —
+  // some da listagem padrão, mas o cadastro e o histórico de visitas são preservados.
+  @Column('boolean', { default: true })
+  ativo!: boolean;
+
   @OneToMany(() => SinaisVitais, (sinais) => sinais.paciente)
   sinaisVitais!: SinaisVitais[];
 }

@@ -18,5 +18,6 @@ import { PatientsModule } from '../patients/patients.module';
     GetCurrentVitalsService,
     { provide: SINAIS_VITAIS_REPOSITORY, useClass: TypeormSinaisVitaisRepository },
   ],
+  exports: [SINAIS_VITAIS_REPOSITORY],
 })
 export class SinaisVitaisModule {}

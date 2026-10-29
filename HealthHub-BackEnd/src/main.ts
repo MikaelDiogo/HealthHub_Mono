@@ -1,3 +1,10 @@
+// As colunas são `timestamp without time zone` e o Postgres grava os defaults
+// (created_at) em UTC. Com o Node no fuso local, a leitura deslocava tudo em 3 h
+// (esperas "no futuro", horários adiantados no chat e no gráfico). O processo
+// roda em UTC; a exibição em horário de Brasília é feita explicitamente na
+// interface e nas métricas (America/Sao_Paulo).
+process.env.TZ = 'UTC';
+
 import 'reflect-metadata';
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';

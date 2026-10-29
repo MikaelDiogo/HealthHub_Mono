@@ -12,9 +12,9 @@ import {
 } from 'class-validator';
 
 export class CreatePatientDto {
-  @IsString()
-  @MinLength(3, { message: 'Nome deve ter ao menos 3 caracteres' })
-  @MaxLength(150)
+  @IsString({ message: 'Nome completo é obrigatório (3 a 150 caracteres)' })
+  @MinLength(3, { message: 'Nome completo é obrigatório (3 a 150 caracteres)' })
+  @MaxLength(150, { message: 'Nome completo é obrigatório (3 a 150 caracteres)' })
   nome_completo!: string;
 
   @Matches(/^\d{11}$/, { message: 'CPF deve conter exatamente 11 dígitos numéricos' })
@@ -26,12 +26,12 @@ export class CreatePatientDto {
   rg?: string;
 
   @Type(() => Number)
-  @IsInt()
-  @Min(0)
-  @Max(150)
+  @IsInt({ message: 'Idade é obrigatória (0 a 150)' })
+  @Min(0, { message: 'Idade é obrigatória (0 a 150)' })
+  @Max(150, { message: 'Idade é obrigatória (0 a 150)' })
   idade!: number;
 
-  @IsIn(['M', 'F', 'Outro'])
+  @IsIn(['M', 'F', 'Outro'], { message: 'Sexo deve ser M, F ou Outro' })
   sexo!: string;
 
   @IsOptional()
