@@ -15,6 +15,7 @@ import { AiModule } from './modules/ai/ai.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { VisitasModule } from './modules/visitas/visitas.module';
 import { MetricasModule } from './modules/metricas/metricas.module';
+import { EventosModule } from './modules/eventos/eventos.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { MetricasModule } from './modules/metricas/metricas.module';
     ChatModule,
     VisitasModule,
     MetricasModule,
+    EventosModule,
   ],
   providers: [
     // Guards globais: toda rota exige JWT (exceto @Public) e respeita @Roles

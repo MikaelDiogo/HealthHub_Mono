@@ -32,11 +32,11 @@ export class GroqChatProvider implements IAiChatProvider {
   async execute(message: string, patientContext: PatientContext, history: ChatMessage[] = []): Promise<AiChatReply> {
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
-      throw new ServiceUnavailableException({ error: 'GROQ_API_KEY não configurada no .env.' });
+      throw new ServiceUnavailableException({ error: 'Assistente clínico não configurado neste ambiente.' });
     }
 
     const messages = [
-      { role: 'system', content: buildSystemPrompt(patientContext) },
+      { role: 'system', content: buildSystemPrompt(patientContext ?? {}) },
       ...(history || [])
         .filter((m) => m.role === 'user' || m.role === 'assistant')
         .map((m) => ({ role: m.role, content: m.content })),
@@ -61,8 +61,9 @@ export class GroqChatProvider implements IAiChatProvider {
     } catch (err: any) {
       const status = err.response?.status;
       const detail = err.response?.data ?? err.message;
+      // O corpo do provedor fica só no log do servidor; o navegador recebe mensagem genérica.
       console.error('[HealthHub Chat] Groq erro:', status, JSON.stringify(detail));
-      throw new InternalServerErrorException({ error: 'Assistente clínico indisponível.', detail });
+      throw new InternalServerErrorException({ error: 'Assistente clínico indisponível.' });
     }
   }
 }

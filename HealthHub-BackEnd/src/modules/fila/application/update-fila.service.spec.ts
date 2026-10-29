@@ -49,7 +49,7 @@ function buildService(sinaisExistem: boolean) {
   const closeVisita = { execute: vi.fn() } as unknown as CloseVisitaService;
   const realtimeGateway = { broadcastFilaChanged: vi.fn() } as unknown as RealtimeGateway;
 
-  const service = new UpdateFilaService(filaRepository, patientsRepository, sinaisVitaisRepository, closeVisita, realtimeGateway);
+  const service = new UpdateFilaService(filaRepository, patientsRepository, sinaisVitaisRepository, closeVisita, realtimeGateway, { registrar: vi.fn().mockResolvedValue(undefined) } as any);
   return { service, entrada, sinaisVitaisRepository };
 }
 

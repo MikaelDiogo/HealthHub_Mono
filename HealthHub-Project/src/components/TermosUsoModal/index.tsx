@@ -176,7 +176,7 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
               O HealthHub trata as seguintes categorias de dados:
             </Text>
             <Stack gap={6} mt="sm">
-              <DataItem label="Dados de identificação do paciente" value="Nome completo, CPF, RG, data de nascimento, sexo, endereço e telefone." />
+              <DataItem label="Dados de identificação do paciente" value="Nome completo, CPF, RG, idade, sexo, endereço e telefone." />
               <DataItem label="Dados de saúde (sensíveis)" value="Sinais vitais (frequência cardíaca, pressão arterial, temperatura, saturação de oxigênio), alergias, medicamentos em uso e anamnese clínica." />
               <DataItem label="Dados de acesso dos profissionais" value="Nome, e-mail, papel (role) e registros de autenticação (tokens JWT com validade de 24 horas)." />
               <DataItem label="Dados gerados pela IA" value="Histórico de conversas clínicas com o assistente de IA e transcrições de áudio enviadas para análise." />
@@ -220,8 +220,8 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
                 'Cadastro, consulta, atualização e exclusão de prontuários de pacientes',
                 'Monitoramento e registro histórico de sinais vitais',
                 'Gerenciamento da fila e esteira de cuidado hospitalar',
-                'Apoio clínico via assistente de inteligência artificial (Groq/Ollama)',
-                'Transcrição de notas clínicas em áudio',
+                'Apoio clínico via assistente de inteligência artificial (Groq — openai/gpt-oss-120b)',
+                'Transcrição de notas clínicas em áudio (Whisper — whisper-large-v3-turbo)',
                 'Geração de documentos médicos em PDF (prontuários, atestados, guias de alta)',
                 'Controle de acesso e segurança do sistema',
               ].map((item, i) => (
@@ -265,19 +265,13 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
           {/* 6. IA e dados */}
           <Section icon={<IconUserShield size={18} />} color="indigo" title="6. Uso da Inteligência Artificial e Dados Clínicos">
             <Text size="sm" c="slate.7" lh={1.8}>
-              O assistente clínico de IA do HealthHub pode ser operado em dois modos:
+              Como o assistente clínico de IA do HealthHub trata os dados:
             </Text>
             <Stack gap="xs" mt="sm">
-              <Box p="sm" style={{ background: 'var(--mantine-color-green-0)', border: '1px solid var(--mantine-color-green-3)', borderRadius: 8 }}>
-                <Text size="sm" fw={700} c="green.8">Modo Local (Ollama — Qwen2.5:7b)</Text>
-                <Text size="sm" c="slate.7" mt={4}>
-                  Os dados do paciente <strong>não saem do servidor local</strong>. Recomendado para ambientes com dados reais.
-                </Text>
-              </Box>
               <Box p="sm" style={{ background: 'var(--mantine-color-orange-0)', border: '1px solid var(--mantine-color-orange-3)', borderRadius: 8 }}>
-                <Text size="sm" fw={700} c="orange.8">Modo Nuvem (Groq API — Llama 3.3-70b)</Text>
+                <Text size="sm" fw={700} c="orange.8">Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo) para transcrição</Text>
                 <Text size="sm" c="slate.7" mt={4}>
-                  Os dados são transmitidos à plataforma Groq (operador externo), demandando <strong>anonimização prévia</strong> e instrumentos contratuais adequados antes do uso com dados reais de pacientes.
+                  As perguntas ao assistente são enviadas à plataforma Groq (operador externo), com o contexto do paciente selecionado: nome, alergias, medicamentos em uso, anamnese e últimos sinais vitais, além de até 4 mensagens anteriores da conversa. Não há anonimização: o nome completo é enviado. CPF, RG, telefone e endereço não são enviados. O áudio da transcrição é enviado à Groq para virar texto e não é gravado pelo HealthHub.
                 </Text>
               </Box>
             </Stack>

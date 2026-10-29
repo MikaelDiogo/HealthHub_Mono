@@ -19,7 +19,7 @@ Substitui fichas de papel por um fluxo digital completo: cadastro de pacientes, 
 
 ### 1. Pré-requisitos
 
-- Node.js 20 LTS
+- Node.js 22.12 ou superior (testado em 24.20.0; o piso vem do campo `engines` do Vitest 5, usado em `npm test`)
 - Docker + Docker Compose
 - Conta na [Groq](https://console.groq.com) para obter a `GROQ_API_KEY` (IA clínica e transcrição de áudio)
 

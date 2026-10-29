@@ -10,7 +10,7 @@ export class AudioTranscriptionService {
     const apiKey = process.env.GROQ_API_KEY;
     if (!apiKey) {
       throw new ServiceUnavailableException({
-        error: 'Transcrição não configurada. Adicione GROQ_API_KEY no arquivo .env.',
+        error: 'Transcrição de áudio não configurada neste ambiente.',
       });
     }
 

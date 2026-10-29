@@ -7,6 +7,7 @@ import {
 import { AdmitirModal } from '../../components/AdmitirModal';
 import { useHistoricoPacientes } from '../../hooks/useMetricas';
 import { formatDuracao, tempoAtras } from '../../services/metricas';
+import { AVISO_RASTREABILIDADE, rotuloEvento, rotuloPerfil, type EventoApi } from '../../utils/eventos';
 import { useDisclosure } from '@mantine/hooks';
 import {
   IconUsers, IconSearch, IconX, IconHistory, IconUser, IconCalendar,
@@ -83,6 +84,7 @@ export const Patients = () => {
   const [patientToEdit, setPatientToEdit] = useState<Patient | null>(null);
   const [visitas, setVisitas] = useState<any[]>([]);
   const [loadingVisitas, setLoadingVisitas] = useState(false);
+  const [eventos, setEventos] = useState<EventoApi[]>([]);
   // Ativos: na esteira ou nunca atendidos. Com alta: saíram e podem ser readmitidos.
   const [aba, setAba] = useState<'ativos' | 'alta'>('ativos');
   const [readmitirId, setReadmitirId] = useState<string | null>(null);
@@ -131,7 +133,10 @@ export const Patients = () => {
   function openPatientModal(patient: Patient) {
     setSelectedPatient(patient);
     setVisitas([]);
+    setEventos([]);
     setLoadingVisitas(true);
+    // Registro de rastreabilidade: só médico e enfermeiro (o backend recusa a recepção)
+    if (podeEditar) api.get(`/patients/${patient.id}/eventos`).then((r) => setEventos(Array.isArray(r.data) ? r.data : [])).catch(() => {});
     api.get(`/patients/${patient.id}/visitas`)
       .then(r => setVisitas(r.data?.visitas ?? []))
       .catch(() => {})
@@ -297,6 +302,31 @@ export const Patients = () => {
                             </Timeline.Item>
                           ))}
                         </Timeline>
+                      )}
+
+                      {podeEditar && (
+                        <Box mt="xl" data-testid="registro-eventos">
+                          <Text fw={600} size="sm" c="var(--hh-ink)">Registro de eventos</Text>
+                          <Text size="xs" c="var(--hh-muted)" mt={2} mb="sm">{AVISO_RASTREABILIDADE}</Text>
+                          {eventos.length === 0 ? (
+                            <Text size="sm" c="var(--hh-faint)">Nenhum evento registrado para este paciente (registros anteriores a esta função não têm autoria).</Text>
+                          ) : (
+                            <Box style={{ borderTop: '1px solid var(--hh-rule)' }}>
+                              {eventos.map((e, i) => (
+                                <Group key={e.id ?? i} py={8} gap="sm" wrap="nowrap" align="flex-start" style={{ borderBottom: '1px solid var(--hh-rule)' }}>
+                                  <Text size="xs" c="var(--hh-faint)" w={92} style={{ flexShrink: 0 }}>
+                                    {e.criado_em ? new Date(e.criado_em + (e.criado_em.endsWith('Z') ? '' : 'Z')).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : ''}
+                                  </Text>
+                                  <Box style={{ flex: 1, minWidth: 0 }}>
+                                    <Text size="sm" c="var(--hh-ink)">{rotuloEvento(e)}</Text>
+                                    <Text size="xs" c="var(--hh-muted)">{e.usuario_nome ? `${e.usuario_nome} · ` : ''}{rotuloPerfil(e.usuario_role)}</Text>
+                                    {e.justificativa && <Text size="xs" c="var(--hh-muted)" fs="italic">Justificativa: {e.justificativa}</Text>}
+                                  </Box>
+                                </Group>
+                              ))}
+                            </Box>
+                          )}
+                        </Box>
                       )}
                     </Box>
                   </ScrollArea.Autosize>

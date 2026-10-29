@@ -1,3 +1,4 @@
+import { EventosModule } from '../eventos/eventos.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SinaisVitais } from './domain/sinais-vitais.entity';
@@ -10,7 +11,7 @@ import { SinaisVitaisController } from './presentation/sinais-vitais.controller'
 import { PatientsModule } from '../patients/patients.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([SinaisVitais]), PatientsModule],
+  imports: [TypeOrmModule.forFeature([SinaisVitais]), PatientsModule, EventosModule],
   controllers: [SinaisVitaisController],
   providers: [
     CreateSinaisVitaisService,

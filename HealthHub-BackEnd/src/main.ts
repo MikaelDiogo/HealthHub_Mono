@@ -9,10 +9,11 @@ import 'reflect-metadata';
 import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
-import { json, urlencoded } from 'express';
+import { json, urlencoded, type NextFunction, type Request, type Response } from 'express';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { validateEnv } from './config/env.validation';
+import { SWAGGER_PATH, configurarSwagger, swaggerHabilitado } from './config/swagger';
 
 async function bootstrap() {
   // Segurança: boot falha imediatamente se envs obrigatórias ausentes
@@ -20,8 +21,13 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule, { bodyParser: false });
 
-  // Segurança: headers HTTP
-  app.use(helmet());
+  // Segurança: headers HTTP. A interface do Swagger usa scripts inline, então só ela fica sem CSP.
+  const comSwagger = swaggerHabilitado(process.env);
+  const helmetPadrao = helmet();
+  const helmetDocs = helmet({ contentSecurityPolicy: false });
+  app.use((req: Request, res: Response, next: NextFunction) =>
+    comSwagger && req.path.startsWith(`/${SWAGGER_PATH}`) ? helmetDocs(req, res, next) : helmetPadrao(req, res, next),
+  );
 
   // Segurança: limite de tamanho de payload (evita DoS)
   app.use(json({ limit: '10kb' }));
@@ -54,6 +60,8 @@ async function bootstrap() {
       transformOptions: { enableImplicitConversion: false },
     }),
   );
+
+  if (comSwagger) configurarSwagger(app);
 
   const PORT = Number(process.env.PORT) || 3001;
   await app.listen(PORT);

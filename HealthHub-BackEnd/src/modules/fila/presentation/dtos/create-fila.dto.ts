@@ -1,5 +1,6 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
+import { STATUS_ESTEIRA } from '../../domain/fila-valores';
 
 export class CreateFilaDto {
   @IsUUID()
@@ -23,6 +24,7 @@ export class CreateFilaDto {
 
   @IsString()
   @MaxLength(50)
+  @IsIn(STATUS_ESTEIRA, { message: 'Status inválido para a admissão na esteira' })
   status!: string;
 
   @IsOptional()

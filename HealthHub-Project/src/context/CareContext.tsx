@@ -40,7 +40,7 @@ interface CareContextValue {
   carePatients: FilaPaciente[];
   loading: boolean;
   admitirPaciente: (patient: Patient, senha: string, motivo?: string) => Promise<void>;
-  avançarFluxo: (filaId: string, novoStatus: PatientStatus, gravidade?: Gravidade) => Promise<void>;
+  avançarFluxo: (filaId: string, novoStatus: PatientStatus, gravidade?: Gravidade, justificativa?: string) => Promise<void>;
   removerPaciente: (filaId: string) => Promise<void>;
   isInObservation: (pacienteId: string) => boolean;
   recarregar: () => Promise<void>;
@@ -96,14 +96,14 @@ export function CareProvider({ children }: { children: React.ReactNode }) {
     setCarePatients((prev) => [...prev, res.data]);
   };
 
-  const avançarFluxo = async (filaId: string, novoStatus: PatientStatus, gravidade?: Gravidade) => {
+  const avançarFluxo = async (filaId: string, novoStatus: PatientStatus, gravidade?: Gravidade, justificativa?: string) => {
     if (novoStatus === 'Alta') {
       // Fecha a visita e inativa o paciente (some da listagem até ser resgatado)
       await api.patch(`/fila/${filaId}/alta`);
       setCarePatients((prev) => prev.filter((p) => p.id !== filaId));
       return;
     }
-    const res = await api.put<FilaPaciente>(`/fila/${filaId}`, { status: novoStatus, gravidade });
+    const res = await api.put<FilaPaciente>(`/fila/${filaId}`, { status: novoStatus, gravidade, justificativa: justificativa?.trim() || undefined });
     setCarePatients((prev) => prev.map((p) => (p.id === filaId ? res.data : p)));
   };
 

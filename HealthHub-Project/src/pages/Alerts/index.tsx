@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   Grid, Paper, Text, Group, Badge, Button, Stack,
-  Box, ScrollArea, Modal, Textarea,
+  Box, ScrollArea, Modal, Textarea, TextInput,
   ActionIcon, Tooltip, Divider,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
@@ -109,8 +109,8 @@ function WorkflowColumn({ title, count, children }: {
 // Espera ao vivo: só conta para quem está aguardando (triagem ou médico).
 const AGUARDANDO = new Set(['Aguardando Triagem', 'Aguardando Atendimento']);
 
-function PatientCard({ patient, borderColor, footer, agora, visita }: {
-  patient: FilaPaciente; borderColor: string; footer: React.ReactNode; agora: Date; visita?: number;
+function PatientCard({ patient, borderColor, footer, agora, visita, motivo }: {
+  patient: FilaPaciente; borderColor: string; footer: React.ReactNode; agora: Date; visita?: number; motivo?: string;
 }) {
   const desde = patient.created_at
     ? Math.max(0, Math.round((agora.getTime() - new Date(patient.created_at).getTime()) / 60_000))
@@ -144,6 +144,11 @@ function PatientCard({ patient, borderColor, footer, agora, visita }: {
             </Text>
           )}
         </Group>
+        {motivo && (
+          <Text size="xs" c="var(--hh-muted)" mt={4} lineClamp={2} title={`Motivo da chegada (texto livre): ${motivo}`}>
+            Motivo: {motivo}
+          </Text>
+        )}
       </Box>
       <Box px="sm" pb="sm">{footer}</Box>
     </Paper>
@@ -233,6 +238,13 @@ export const Alerts = () => {
   const [altaTarget, setAltaTarget] = useState<FilaPaciente | null>(null);
   const agora = useAgora();
   const { historico } = useHistoricoPacientes();
+  // Justificativa opcional do enfermeiro ao registrar a cor (vai para o registro de rastreabilidade)
+  const [justificativas, setJustificativas] = useState<Record<string, string>>({});
+  // Motivo da chegada: texto livre da admissão, só enquanto a visita está aberta
+  const motivoDe = (p: FilaPaciente) => {
+    const u = historico[p.paciente_id]?.ultima;
+    return u && !u.alta ? u.motivo_visita ?? undefined : undefined;
+  };
   // A visita atual já conta no histórico (é criada na admissão)
   const visitaDe = (p: FilaPaciente) => historico[p.paciente_id]?.total;
 
@@ -311,6 +323,7 @@ export const Alerts = () => {
                   patient={p}
                   agora={agora}
                   visita={visitaDe(p)}
+                  motivo={motivoDe(p)}
                   borderColor="var(--hh-control)"
                   footer={
                     <Group gap={4} justify="space-between" w="100%">
@@ -327,6 +340,15 @@ export const Alerts = () => {
                         {p.status === 'Em Triagem (Enfermeiro)' && currentRole === 'Enfermeiro' && (
                           <Stack gap={6}>
                             <Text size="xs" c="var(--hh-muted)">Classificar risco (Manchester)</Text>
+                            <Text size="xs" c="var(--hh-faint)">Cor escolhida manualmente; os tempos ao lado são só rótulos, sem controle de prazo.</Text>
+                            <TextInput
+                              size="xs"
+                              aria-label="Justificativa da classificação (opcional)"
+                              placeholder="Justificativa (opcional)"
+                              maxLength={500}
+                              value={justificativas[p.id] ?? ''}
+                              onChange={(e) => { const v = e.currentTarget.value; setJustificativas((j) => ({ ...j, [p.id]: v })); }}
+                            />
                             <Stack gap={4}>
                               {MANCHESTER.map(({ g, label, mantine, tempo }) => (
                                 <Button
@@ -338,7 +360,7 @@ export const Alerts = () => {
                                   rightSection={
                                     <Text size="xs" style={{ opacity: 0.9 }}>{tempo}</Text>
                                   }
-                                  onClick={() => avançarFluxo(p.id, 'Aguardando Atendimento', g)}
+                                  onClick={() => { avançarFluxo(p.id, 'Aguardando Atendimento', g, justificativas[p.id]); setJustificativas((j) => ({ ...j, [p.id]: '' })); }}
                                   fullWidth
                                 >
                                   {label}
@@ -377,6 +399,7 @@ export const Alerts = () => {
                   patient={p}
                   agora={agora}
                   visita={visitaDe(p)}
+                  motivo={motivoDe(p)}
                   borderColor={riskBorderColor(p.gravidade)}
                   footer={
                     <Group gap={4} justify="space-between" w="100%">
@@ -443,6 +466,7 @@ export const Alerts = () => {
                   patient={p}
                   agora={agora}
                   visita={visitaDe(p)}
+                  motivo={motivoDe(p)}
                   borderColor="var(--hh-control)"
                   footer={
                     // Alta clínica: só o médico (PATCH /fila/:id/alta é restrito a esse perfil no backend)

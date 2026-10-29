@@ -76,7 +76,7 @@ export function PoliticaDados() {
       <PolicySection icon={<IconDatabase size={16} />} color="blue" title="2. Dados Pessoais Coletados">
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
           {[
-            { label: 'Identificação do paciente', items: ['Nome completo, CPF, RG', 'Data de nascimento, sexo', 'Endereço e telefone'] },
+            { label: 'Identificação do paciente', items: ['Nome completo, CPF, RG', 'Idade, sexo', 'Endereço e telefone'] },
             { label: 'Dados de saúde (sensíveis)', items: ['Sinais vitais (FC, PA, Temp, SpO2)', 'Alergias e medicamentos', 'Anamnese clínica'] },
             { label: 'Acesso dos profissionais', items: ['Nome e e-mail', 'Papel (role)', 'Registros JWT (24h)'] },
             { label: 'Dados da IA', items: ['Histórico de conversas clínicas', 'Transcrições de áudio', 'Contexto clínico enviado'] },
@@ -141,16 +141,10 @@ export function PoliticaDados() {
       </PolicySection>
 
       <PolicySection icon={<IconEye size={16} />} color="indigo" title="5. IA e Privacidade dos Dados Clínicos">
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-          <Box p="sm" style={{ background: 'var(--mantine-color-green-0)', border: '1px solid var(--mantine-color-green-3)', borderRadius: 8 }}>
-            <Text size="sm" fw={700} c="green.8" mb={4}>Modo Local (Ollama)</Text>
-            <Text size="xs" c="slate.7">Dados <strong>não saem do servidor</strong>. Recomendado para dados reais de pacientes.</Text>
-          </Box>
-          <Box p="sm" style={{ background: 'var(--mantine-color-orange-0)', border: '1px solid var(--mantine-color-orange-3)', borderRadius: 8 }}>
-            <Text size="sm" fw={700} c="orange.8" mb={4}>Modo Nuvem (Groq API)</Text>
-            <Text size="xs" c="slate.7">Dados transmitidos a servidor externo. Exige <strong>anonimização prévia</strong> para dados reais.</Text>
-          </Box>
-        </SimpleGrid>
+        <Box p="sm" style={{ background: 'var(--mantine-color-orange-0)', border: '1px solid var(--mantine-color-orange-3)', borderRadius: 8 }}>
+          <Text size="sm" fw={700} c="orange.8" mb={4}>Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo)</Text>
+          <Text size="xs" c="slate.7">Dados enviados à Groq (servidor externo): nome, alergias, medicamentos, anamnese e últimos sinais vitais do paciente em consulta, a pergunta e até 4 mensagens anteriores. Sem anonimização. CPF, RG, telefone e endereço não são enviados.</Text>
+        </Box>
         <Alert mt="sm" color="yellow" variant="light" icon={<IconAlertTriangle size={14} />} radius="md" p="sm">
           <Text size="xs" fw={600}>
             A <strong>responsabilidade clínica é sempre do profissional de saúde</strong>. A IA é ferramenta de apoio, nunca substituta do julgamento médico.

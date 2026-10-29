@@ -1,3 +1,4 @@
+import { EventosModule } from '../eventos/eventos.module';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { FilaPaciente } from './domain/fila-paciente.entity';
@@ -15,7 +16,7 @@ import { SinaisVitaisModule } from '../sinais-vitais/sinais-vitais.module';
 import { RealtimeModule } from '../../shared/realtime/realtime.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([FilaPaciente]), VisitasModule, PatientsModule, SinaisVitaisModule, RealtimeModule],
+  imports: [TypeOrmModule.forFeature([FilaPaciente]), VisitasModule, PatientsModule, SinaisVitaisModule, RealtimeModule, EventosModule],
   controllers: [FilaController],
   providers: [
     CreateFilaService,

@@ -10,7 +10,7 @@ API REST + WebSocket do sistema de gestão hospitalar com triagem inteligente.
 
 | Ferramenta | Versão mínima |
 |---|---|
-| Node.js | 20 LTS |
+| Node.js | 22.12 ou superior (testado em 24.20.0; piso pelo `engines` do Vitest 5) |
 | Docker + Docker Compose | qualquer atual |
 | npm | 10 |
 
@@ -148,6 +148,13 @@ A API estará disponível em **http://localhost:3001**
 | `npm run seed` | Cria os três usuários de desenvolvimento |
 
 ---
+
+## Documentação da API (Swagger)
+
+Com a API rodando, abra `http://localhost:3001/api/docs` (JSON em `/api/docs-json`). A interface lista todas as rotas, os corpos esperados (gerados a partir dos DTOs) e os perfis permitidos em cada uma. Para testar rotas protegidas: faça `POST /login`, copie o `token` e use **Authorize**.
+
+- Ligado por padrão fora de produção; em produção fica **desligado** (404), a menos que `SWAGGER_ENABLED=true` seja definido de propósito. `SWAGGER_ENABLED=false` desliga em qualquer ambiente.
+- A documentação descreve o que o código faz hoje; não é validação clínica. A cor de risco é escolhida manualmente e o sistema não implementa o Protocolo de Manchester.
 
 ## Módulos e rotas principais
 

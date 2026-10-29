@@ -10,7 +10,7 @@ Dashboard de monitoramento e triagem hospitalar. Interface responsiva com trilha
 
 | Ferramenta | Versão mínima |
 |---|---|
-| Node.js | 20 LTS |
+| Node.js | 22.12 ou superior (testado em 24.20.0; piso pelo `engines` do Vitest 5) |
 | npm | 10 |
 | Backend HealthHub | rodando em `localhost:3001` |
 

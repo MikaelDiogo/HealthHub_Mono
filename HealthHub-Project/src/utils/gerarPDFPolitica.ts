@@ -139,7 +139,7 @@ export function gerarPDFPolitica() {
   // 2
   sectionTitle('2. Dados Pessoais Coletados e Tratados');
   paragraph('O HealthHub trata as seguintes categorias de dados:');
-  subBox('Dados de identificacao do paciente', 'Nome completo, CPF, RG, data de nascimento, sexo, endereco e telefone.', 240, 249, 255);
+  subBox('Dados de identificacao do paciente', 'Nome completo, CPF, RG, idade, sexo, endereco e telefone.', 240, 249, 255);
   subBox('Dados de saude (sensiveis)', 'Sinais vitais (frequencia cardiaca, pressao arterial, temperatura, SpO2), alergias, medicamentos em uso e anamnese clinica.', 254, 242, 242);
   subBox('Dados de acesso dos profissionais', 'Nome, e-mail, papel (role) e registros de autenticacao (tokens JWT com validade de 24 horas).', 240, 253, 244);
   subBox('Dados gerados pela IA', 'Historico de conversas clinicas com o assistente de IA e transcricoes de audio enviadas para analise.', 250, 245, 255);
@@ -163,8 +163,8 @@ export function gerarPDFPolitica() {
     'Cadastro, consulta, atualizacao e exclusao de prontuarios de pacientes',
     'Monitoramento e registro historico de sinais vitais',
     'Gerenciamento da fila e esteira de cuidado hospitalar',
-    'Apoio clinico via assistente de inteligencia artificial (Groq/Ollama)',
-    'Transcricao de notas clinicas em audio',
+    'Apoio clinico via assistente de inteligencia artificial (Groq - openai/gpt-oss-120b)',
+    'Transcricao de notas clinicas em audio (Whisper - whisper-large-v3-turbo)',
     'Geracao de documentos medicos em PDF (prontuarios, atestados, guias de alta)',
     'Controle de acesso e seguranca do sistema',
   ];
@@ -193,9 +193,8 @@ export function gerarPDFPolitica() {
 
   // 6
   sectionTitle('6. Uso da Inteligencia Artificial e Dados Clinicos');
-  paragraph('O assistente clinico de IA do HealthHub pode ser operado em dois modos:');
-  subBox('Modo Local (Ollama — Qwen2.5:7b)', 'Os dados do paciente NAO saem do servidor local. Recomendado para ambientes com dados reais de pacientes.', 240, 253, 244);
-  subBox('Modo Nuvem (Groq API — Llama 3.3-70b)', 'Os dados sao transmitidos a plataforma Groq (operador externo), demandando anonimizacao previa e instrumentos contratuais adequados.', 255, 247, 237);
+  paragraph('Como o assistente clinico de IA do HealthHub trata os dados:');
+  subBox('Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo) para transcricao', 'As perguntas ao assistente sao enviadas a plataforma Groq (operador externo), com o contexto do paciente selecionado: nome, alergias, medicamentos em uso, anamnese e ultimos sinais vitais, alem de ate 4 mensagens anteriores da conversa. Nao ha anonimizacao: o nome completo e enviado. CPF, RG, telefone e endereco nao sao enviados. O audio da transcricao e enviado a Groq para virar texto e nao e gravado pelo HealthHub.', 255, 247, 237);
   paragraph('Em qualquer cenario, a responsabilidade pela decisao clinica permanece integralmente do profissional de saude. O assistente de IA e uma ferramenta de apoio e nunca substitui o julgamento clinico.');
 
   divider();

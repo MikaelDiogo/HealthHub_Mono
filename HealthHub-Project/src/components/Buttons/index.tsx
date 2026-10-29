@@ -157,10 +157,10 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
       const patientId = response.data.id;
       if (!isRecepcionista && (values.temperatura || values.frequencia_cardiaca)) {
         await api.post(`/sinais/${patientId}`, {
-          temperatura: values.temperatura,
-          frequencia_cardiaca: values.frequencia_cardiaca,
-          saturacao_oxigenio: values.saturacao_oxigenio,
-          pressao_arterial: values.pressao_arterial,
+          temperatura: values.temperatura || undefined,
+          frequencia_cardiaca: values.frequencia_cardiaca || undefined,
+          saturacao_oxigenio: values.saturacao_oxigenio || undefined,
+          pressao_arterial: values.pressao_arterial || undefined,
         });
         dispatchVitalsUpdated(patientId);
       }
