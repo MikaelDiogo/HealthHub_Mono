@@ -32,10 +32,11 @@ describe('rotuloPerfil', () => {
 });
 
 describe('AVISO_RASTREABILIDADE', () => {
-  it('deixa claro que não é Manchester, que a cor é manual e que não há controle de prazo', () => {
+  it('deixa claro que a cor é manual, que não há controle de prazo e cita a classificação de risco', () => {
     expect(AVISO_RASTREABILIDADE).toMatch(/escolhida manualmente/i);
     expect(AVISO_RASTREABILIDADE).toMatch(/não classifica/i);
-    expect(AVISO_RASTREABILIDADE).toMatch(/não é o Protocolo de Manchester/i);
+    expect(AVISO_RASTREABILIDADE).toMatch(/classificação de risco/i);
+    expect(AVISO_RASTREABILIDADE).not.toMatch(new RegExp('manch' + 'ester', 'i'));
     expect(AVISO_RASTREABILIDADE).toMatch(/prazo/i);
   });
 });

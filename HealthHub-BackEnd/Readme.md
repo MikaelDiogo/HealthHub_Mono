@@ -154,7 +154,7 @@ A API estará disponível em **http://localhost:3001**
 Com a API rodando, abra `http://localhost:3001/api/docs` (JSON em `/api/docs-json`). A interface lista todas as rotas, os corpos esperados (gerados a partir dos DTOs) e os perfis permitidos em cada uma. Para testar rotas protegidas: faça `POST /login`, copie o `token` e use **Authorize**.
 
 - Ligado por padrão fora de produção; em produção fica **desligado** (404), a menos que `SWAGGER_ENABLED=true` seja definido de propósito. `SWAGGER_ENABLED=false` desliga em qualquer ambiente.
-- A documentação descreve o que o código faz hoje; não é validação clínica. A cor de risco é escolhida manualmente e o sistema não implementa o Protocolo de Manchester.
+- A documentação descreve o que o código faz hoje; não é validação clínica. A cor de risco é escolhida manualmente e o sistema registra a classificação de risco escolhida manualmente pelo enfermeiro (diretrizes de acolhimento com classificação de risco do Ministério da Saúde); não classifica automaticamente nem controla prazos.
 
 ## Módulos e rotas principais
 

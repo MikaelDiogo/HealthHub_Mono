@@ -46,7 +46,7 @@
 
 ### 1.1 Propósito
 
-O HealthHub é um sistema de informação hospitalar voltado a unidades de **pequeno e médio porte** que ainda operam com fichagem manual em papel. O sistema digitaliza o ciclo completo de atendimento de pronto-atendimento: cadastro do paciente, admissão em fila, triagem por Protocolo de Manchester, registro seriado de sinais vitais, apoio à decisão clínica por IA, comunicação interna da equipe e emissão de documentos.
+O HealthHub é um sistema de informação hospitalar voltado a unidades de **pequeno e médio porte** que ainda operam com fichagem manual em papel. O sistema digitaliza o ciclo completo de atendimento de pronto-atendimento: cadastro do paciente, admissão em fila, registro da classificação de risco pelo enfermeiro, registro seriado de sinais vitais, apoio à decisão clínica por IA, comunicação interna da equipe e emissão de documentos.
 
 ### 1.2 Problema
 
@@ -85,7 +85,7 @@ Cobre requisitos, arquitetura, modelo de dados, comportamento dinâmico, API, se
 flowchart LR
     A["Chegada do<br/>paciente"] --> B["Recepção<br/>cadastro / senha"]
     B --> C["Admissão na<br/>Esteira de Cuidado"]
-    C --> D["Triagem<br/>Protocolo Manchester"]
+    C --> D["Classificação de risco<br/>(registro pelo enfermeiro)"]
     D --> E["Consulta<br/>médica"]
     E --> F["Observação /<br/>sinais vitais seriados"]
     F --> G["Desfecho<br/>alta / internação /<br/>transferência"]
@@ -128,7 +128,7 @@ flowchart LR
 | Ator | Tipo | Papel no sistema | Responsabilidade principal |
 |---|---|---|---|
 | Recepcionista | Humano primário | `recepcionista` | Cadastro reduzido, emissão de senha, admissão na fila |
-| Enfermeiro | Humano primário | `enfermeiro` | Triagem Manchester, registro de sinais vitais |
+| Enfermeiro | Humano primário | `enfermeiro` | Registro da classificação de risco, registro de sinais vitais |
 | Médico | Humano primário | `medico` | Consulta, conduta, desfecho, remoção da fila |
 | Coordenação / Gestão | Humano secundário | — | Consome indicadores e histórico (via prontuário/PDF) |
 | Groq API | Sistema externo | — | LLM de apoio clínico e transcrição de fala (Whisper) |
@@ -178,7 +178,7 @@ flowchart LR
 | RF-12 | Admitir paciente na Esteira de Cuidado gerando senha de atendimento | Alta | Todos | `create-fila.service.ts` |
 | RF-13 | Impedir que o mesmo paciente ocupe duas posições na fila | Alta | Todos | `create-fila.service.ts` |
 | RF-14 | Avançar o paciente pelos estados do fluxo de atendimento | Alta | Médico, Enfermeiro | `update-fila.service.ts` |
-| RF-15 | Classificar gravidade pelo Protocolo de Manchester (5 níveis) | Alta | Enfermeiro | `Alerts`, `MobileTriage` |
+| RF-15 | Registrar a classificação de risco atribuída pelo enfermeiro (5 cores, decisão de projeto do protótipo) | Alta | Enfermeiro | `Alerts`, `MobileTriage` |
 | RF-16 | Remover paciente da fila | Média | Médico | `delete-fila.service.ts` |
 | RF-17 | Abrir visita automaticamente ao admitir o paciente na fila | Alta | — | `create-fila.service.ts` |
 | RF-18 | Fechar visita registrando desfecho, alta e gravidade | Alta | — | `close-visita.service.ts` |
@@ -252,7 +252,7 @@ flowchart TB
         UC01(["UC01<br/>Autenticar"])
         UC02(["UC02<br/>Cadastrar paciente"])
         UC03(["UC03<br/>Admitir na esteira"])
-        UC04(["UC04<br/>Triar por Manchester"])
+        UC04(["UC04 · Registrar classificação de risco"])
         UC05(["UC05<br/>Registrar sinais vitais"])
         UC06(["UC06<br/>Monitorar evolução"])
         UC07(["UC07<br/>Consultar assistente IA"])
@@ -327,7 +327,7 @@ flowchart TB
 | A4 | Paciente ainda não cadastrado | Estende para UC02 (cadastro na hora) |
 | A5 | Paciente possui visita ativa aberta | Visita existente é reutilizada, sem duplicar registro |
 
-### 5.3 Especificação detalhada — UC04 · Triar por Protocolo de Manchester
+### 5.3 Especificação detalhada — UC04 · Registrar classificação de risco
 
 | Item | Descrição |
 |---|---|
@@ -347,13 +347,7 @@ flowchart TB
 
 **Regras de negócio**
 
-| Nível | Cor | Tempo-alvo de atendimento |
-|---|---|---|
-| Emergência | Vermelho | Imediato |
-| Muito urgente | Laranja | 10 min |
-| Urgente | Amarelo | 60 min |
-| Pouco urgente | Verde | 120 min |
-| Não urgente | Azul | 240 min |
+A escala tem cinco cores, em ordem de prioridade: Vermelho, Laranja, Amarelo, Verde e Azul. As cinco cores são uma decisão de projeto do protótipo (compatível com a recomendação mínima de quatro níveis do manual do Ministério da Saúde de 2009), não um padrão oficial. A cor é escolhida manualmente pelo enfermeiro; o sistema não classifica, não sugere prioridade e não controla prazos, e não há tempo-alvo associado às cores.
 
 ---
 
@@ -613,7 +607,7 @@ classDiagram
         +uuid paciente_id
         +Date chegada
         +Date alta
-        +string gravidade_manchester
+        +string classificacao_risco
         +string motivo_visita
         +string desfecho
         +string observacoes
@@ -749,7 +743,7 @@ erDiagram
     PACIENTE ||--o{ MEDICAO_DE_SINAIS_VITAIS : "é aferido em"
     PACIENTE |o--o| POSICAO_NA_ESTEIRA : "ocupa no momento"
     VISITA ||--|| DESFECHO_CLINICO : "encerra com"
-    VISITA |o--o| CLASSIFICACAO_MANCHESTER : "é triada como"
+    VISITA |o--o| CLASSIFICACAO_RISCO : "é triada como"
 
     PROFISSIONAL ||--o{ MENSAGEM : "escreve"
     PROFISSIONAL ||--o{ PARTICIPACAO : "mantém"
@@ -770,7 +764,7 @@ erDiagram
 | Profissional → Mensagem | 1 : 0..N | Autoria imutável, base do rastro auditável (RN-05) |
 | Conversa ↔ Profissional | N : N (via Participação) | Resolvida pela entidade associativa `PARTICIPACAO` |
 
-> ⚠️ No modelo conceitual, `DESFECHO_CLINICO` e `CLASSIFICACAO_MANCHESTER` aparecem como entidades porque são **domínios de valor com semântica clínica**. Na implementação atual foram reduzidos a colunas `varchar` sem tabela de referência nem `CHECK` — desvio registrado em [DEB-19](#13-débito-técnico-e-defeitos-identificados).
+> ⚠️ No modelo conceitual, `DESFECHO_CLINICO` e `CLASSIFICACAO_RISCO` aparecem como entidades porque são **domínios de valor com semântica clínica**. Na implementação atual foram reduzidos a colunas `varchar` sem tabela de referência nem `CHECK` — desvio registrado em [DEB-19](#13-débito-técnico-e-defeitos-identificados).
 
 ### 8.2 DER Lógico completo (esquema implementado)
 
@@ -827,7 +821,7 @@ erDiagram
         uuid paciente_id FK
         timestamp chegada
         timestamp alta
-        varchar gravidade_manchester
+        varchar classificacao_risco
         text motivo_visita
         varchar desfecho
         text observacoes
@@ -925,7 +919,7 @@ erDiagram
         uuid paciente_id FK "ON DELETE CASCADE · indexado"
         timestamp chegada "now()"
         timestamp alta "NULL enquanto ativa"
-        varchar gravidade_manchester "NULL"
+        varchar classificacao_risco "NULL"
         text motivo_visita "NULL"
         varchar desfecho "default Em Atendimento · indexado"
         text observacoes "NULL"
@@ -1015,7 +1009,7 @@ erDiagram
 | O que não existe | Onde a regra vive hoje | Risco |
 |---|---|---|
 | `CHECK` em `fila_pacientes.status` | `PatientStatus` no TypeScript | Escrita direta no banco aceita status inválido |
-| `CHECK` em `visitas.desfecho` / `gravidade_manchester` | `@IsIn` no `CloseVisitaDto` | Idem |
+| `CHECK` em `visitas.desfecho` / `classificacao_risco` | `@IsIn` no `CloseVisitaDto` | Idem |
 | `CHECK` em `users.role` | Tipo `UserRole` | Idem |
 | `UNIQUE (paciente_id)` em `fila_pacientes` | `findByPacienteId` no service | Corrida entre duas admissões simultâneas pode duplicar |
 | Índice único parcial de visita ativa | `findActiveByPacienteId` | Corrida pode abrir duas visitas ativas |
@@ -1266,7 +1260,7 @@ stateDiagram-v2
     EmObservacao : Em Observação
 
     AguardandoTriagem --> EmTriagem : enfermeiro assume
-    EmTriagem --> AguardandoAtendimento : classifica gravidade<br/>Manchester
+    EmTriagem --> AguardandoAtendimento : registra classificação<br/>de risco
     AguardandoAtendimento --> EmConsulta : médico assume
     EmConsulta --> EmObservacao : requer observação
     EmConsulta --> Alta : desfecho imediato
@@ -1281,7 +1275,7 @@ stateDiagram-v2
 
     note right of AguardandoAtendimento
         A cor do cartão passa a refletir
-        a gravidade Manchester
+        a classificação de risco
         (Vermelho → Azul)
     end note
 
@@ -1428,7 +1422,7 @@ Base: `http://localhost:3001` · Autenticação: `Authorization: Bearer <jwt>` e
 | `GET` | `/patients/:id/visitas` | ⚠️ qualquer autenticado | — | `200 { visitas, total }` |
 | `PATCH` | `/patients/:id/visitas/fechar` | ⚠️ qualquer autenticado | `CloseVisitaDto` | `200 Visita \| null` |
 
-`desfecho` ∈ `Alta`, `Internacao`, `Transferencia`, `Saida Voluntaria` (default `Alta`) · `gravidade_manchester` ∈ `Vermelho`, `Laranja`, `Amarelo`, `Verde`, `Azul`.
+`desfecho` ∈ `Alta`, `Internacao`, `Transferencia`, `Saida Voluntaria` (default `Alta`) · `classificacao_risco` ∈ `Vermelho`, `Laranja`, `Amarelo`, `Verde`, `Azul`.
 
 ### 10.6 Inteligência artificial
 
@@ -1648,7 +1642,7 @@ Itens levantados por leitura do código, com severidade e correção proposta.
 | **DEB-16** | 🟡 Baixa | **Swagger previsto e não implementado.** | Plano §3.1 vs. `package.json` | API sem documentação executável. | Adicionar `@nestjs/swagger` com decorators nos DTOs. |
 | **DEB-17** | 🟡 Baixa | **`.env.example` retém chaves de Supabase/Vite não usadas.** | `.env.example` | Confunde quem configura o ambiente. | Remover as entradas obsoletas. |
 | **DEB-18** | 🟡 Baixa | **PDF gerado no cliente.** Layout e dados dependem do navegador. | `pages/ExportPDF`, `Alerts` | Inconsistência entre máquinas; impede anexar PDF ao chat. | Módulo `pdf` server-side (`GET /patients/:id/pdf`). |
-| **DEB-19** | 🟠 Média | **Domínios de valor sem `CHECK` nem tabela de referência.** `status`, `desfecho`, `gravidade_manchester` e `role` são `varchar` livres; a regra existe só em TypeScript. | migrations vs. `@IsIn`, `PatientStatus`, `UserRole` | Escrita fora da API (script, correção manual, migration futura) grava valor inválido sem o banco reclamar; consultas analíticas ficam sujeitas a variação de grafia. | Adicionar `CHECK` nas colunas, ou tabelas de domínio com FK. O `CHECK` é suficiente e mais barato. |
+| **DEB-19** | 🟠 Média | **Domínios de valor sem `CHECK` nem tabela de referência.** `status`, `desfecho`, `classificacao_risco` e `role` são `varchar` livres; a regra existe só em TypeScript. | migrations vs. `@IsIn`, `PatientStatus`, `UserRole` | Escrita fora da API (script, correção manual, migration futura) grava valor inválido sem o banco reclamar; consultas analíticas ficam sujeitas a variação de grafia. | Adicionar `CHECK` nas colunas, ou tabelas de domínio com FK. O `CHECK` é suficiente e mais barato. |
 | **DEB-20** | 🟡 Baixa | **Denormalização acidental em `fila_pacientes`.** `nome` e `idade` são cópias de `pacientes`, sem a justificativa histórica que `messages` tem. | migration `CreateFilaPacientes`, `CareContext.admitirPaciente` | Corrigir o nome do paciente durante o atendimento não atualiza o cartão do Kanban — dois valores divergentes na mesma tela. | Remover as colunas e obter os dados por join/`relations`. |
 | **DEB-21** | 🟠 Média | **Unicidade de fila e de visita ativa garantida só na aplicação.** Não há `UNIQUE` em `fila_pacientes.paciente_id` nem índice parcial de visita aberta. | RN-02, RN-03 verificadas com `SELECT` prévio | Duas admissões simultâneas do mesmo paciente passam pela verificação antes de qualquer `INSERT` e duplicam o registro. | `UNIQUE (paciente_id)` na fila e `CREATE UNIQUE INDEX ON visitas (paciente_id) WHERE alta IS NULL`. |
 
@@ -1948,7 +1942,7 @@ flowchart TB
     end
 
     subgraph N3["Nível 3 — Supervisionado ⭐"]
-        S1["<b>Sugestão automática de<br/>gravidade Manchester</b><br/>features: FC, SpO₂, PA, Temp, idade<br/>rótulo: gravidade_manchester"]
+        S1["<b>Sugestão automática de classificação de risco<br/>(futuro, fora do escopo atual; hoje a cor é sempre manual)</b><br/>features: FC, SpO₂, PA, Temp, idade<br/>rótulo: classificacao_risco"]
     end
 
     subgraph N4["Nível 4 — Preditivo"]
@@ -1972,7 +1966,7 @@ flowchart TB
 | Termo | Definição |
 |---|---|
 | **Esteira de Cuidado** | Quadro Kanban que representa o fluxo do paciente no pronto-atendimento, das colunas *Aguardando Triagem* a *Alta* |
-| **Protocolo de Manchester** | Sistema de triagem por cinco níveis de gravidade (Vermelho, Laranja, Amarelo, Verde, Azul) com tempos-alvo de atendimento |
+| **Classificação de risco** | Escala em cores definida para o protótipo, atribuída manualmente pelo enfermeiro, conforme diretrizes de acolhimento com classificação de risco do Ministério da Saúde (2009). Sem tempos-alvo. |
 | **Visita** | Episódio único de atendimento de um paciente, da chegada ao desfecho; permite reaproveitar o cadastro entre atendimentos |
 | **Desfecho** | Encerramento clínico da visita: Alta, Internação, Transferência ou Saída Voluntária |
 | **Anamnese** | Histórico clínico relatado pelo paciente e registrado pelo profissional |
@@ -2029,7 +2023,7 @@ flowchart TB
 | `services/api.ts` | Cliente axios com interceptors de JWT e `401` |
 | `services/chatService.ts` | Socket.IO com ACK, dedupe, reconexão e fallback REST |
 | `hooks/useMobile.ts` | Detecção de viewport ≤ 768 px |
-| `utils/vitalStatus.ts` | Classificação clínica e cores de Manchester |
+| `utils/vitalStatus.ts` | Classificação clínica e cores da classificação de risco |
 | `utils/formatters.ts` | Máscaras de CPF e telefone |
 | `utils/gerarPDFPolitica.ts` | PDF da política de dados |
 | `Layouts/index.tsx` | `AppShell`, sidebar, bolha de chat, modal de termos |

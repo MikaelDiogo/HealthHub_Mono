@@ -1,0 +1,93 @@
+classDiagram
+    class User {
+        +uuid id
+        +string nome
+        +string email «unique»
+        +string senha «bcrypt»
+        +UserRole role
+        +Date created_at
+    }
+
+    class Paciente {
+        +uuid id
+        +string nome_completo
+        +string cpf «unique»
+        +string rg
+        +int idade
+        +string sexo
+        +string telefone
+        +string endereco
+        +string alergias
+        +string medicamentos_em_uso
+        +string anamnese
+        +SinaisVitais[] sinaisVitais
+    }
+
+    class SinaisVitais {
+        +uuid id
+        +uuid patient_id
+        +int hora «HHMM»
+        +float frequencia_cardiaca
+        +float saturacao_oxigenio
+        +string pressao_arterial
+        +float temperatura
+        +Date created_at
+    }
+
+    class FilaPaciente {
+        +uuid id
+        +uuid paciente_id
+        +string nome
+        +int idade
+        +string senha
+        +string chegada
+        +string status
+        +string gravidade
+        +Date created_at
+    }
+
+    class Visita {
+        +uuid id
+        +uuid paciente_id
+        +Date chegada
+        +Date alta
+        +string classificacao_risco
+        +string motivo_visita
+        +string desfecho
+        +string observacoes
+        +Date created_at
+    }
+
+    class Conversation {
+        +uuid id
+        +ConversationType type
+        +string name
+        +Date created_at
+    }
+
+    class ConversationParticipant {
+        +uuid id
+        +uuid conversation_id
+        +uuid user_id
+        +Date last_read_at
+        +Date joined_at
+    }
+
+    class Message {
+        +uuid id
+        +uuid conversation_id
+        +uuid sender_id
+        +string sender_nome «denormalizado»
+        +string sender_role «denormalizado»
+        +string content
+        +MessagePriority priority
+        +Date created_at
+    }
+
+    Paciente "1" --o "0..*" SinaisVitais : historico
+    Paciente "1" --o "0..1" FilaPaciente : posicao_atual
+    Paciente "1" --o "0..*" Visita : episodios
+    Conversation "1" --o "0..*" ConversationParticipant
+    Conversation "1" --o "0..*" Message
+    User "1" --o "0..*" ConversationParticipant
+    User "1" --o "0..*" Message : remetente

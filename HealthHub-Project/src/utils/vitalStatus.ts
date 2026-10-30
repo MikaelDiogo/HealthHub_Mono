@@ -78,25 +78,26 @@ export function tempStatus(v: number): VitalStatus {
   return 'normal';
 }
 
-// ─── Cores de Triagem Manchester → CSS ────────────────────────────────────────
-const MANCHESTER_MAP: Record<string, string> = {
+// ─── Cores da classificação de risco → CSS ────────────────────────────────────
+// Escala de 5 cores: decisão de projeto do protótipo (a cor é escolhida manualmente pelo enfermeiro).
+const RISCO_MAP: Record<string, string> = {
   Vermelho: 'oklch(0.55 0.21 25)',
   Laranja:  'oklch(0.68 0.18 45)',
   Amarelo:  'oklch(0.82 0.15 90)',
   Verde:    'oklch(0.68 0.14 150)',
   Azul:     'oklch(0.55 0.13 240)',
 };
-/** Os 5 níveis em ordem de prioridade, com o tempo-alvo de atendimento. */
-export const NIVEIS_MANCHESTER = [
-  { nivel: 'Vermelho', mantine: 'red',    tempo: 'Imediato' },
-  { nivel: 'Laranja',  mantine: 'orange', tempo: '10 min' },
-  { nivel: 'Amarelo',  mantine: 'yellow', tempo: '60 min' },
-  { nivel: 'Verde',    mantine: 'green',  tempo: '120 min' },
-  { nivel: 'Azul',     mantine: 'blue',   tempo: '240 min' },
+/** Os 5 níveis da escala de classificação de risco do protótipo, em ordem de prioridade. */
+export const NIVEIS_RISCO = [
+  { nivel: 'Vermelho', mantine: 'red' },
+  { nivel: 'Laranja',  mantine: 'orange' },
+  { nivel: 'Amarelo',  mantine: 'yellow' },
+  { nivel: 'Verde',    mantine: 'green' },
+  { nivel: 'Azul',     mantine: 'blue' },
 ] as const;
 
-/** Converte gravidade Manchester em cor CSS (cinza se não triado) */
-export function manchesterCSSColor(gravidade?: string | null): string {
+/** Converte a classificação de risco em cor CSS (cinza se não classificado) */
+export function riscoCSSColor(gravidade?: string | null): string {
   if (!gravidade) return 'var(--mantine-color-slate-3)';
-  return MANCHESTER_MAP[gravidade] ?? 'var(--mantine-color-slate-3)';
+  return RISCO_MAP[gravidade] ?? 'var(--mantine-color-slate-3)';
 }

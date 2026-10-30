@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, Jo
 import { Paciente } from '../../patients/domain/paciente.entity';
 
 export type Desfecho = 'Em Atendimento' | 'Alta' | 'Internacao' | 'Transferencia' | 'Saida Voluntaria';
-export type GravidadeMmanchester = 'Vermelho' | 'Laranja' | 'Amarelo' | 'Verde' | 'Azul';
+export type GravidadeRisco = 'Vermelho' | 'Laranja' | 'Amarelo' | 'Verde' | 'Azul';
 
 @Entity('visitas')
 export class Visita {
@@ -23,7 +23,7 @@ export class Visita {
   alta?: Date;
 
   @Column('varchar', { nullable: true })
-  gravidade_manchester?: string;
+  classificacao_risco?: string;
 
   @Column('text', { nullable: true })
   motivo_visita?: string;

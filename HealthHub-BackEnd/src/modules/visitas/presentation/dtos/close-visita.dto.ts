@@ -9,7 +9,7 @@ export class CloseVisitaDto {
   @IsOptional()
   @IsString()
   @IsIn(['Vermelho', 'Laranja', 'Amarelo', 'Verde', 'Azul'])
-  gravidade_manchester?: string;
+  classificacao_risco?: string;
 
   @IsOptional()
   @IsString()

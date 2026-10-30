@@ -15,7 +15,7 @@ import {
 import { ButtonAddPatient } from '../../components/Buttons';
 import CardPatient from '../../components/CardPatient';
 import api from '../../services/api';
-import { manchesterCSSColor } from '../../utils/vitalStatus';
+import { riscoCSSColor } from '../../utils/vitalStatus';
 import { ModalEditPatient } from '../../components/Buttons/ModalEditPatient';
 import { PageShell } from '../../components/PageShell';
 import { EmptyState, ErrorState } from '../../components/ui';
@@ -275,9 +275,9 @@ export const Patients = () => {
                               title={
                                 <Group gap="xs" wrap="nowrap">
                                   <Text size="sm" fw={600}>Visita {visitas.length - i}</Text>
-                                  {v.gravidade_manchester && (
-                                    <Badge size="xs" color={GRAVIDADE_COLOR[v.gravidade_manchester] ?? 'gray'} variant="filled">
-                                      {v.gravidade_manchester}
+                                  {v.classificacao_risco && (
+                                    <Badge size="xs" color={GRAVIDADE_COLOR[v.classificacao_risco] ?? 'gray'} variant="filled">
+                                      {v.classificacao_risco}
                                     </Badge>
                                   )}
                                   <Badge size="xs" color={DESFECHO_COLOR[v.desfecho] ?? 'gray'} variant="light">
@@ -423,7 +423,7 @@ export const Patients = () => {
                         temp={v?.temperatura ? `${v.temperatura}°C` : '--'}
                         bpm={v?.frequencia_cardiaca ? `${v.frequencia_cardiaca} bpm` : '--'}
                         spo2={v?.saturacao_oxigenio ? `${v.saturacao_oxigenio}%` : '--'}
-                        topColor={manchesterCSSColor(
+                        topColor={riscoCSSColor(
                           carePatients.find(c => c.paciente_id === patient.id)?.gravidade
                         )}
                         onView={() => openPatientModal(patient)}

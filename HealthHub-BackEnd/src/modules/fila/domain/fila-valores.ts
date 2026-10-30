@@ -11,4 +11,4 @@ export const STATUS_ESTEIRA = [
 /** "Alta" só chega pelo PUT para ser recusada a quem não é médico (ver UpdateFilaService). */
 export const STATUS_ATUALIZACAO = [...STATUS_ESTEIRA, 'Alta'] as const;
 
-export const GRAVIDADES_MANCHESTER = ['Vermelho', 'Laranja', 'Amarelo', 'Verde', 'Azul'] as const;
+export const GRAVIDADES_RISCO = ['Vermelho', 'Laranja', 'Amarelo', 'Verde', 'Azul'] as const;

@@ -100,4 +100,4 @@ describe('Admissão, alta e remoção registram evento (a cor fica preservada me
 });
 
 // Não prova: gravação no banco; transação; que a cor é "correta" (é a escolha manual do enfermeiro, sem motor
-// de decisão e sem relação com o Protocolo de Manchester); nem tempos-alvo ou alerta de prazo (não existem).
+// de decisão e sem relação com protocolo de classificação); nem tempos-alvo ou alerta de prazo (não existem).

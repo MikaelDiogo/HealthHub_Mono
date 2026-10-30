@@ -1,0 +1,14 @@
+
+> healthhub-backend@2.0.0 test
+> vitest run
+
+
+ RUN  v5.0.4 C:/Users/642mi/Documents/HealthHub_Mono/HealthHub-BackEnd
+
+
+ Test Files  14 passed (14)
+      Tests  115 passed (115)
+   Start at  14:32:57
+   Duration  6.85s (import 94%, transform 5%)
+
+vitest-backend exit=0

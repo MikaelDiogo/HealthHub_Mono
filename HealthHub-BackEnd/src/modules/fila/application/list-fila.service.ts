@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { FilaPaciente } from '../domain/fila-paciente.entity';
 import { FILA_REPOSITORY, IFilaRepository } from '../domain/fila-repository.interface';
 
-// Protocolo de Manchester: vermelho é o mais urgente, azul o menos urgente.
+// Escala de classificação de risco do protótipo (decisão de projeto): Vermelho é a maior prioridade, Azul a menor. Quem não foi classificado vem depois, em ordem de chegada.
 // Quem ainda não foi classificado (sem gravidade) vem DEPOIS de todos os classificados,
 // em ordem de chegada: um paciente sem cor nunca fica à frente de um Vermelho (RF09).
 const GRAVIDADE_ORDER: Record<string, number> = {
@@ -14,7 +14,7 @@ const GRAVIDADE_ORDER: Record<string, number> = {
 };
 const SEM_CLASSIFICACAO = 99;
 
-export function ordenarPorManchesterEChegada(entradas: FilaPaciente[]): FilaPaciente[] {
+export function ordenarPorRiscoEChegada(entradas: FilaPaciente[]): FilaPaciente[] {
   return [...entradas].sort((a, b) => {
     const rankA = a.gravidade ? (GRAVIDADE_ORDER[a.gravidade] ?? SEM_CLASSIFICACAO) : SEM_CLASSIFICACAO;
     const rankB = b.gravidade ? (GRAVIDADE_ORDER[b.gravidade] ?? SEM_CLASSIFICACAO) : SEM_CLASSIFICACAO;
@@ -32,6 +32,6 @@ export class ListFilaService {
 
   async execute(): Promise<FilaPaciente[]> {
     const entradas = await this.filaRepository.findAll();
-    return ordenarPorManchesterEChegada(entradas);
+    return ordenarPorRiscoEChegada(entradas);
   }
 }

@@ -10,7 +10,7 @@ export interface ResumoHistorico {
     chegada: Date;
     alta: Date | null;
     desfecho: string;
-    gravidade_manchester: string | null;
+    classificacao_risco: string | null;
     motivo_visita: string | null;
   };
 }
@@ -34,7 +34,7 @@ export class HistoricoPacientesService {
           chegada: v.chegada,
           alta: v.alta ?? null,
           desfecho: v.desfecho,
-          gravidade_manchester: v.gravidade_manchester ?? null,
+          classificacao_risco: v.classificacao_risco ?? null,
           motivo_visita: v.motivo_visita ?? null,
         },
       };

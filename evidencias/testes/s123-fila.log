@@ -1,0 +1,28 @@
+# Fase s123 — 2026-10-30T17:37:09.167Z (UTC) — API http://localhost:3001
+
+## S1 — ordenação da fila
+fila: P2 Fictício S1 [Vermelho] | P4 Fictício S1 [Laranja] | P5 Fictício S1 [Amarelo] | P1 Fictício S1 [Verde] | P3 Fictício S1 [Azul]
+OK    S1 ordem P2,P4,P5,P1,P3
+   esperado: ["P2","P4","P5","P1","P3"]
+   obtido:   ["P2","P4","P5","P1","P3"]
+
+## S2 — desempate por chegada (sem limpar)
+fila: P2 Fictício S1 [Vermelho] | P4 Fictício S1 [Laranja] | P5 Fictício S1 [Amarelo] | P6 Fictício S1 [Amarelo] | P7 Fictício S1 [Amarelo] | P1 Fictício S1 [Verde] | P3 Fictício S1 [Azul]
+OK    S2 Amarelos em ordem de chegada P5,P6,P7
+   esperado: ["P5","P6","P7"]
+   obtido:   ["P5","P6","P7"]
+
+## S3 — reavaliação (P5 Amarelo → Vermelho)
+PUT reclassificar → HTTP 200
+fila: P2 Fictício S1 [Vermelho] | P5 Fictício S1 [Vermelho] | P4 Fictício S1 [Laranja] | P6 Fictício S1 [Amarelo] | P7 Fictício S1 [Amarelo] | P1 Fictício S1 [Verde] | P3 Fictício S1 [Azul]
+OK    S3 fila P2,P5,P4,P6,P7,P1,P3
+   esperado: ["P2","P5","P4","P6","P7","P1","P3"]
+   obtido:   ["P2","P5","P4","P6","P7","P1","P3"]
+eventos de P5 (do mais recente ao mais antigo; campos devolvidos pela API):
+  {"tipo":"classificado","gravidade":"Vermelho","status_anterior":"Aguardando Atendimento","status_novo":"Aguardando Atendimento","justificativa":"Reavaliação fictícia de teste","usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-10-30T17:37:17.993Z"}
+  {"tipo":"classificado","gravidade":"Amarelo","status_anterior":"Em Triagem (Enfermeiro)","status_novo":"Aguardando Atendimento","justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-10-30T17:37:15.436Z"}
+  {"tipo":"triagem_iniciada","gravidade":null,"status_anterior":"Aguardando Triagem","status_novo":"Em Triagem (Enfermeiro)","justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-10-30T17:37:15.278Z"}
+  {"tipo":"sinais_registrados","gravidade":null,"status_anterior":null,"status_novo":null,"justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-10-30T17:37:15.247Z"}
+  {"tipo":"admitido","gravidade":null,"status_anterior":null,"status_novo":"Aguardando Triagem","justificativa":null,"usuario_nome":"Ana Souza","usuario_role":"recepcionista","criado_em":"2026-10-30T17:37:14.103Z"}
+eventos "classificado" de P5: 2 (cores: Amarelo → Vermelho)
+Observação: o evento guarda a cor NOVA, o autor, o horário e a justificativa; a cor anterior aparece como o evento "classificado" anterior da mesma linha do tempo (não há campo próprio "cor_anterior").

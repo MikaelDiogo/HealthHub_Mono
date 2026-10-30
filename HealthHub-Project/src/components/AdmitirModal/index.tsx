@@ -7,7 +7,7 @@ import api from '../../services/api';
 import type { Patient } from '../../types/patient';
 import { proximaSenha, useCare } from '../../context/CareContext';
 import { horarioBrasilia } from '../../utils/datetime';
-import { manchesterCSSColor } from '../../utils/vitalStatus';
+import { riscoCSSColor } from '../../utils/vitalStatus';
 import {
   buscarHistoricoPacientes, formatDataCurta, formatDuracao, ordinal, tempoAtras, type ResumoHistorico,
 } from '../../services/metricas';
@@ -19,7 +19,7 @@ interface Visita {
   chegada: string;
   alta: string | null;
   desfecho: string;
-  gravidade_manchester: string | null;
+  classificacao_risco: string | null;
   motivo_visita: string | null;
 }
 
@@ -142,11 +142,11 @@ function Detalhe({ paciente, resumo, agora, onAdmitir, admitindo, senha }: {
                     </Box>
                     <Box style={{ textAlign: 'right', flexShrink: 0 }}>
                       <Group gap={6} justify="flex-end" wrap="nowrap">
-                        {v.gravidade_manchester && (
+                        {v.classificacao_risco && (
                           <span
-                            aria-label={`Risco ${v.gravidade_manchester}`}
-                            title={`Risco ${v.gravidade_manchester}`}
-                            style={{ width: 8, height: 8, borderRadius: 2, background: manchesterCSSColor(v.gravidade_manchester) }}
+                            aria-label={`Risco ${v.classificacao_risco}`}
+                            title={`Risco ${v.classificacao_risco}`}
+                            style={{ width: 8, height: 8, borderRadius: 2, background: riscoCSSColor(v.classificacao_risco) }}
                           />
                         )}
                         <Text size="sm" c="var(--hh-ink)">{NOME_DESFECHO[v.desfecho] ?? v.desfecho}</Text>

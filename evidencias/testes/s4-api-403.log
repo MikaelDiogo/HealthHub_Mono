@@ -1,0 +1,19 @@
+# Fase s4 — 2026-10-30T17:38:06.888Z (UTC) — API http://localhost:3001
+recepcionista PUT /fila/:id com gravidade=Vermelho → HTTP 403
+corpo: {"message":"Acesso negado para este perfil"}
+entrada após a tentativa: status=Aguardando Triagem gravidade=null
+(extra) médico PUT com gravidade=Vermelho → HTTP 403
+corpo: {"error":"Apenas o enfermeiro pode atribuir a categoria de risco."}
+Achado: a recepção é barrada antes, pelo RolesGuard (PUT /fila/:id não lista recepcionista), com a mensagem genérica do guard; a mensagem do serviço aparece para quem passa pelo guard sem ser enfermeiro (médico).
+OK    S4 (extra) médico: mensagem do serviço
+   esperado: "Apenas o enfermeiro pode atribuir a categoria de risco."
+   obtido:   "Apenas o enfermeiro pode atribuir a categoria de risco."
+OK    S4 HTTP 403
+   esperado: 403
+   obtido:   403
+FALHA S4 mensagem real
+   esperado: "Apenas o enfermeiro pode atribuir a categoria de risco."
+   obtido:   undefined
+OK    S4 nenhuma cor gravada
+   esperado: null
+   obtido:   null

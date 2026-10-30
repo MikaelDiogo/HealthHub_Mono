@@ -7,7 +7,7 @@ interface CardPatientProps {
   temp?: string;
   bpm?: string;
   spo2?: string;
-  /** Cor da faixa superior — a cor Manchester da triagem (manchesterCSSColor) */
+  /** Cor da faixa superior — a cor da classificação de risco (riscoCSSColor) */
   topColor?: string;
   onView?: () => void;
   onClickView?: () => void;

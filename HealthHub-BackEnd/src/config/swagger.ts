@@ -15,7 +15,7 @@ export function configurarSwagger(app: INestApplication): void {
     .setTitle('HealthHub API')
     .setDescription(
       'API do HealthHub (MVP acadêmico de triagem e esteira de cuidado). A cor de risco é escolhida manualmente pelo enfermeiro; ' +
-        'o sistema não classifica, não sugere prioridade e não controla prazos. Não implementa o Protocolo de Manchester. ' +
+        'o sistema não classifica, não sugere prioridade e não controla prazos. A classificação de risco é registrada manualmente pelo enfermeiro, conforme as diretrizes de acolhimento com classificação de risco do Ministério da Saúde. ' +
         'Perfis: recepcionista, enfermeiro, medico. Faça login em POST /login e use o token em "Authorize".',
     )
     .setVersion('1.0')

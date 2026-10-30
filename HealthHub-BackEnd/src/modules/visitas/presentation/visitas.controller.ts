@@ -32,7 +32,7 @@ export class VisitasController {
     return this.closeVisita.execute(
       pacienteId,
       dto.desfecho ?? 'Alta',
-      dto.gravidade_manchester,
+      dto.classificacao_risco,
       dto.observacoes,
     );
   }

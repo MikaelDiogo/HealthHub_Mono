@@ -30,8 +30,8 @@ e para um único acento. Nada decorativo: sem gradiente, sem brilho, sem sombra 
 - **Primário = quase preto** (`slate`, shade 8). Um botão preenchido por tela.
 - **Acento azul** só em dados, links, foco e no máximo um controle. Nunca em todo botão.
 - **Texto**: todo nível ≥ 4,5:1 sobre branco e sobre `--hh-ground`, inclusive placeholders.
-- **Cores de dado (não são decoração):** Manchester — vermelho, laranja, amarelo, verde, azul
-  (`manchesterCSSColor`); status de sinais vitais — crítico, alerta, normal (`getVitalStatus`).
+- **Cores de dado (não são decoração):** classificação de risco — vermelho, laranja, amarelo, verde, azul
+  (`riscoCSSColor`); status de sinais vitais — crítico, alerta, normal (`getVitalStatus`).
   Ambos em `src/utils/vitalStatus.ts`. Não mudar o significado.
 - Selos: par pálido (`--hh-pill-*-bg` com `--hh-pill-*-ink`). Verde/vermelho vivo não vai em texto.
 

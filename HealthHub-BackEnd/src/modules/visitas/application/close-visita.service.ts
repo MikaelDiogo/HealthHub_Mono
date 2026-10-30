@@ -12,7 +12,7 @@ export class CloseVisitaService {
   async execute(
     pacienteId: string,
     desfecho: string = 'Alta',
-    gravidadeManchester?: string,
+    classificacaoRisco?: string,
     observacoes?: string,
   ): Promise<Visita | null> {
     const visita = await this.visitasRepository.findActiveByPacienteId(pacienteId);
@@ -20,7 +20,7 @@ export class CloseVisitaService {
 
     visita.alta = new Date();
     visita.desfecho = desfecho;
-    if (gravidadeManchester) visita.gravidade_manchester = gravidadeManchester;
+    if (classificacaoRisco) visita.classificacao_risco = classificacaoRisco;
     if (observacoes) visita.observacoes = observacoes;
 
     return this.visitasRepository.save(visita);

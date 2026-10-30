@@ -11,7 +11,7 @@ import { EmptyState, ErrorState, LoadingState } from '../../components/ui';
 import api from '../../services/api';
 import type { Patient } from '../../types/patient';
 import { useCare } from '../../context/CareContext';
-import { manchesterCSSColor } from '../../utils/vitalStatus';
+import { riscoCSSColor } from '../../utils/vitalStatus';
 import { chatService } from '../../services/chatService';
 import { useAgora, useMetricas } from '../../hooks/useMetricas';
 import { formatDuracao, formatPct, type Metricas } from '../../services/metricas';
@@ -260,7 +260,7 @@ export default function DashboardHome() {
                             patient={p}
                             isActive={selectedPatient?.id === p.id}
                             onClick={() => setSelectedPatient(p)}
-                            dotColor={manchesterCSSColor(
+                            dotColor={riscoCSSColor(
                               carePatients.find((c) => c.paciente_id === p.id)?.gravidade,
                             )}
                           />

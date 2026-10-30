@@ -1,0 +1,17 @@
+✓ S1 s1-fila-ordenada
+✓ S2 s2-desempate
+✓ S3 s3-reavaliacao
+✓ tcc-fila-espera / tcc-esteira-desktop
+✓ S5 s5-seletor-sem-tempos + tcc-triagem-seletor
+S5 texto da esteira (enfermeiro): contém "Classificar risco"? true; contém "o sistema não controla prazos"? true; contém Manchester/Imediato/tempos-alvo? false
+S5 trechos proibidos encontrados: []
+S4 UI recepção: contém "Classificar risco"? false; contém botões de cor do seletor? false
+✓ S4 s4-permissao-negada
+Dashboard: legenda "Cor = classificação de risco:" presente? true; Manchester presente? false
+✓ tcc-dashboard-legenda
+✓ tcc-pacientes-badge
+Evento: "Registro de eventos" presente? true; menciona Vermelho/Amarelo? true/true
+✓ tcc-reavaliacao-evento
+Mobile: "Classificação de risco:" presente? false; Manchester/tempos? []
+✓ S5 mobile (rótulo "Classificação de risco:")
+Nota: no mobile o rótulo é exibido em caixa alta por CSS (CLASSIFICAÇÃO DE RISCO:), por isso a checagem textual 'Classificação de risco:' deu falso; a captura s5-mobile-seletor.png mostra o rótulo e nenhum tempo.

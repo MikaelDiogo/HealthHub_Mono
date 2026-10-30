@@ -38,7 +38,7 @@ export interface ResumoHistorico {
     chegada: string;
     alta: string | null;
     desfecho: string;
-    gravidade_manchester: string | null;
+    classificacao_risco: string | null;
     motivo_visita: string | null;
   };
 }

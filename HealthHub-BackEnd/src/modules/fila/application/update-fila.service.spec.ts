@@ -53,7 +53,7 @@ function buildService(sinaisExistem: boolean) {
   return { service, entrada, sinaisVitaisRepository };
 }
 
-describe('UpdateFilaService — categoria de Manchester só pelo enfermeiro, após sinais vitais', () => {
+describe('UpdateFilaService — classificação de risco só pelo enfermeiro, após sinais vitais', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('médico não pode atribuir a categoria de risco', async () => {

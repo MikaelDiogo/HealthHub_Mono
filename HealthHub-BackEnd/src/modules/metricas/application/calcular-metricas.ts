@@ -7,7 +7,7 @@ export interface VisitaInput {
   chegada: Date;
   alta?: Date | null;
   desfecho: string;
-  gravidade_manchester?: string | null;
+  classificacao_risco?: string | null;
 }
 
 export interface FilaInput {
@@ -123,7 +123,7 @@ export function calcularMetricas(input: {
   const desfechos: Record<string, number> = {};
   for (const v of encerradas30) desfechos[v.desfecho] = (desfechos[v.desfecho] ?? 0) + 1;
   const risco30: Record<string, number> = Object.fromEntries(RISCOS.map((r) => [r, 0]));
-  for (const v of v30) if (v.gravidade_manchester && v.gravidade_manchester in risco30) risco30[v.gravidade_manchester]++;
+  for (const v of v30) if (v.classificacao_risco && v.classificacao_risco in risco30) risco30[v.classificacao_risco]++;
 
   // ── Série de 30 dias (chegadas e altas por dia civil de Brasília) ──
   const serie30d: { dia: string; rotulo: string; chegadas: number; altas: number }[] = [];

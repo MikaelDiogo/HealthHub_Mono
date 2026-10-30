@@ -2,7 +2,7 @@ import 'reflect-metadata';
 import 'dotenv/config';
 import { AppDataSource } from './data-source';
 import { Paciente } from '../modules/patients/domain/paciente.entity';
-import { Visita, Desfecho, GravidadeMmanchester } from '../modules/visitas/domain/visita.entity';
+import { Visita, Desfecho, GravidadeRisco } from '../modules/visitas/domain/visita.entity';
 import { SinaisVitais } from '../modules/sinais-vitais/domain/sinais-vitais.entity';
 
 // ─── Helpers de data ───────────────────────────────────────────────────────────
@@ -25,7 +25,7 @@ interface VisitaSeed {
   chegada: Date;
   alta: Date | null;
   desfecho: Desfecho;
-  gravidade: GravidadeMmanchester;
+  gravidade: GravidadeRisco;
   motivo: string;
   observacoes?: string;
   sinais: { offsetHoras: number; temperatura: number; fc: number; spo2: number; pa: string }[];
@@ -428,7 +428,7 @@ async function seed() {
           chegada: v.chegada,
           alta: v.alta ?? undefined,
           desfecho: v.desfecho,
-          gravidade_manchester: v.gravidade,
+          classificacao_risco: v.gravidade,
           motivo_visita: v.motivo,
           observacoes: v.observacoes,
         }),

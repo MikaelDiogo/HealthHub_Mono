@@ -51,7 +51,7 @@ Acesse em: **http://localhost:5173**
 | `/main` | Dashboard de sinais vitais | médico, enfermeiro |
 | `/main/pacientes` | Cadastro e prontuário (abas: Dados Clínicos + Histórico de Visitas) | todos |
 | `/main/monitor` | Assistente de IA + transcrição de áudio | médico, enfermeiro |
-| `/main/alertas` | Esteira de Cuidado (Kanban Manchester) | todos |
+| `/main/alertas` | Esteira de Cuidado (Kanban com classificação de risco) | todos |
 | `/main/exportar` | Exportar prontuário em PDF | médico, enfermeiro |
 | `/main/politica` | Política de dados LGPD | todos |
 | `/chat` | Chat interno em tempo real | todos |
@@ -117,7 +117,7 @@ src/
   types/
     patient.ts
   utils/
-    vitalStatus.ts   # limiares clínicos e cores Manchester
+    vitalStatus.ts   # limiares clínicos e cores da classificação de risco
     formatters.ts    # máscaras CPF e telefone
     gerarPDFPolitica.ts
   theme.ts         # paleta hub/slate · tipografia · defaults

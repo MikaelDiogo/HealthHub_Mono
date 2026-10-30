@@ -14,7 +14,7 @@ export interface EventoApi {
 }
 
 export const AVISO_RASTREABILIDADE =
-  'Registro de rastreabilidade das ações na esteira. A cor é escolhida manualmente pelo enfermeiro; o sistema não classifica, não sugere prioridade e não controla prazos. Não é o Protocolo de Manchester.';
+  'Registro de rastreabilidade das ações na esteira. A cor é escolhida manualmente pelo enfermeiro; o sistema não classifica, não sugere prioridade e não controla prazos. Classificação de risco registrada conforme as diretrizes de acolhimento com classificação de risco do Ministério da Saúde.';
 
 const ROTULOS: Record<string, string> = {
   admitido: 'Admitido na esteira',

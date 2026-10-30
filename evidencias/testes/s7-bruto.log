@@ -1,0 +1,8 @@
+# Fase s7 — 2026-10-30T17:37:52.411Z (UTC) — API http://localhost:3001
+admissão (recepção) → entrada criada, status "Aguardando Triagem"
+sinais vitais (enfermeiro) → HTTP 201
+última leitura → HTTP 200 [{"id":"30d7b577-1477-49da-a933-ce301ddf2c20","patient_id":"402ef1e3-28b0-42ea-946a-9b299d5b63fa","hora":1737,"frequencia_cardiaca":130,"saturacao_oxigenio":88,
+chat de IA (provedor simulado) → HTTP 201; resposta: {"reply":"[RESPOSTA SIMULADA — NÃO É DO MODELO REAL] Texto fixo do mock para teste de integração.","source":"groq"}
+gravidade após usar a IA: null (esperado null: a IA não atribui cor)
+alta por enfermeiro → HTTP 403
+alta por médico → HTTP 204

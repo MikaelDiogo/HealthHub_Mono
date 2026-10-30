@@ -7,7 +7,7 @@ import {
   formatDuracao, formatPct, type Etapa, type Metricas,
 } from '../../services/metricas';
 import type { FilaPaciente } from '../../context/CareContext';
-import { manchesterCSSColor, NIVEIS_MANCHESTER } from '../../utils/vitalStatus';
+import { riscoCSSColor, NIVEIS_RISCO } from '../../utils/vitalStatus';
 import { EmptyState } from '../../components/ui';
 
 const ESPERA_ALERTA_MIN = 30;
@@ -201,7 +201,7 @@ export function EsteiraFluxo({ fila, agora, esperaMediaMin, onSelecionar, seleci
                             <span
                               aria-hidden
                               title={risco}
-                              style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: manchesterCSSColor(p.gravidade) }}
+                              style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: riscoCSSColor(p.gravidade) }}
                             />
                             <Text size="xs" fw={500} c="var(--hh-ink)" truncate style={{ flex: 1 }}>{nomeCurto(p.nome)}</Text>
                             {espera !== null && (
@@ -231,15 +231,15 @@ export function EsteiraFluxo({ fila, agora, esperaMediaMin, onSelecionar, seleci
 
           {/* legenda em frase: o que a bolinha e o tempo querem dizer */}
           <Group gap="md" mt="md" pt="sm" wrap="wrap" style={{ borderTop: '1px solid var(--hh-rule)' }}>
-            <Text size="xs" c="var(--hh-muted)">Cor = risco Manchester:</Text>
-            {NIVEIS_MANCHESTER.map((n) => (
+            <Text size="xs" c="var(--hh-muted)">Cor = classificação de risco:</Text>
+            {NIVEIS_RISCO.map((n) => (
               <Group key={n.nivel} gap={5} wrap="nowrap">
-                <span aria-hidden style={{ width: 8, height: 8, borderRadius: '50%', background: manchesterCSSColor(n.nivel) }} />
+                <span aria-hidden style={{ width: 8, height: 8, borderRadius: '50%', background: riscoCSSColor(n.nivel) }} />
                 <Text size="xs" c="var(--hh-muted)">{n.nivel}</Text>
               </Group>
             ))}
             <Group gap={5} wrap="nowrap">
-              <span aria-hidden style={{ width: 8, height: 8, borderRadius: '50%', background: manchesterCSSColor(null) }} />
+              <span aria-hidden style={{ width: 8, height: 8, borderRadius: '50%', background: riscoCSSColor(null) }} />
               <Text size="xs" c="var(--hh-muted)">Sem classificação</Text>
             </Group>
             <Text size="xs" c="var(--hh-faint)" ml="auto">
@@ -375,7 +375,7 @@ const NOME_DESFECHO: Record<string, string> = {
 export function Composicao({ periodo }: { periodo: Metricas['periodo30d'] }) {
   const desfechos = Object.entries(periodo.desfechos).sort((a, b) => b[1] - a[1]);
   const totalDesf = desfechos.reduce((s, [, n]) => s + n, 0);
-  const riscos = NIVEIS_MANCHESTER.map((n) => ({ ...n, qtd: periodo.risco[n.nivel] ?? 0 }));
+  const riscos = NIVEIS_RISCO.map((n) => ({ ...n, qtd: periodo.risco[n.nivel] ?? 0 }));
   const totalRisco = riscos.reduce((s, r) => s + r.qtd, 0);
 
   return (
@@ -417,13 +417,13 @@ export function Composicao({ periodo }: { periodo: Metricas['periodo30d'] }) {
                 style={{ display: 'flex', height: 10, borderRadius: 3, overflow: 'hidden', gap: 2 }}
               >
                 {riscos.filter((r) => r.qtd).map((r) => (
-                  <Box key={r.nivel} style={{ flex: r.qtd, background: manchesterCSSColor(r.nivel) }} />
+                  <Box key={r.nivel} style={{ flex: r.qtd, background: riscoCSSColor(r.nivel) }} />
                 ))}
               </Box>
               <Group gap="md" mt="sm">
                 {riscos.filter((r) => r.qtd).map((r) => (
                   <Group key={r.nivel} gap={6} wrap="nowrap">
-                    <span aria-hidden style={{ width: 10, height: 10, borderRadius: 3, background: manchesterCSSColor(r.nivel) }} />
+                    <span aria-hidden style={{ width: 10, height: 10, borderRadius: 3, background: riscoCSSColor(r.nivel) }} />
                     <Text size="xs" c="var(--hh-muted)">{r.nivel} <Text span fw={600} c="var(--hh-ink)" inherit>{r.qtd}</Text></Text>
                   </Group>
                 ))}

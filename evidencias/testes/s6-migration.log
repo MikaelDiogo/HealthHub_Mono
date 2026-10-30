@@ -1,0 +1,96 @@
+# S6 — preservação de dados na migration (banco de teste isolado healthhub-test-db:5435, dados fictícios)
+início (UTC): 2026-10-30 17:35:00
+(nota: a primeira tentativa de inserir as fixtures não gravou nada — docker exec sem -i; refeito abaixo)
+
+## Fixtures (visitas fictícias com prefixo S6, além das 10 visitas de demonstração já existentes no banco de teste)
+INSERT 0 5
+INSERT 0 5
+## ANTES (coluna gravidade_manchester)
+ total_visitas | classificadas 
+---------------+---------------
+            15 |             6
+(1 row)
+
+                  id                  |    nome_completo     | gravidade_manchester 
+--------------------------------------+----------------------+----------------------
+ 02d49900-6d8f-444b-bb2e-76bcce20b1ec | Gisele Prado Lins    | Verde
+ 23258424-63af-44b2-8da1-7054188f2125 | Ana Lima Freitas     | 
+ 257f89fb-16d8-4110-aa5c-23667d2d2428 | Iara Campos Lopes    | Azul
+ 679f2eeb-de89-4b1c-9a66-25d240a8d93c | Elisa Rocha Vidal    | 
+ 6cdf5f1f-2ab8-44df-9094-1e19826458c2 | S6 Paciente Tres     | Azul
+ 8953ac3a-ad08-494f-9a35-6b9a77538df7 | S6 Paciente Dois     | Vermelho
+ 8eae8dd4-7ca1-44f1-958a-f18262b85ae5 | S6 Paciente Um       | Verde
+ a3367c6a-f2f1-4665-b86c-6983f651b87f | S6 Paciente Cinco    | 
+ bba0f2eb-2dd7-4483-922d-a16a73ddfc75 | Fábio Nunes Torres   | 
+ bf6fd0f6-a21c-4bd0-8354-d5babd59d363 | Jonas Teixeira Rocha | 
+ bf7c32bc-c4eb-4fbe-bd92-dd93d7902c94 | Hugo Melo Barros     | 
+ c48e5f0d-82c7-41ab-9ba5-2731655329da | S6 Paciente Quatro   | Laranja
+ cd7884d7-3745-4469-860b-8ff1fe07292e | Diego Alves Prado    | 
+ d87bef9d-f589-48b3-9d5a-7175d63ce7da | Carla Dias Mendes    | 
+ e9f3fef7-6a69-43fe-b69a-56294b745ef0 | Bruno Costa Ribeiro  | 
+(15 rows)
+
+hash ANTES: ec5f943cffc3a013d60ca5645dc162e2
+## migration:run
+[90m[4mquery:[24m[39m [94mCREATE[0m [37mEXTENSION[0m [94mIF[0m [94mNOT[0m [94mEXISTS[0m [37m"uuid-ossp"[0m
+[90m[4mquery:[24m[39m [94mSELECT[0m [37m*[0m [94mFROM[0m [37m"information_schema"[0m[37m.[0m[37m"tables"[0m [94mWHERE[0m [37m"table_schema"[0m [37m=[0m [37m'public'[0m [94mAND[0m [37m"table_name"[0m [37m=[0m [37m'migrations'[0m
+[90m[4mquery:[24m[39m [94mSELECT[0m [37m*[0m [94mFROM[0m [37m"migrations"[0m [37m"migrations"[0m [94mORDER BY[0m [37m"id"[0m [94mDESC[0m
+[4m8 migrations are already loaded in the database.[24m
+[4m9 migrations were found in the source code.[24m
+[4mCreateFilaEventos1783200000000 is the last executed migration. It was executed on Sat Jul 04 2026 18:20:00 GMT-0300 (Horário Padrão de Brasília).[24m
+[4m1 migrations are new migrations must be executed.[24m
+[90m[4mquery:[24m[39m [37mSTART[0m [37mTRANSACTION[0m
+[90m[4mquery:[24m[39m [94mALTER TABLE[0m [37m"visitas"[0m [37mRENAME[0m [94mCOLUMN[0m [37m"gravidade_manchester"[0m [94mTO[0m [37m"classificacao_risco"[0m
+[90m[4mquery:[24m[39m [94mINSERT INTO[0m [37m"migrations"[0m[37m([0m[37m"timestamp"[0m[37m,[0m [37m"name"[0m[37m)[0m [94mVALUES[0m [37m([0m[37m$[0m[32m1[0m[37m,[0m [37m$[0m[32m2[0m[37m)[0m [90m-- PARAMETERS: [1783300000000,"RenameGravidadeToClassificacaoRisco1783300000000"][0m
+[4mMigration RenameGravidadeToClassificacaoRisco1783300000000 has been executed successfully.[24m
+[90m[4mquery:[24m[39m [94mCOMMIT[0m
+## DEPOIS da migration:run
+ total_visitas 
+---------------
+            15
+(1 row)
+
+     column_name     
+---------------------
+ classificacao_risco
+(1 row)
+
+                  id                  |    nome_completo     | classificacao_risco 
+--------------------------------------+----------------------+---------------------
+ 02d49900-6d8f-444b-bb2e-76bcce20b1ec | Gisele Prado Lins    | Verde
+ 23258424-63af-44b2-8da1-7054188f2125 | Ana Lima Freitas     | 
+ 257f89fb-16d8-4110-aa5c-23667d2d2428 | Iara Campos Lopes    | Azul
+ 679f2eeb-de89-4b1c-9a66-25d240a8d93c | Elisa Rocha Vidal    | 
+ 6cdf5f1f-2ab8-44df-9094-1e19826458c2 | S6 Paciente Tres     | Azul
+ 8953ac3a-ad08-494f-9a35-6b9a77538df7 | S6 Paciente Dois     | Vermelho
+ 8eae8dd4-7ca1-44f1-958a-f18262b85ae5 | S6 Paciente Um       | Verde
+ a3367c6a-f2f1-4665-b86c-6983f651b87f | S6 Paciente Cinco    | 
+ bba0f2eb-2dd7-4483-922d-a16a73ddfc75 | Fábio Nunes Torres   | 
+ bf6fd0f6-a21c-4bd0-8354-d5babd59d363 | Jonas Teixeira Rocha | 
+ bf7c32bc-c4eb-4fbe-bd92-dd93d7902c94 | Hugo Melo Barros     | 
+ c48e5f0d-82c7-41ab-9ba5-2731655329da | S6 Paciente Quatro   | Laranja
+ cd7884d7-3745-4469-860b-8ff1fe07292e | Diego Alves Prado    | 
+ d87bef9d-f589-48b3-9d5a-7175d63ce7da | Carla Dias Mendes    | 
+ e9f3fef7-6a69-43fe-b69a-56294b745ef0 | Bruno Costa Ribeiro  | 
+(15 rows)
+
+hash DEPOIS (run): ec5f943cffc3a013d60ca5645dc162e2
+## migration:revert
+query: ALTER TABLE "visitas" RENAME COLUMN "classificacao_risco" TO "gravidade_manchester"
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been reverted successfully.
+## DEPOIS da reversão
+ total_visitas 
+---------------
+            15
+(1 row)
+
+     column_name      
+----------------------
+ gravidade_manchester
+(1 row)
+
+hash DEPOIS (revert): ec5f943cffc3a013d60ca5645dc162e2
+## migration:run (reaplicada, para deixar o banco de teste no estado atual)
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been executed successfully.
+hash final (run novamente): ec5f943cffc3a013d60ca5645dc162e2
+fim (UTC): 2026-10-30 17:35:30 — resultado: contagem (15), IDs e cores idênticos nos três pontos; coluna renomeada e restaurada sem perda.

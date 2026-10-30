@@ -14,6 +14,7 @@ import { PageShell } from '../../components/PageShell';
 import { AdmitirModal } from '../../components/AdmitirModal';
 import { AvisoErro, EmptyState, LoadingState, useAviso } from '../../components/ui';
 import { mensagemErro } from '../../utils/erro';
+import { NIVEIS_RISCO, riscoCSSColor } from '../../utils/vitalStatus';
 import { useCare } from '../../context/CareContext';
 import type { Gravidade, FilaPaciente } from '../../context/CareContext';
 import { useAuth } from '../../context/AuthContext';
@@ -261,20 +262,10 @@ export const Alerts = () => {
   );
   const emObservacao = patients.filter((p) => p.status === 'Em Observação');
 
-  // Escala de Manchester — 5 níveis
-  const MANCHESTER: { g: Gravidade; label: string; mantine: string; oklch: string; tempo: string }[] = [
-    { g: 'Vermelho', label: 'Vermelho',  mantine: 'red',    oklch: 'oklch(0.55 0.21 25)',  tempo: 'Imediato' },
-    { g: 'Laranja',  label: 'Laranja',   mantine: 'orange', oklch: 'oklch(0.68 0.18 45)',  tempo: '10 min' },
-    { g: 'Amarelo',  label: 'Amarelo',   mantine: 'yellow', oklch: 'oklch(0.82 0.15 90)',  tempo: '60 min' },
-    { g: 'Verde',    label: 'Verde',     mantine: 'green',  oklch: 'oklch(0.68 0.14 150)', tempo: '120 min' },
-    { g: 'Azul',     label: 'Azul',      mantine: 'blue',   oklch: 'oklch(0.55 0.13 240)', tempo: '240 min' },
-  ];
-
   const badgeColor = (g?: Gravidade) =>
-    MANCHESTER.find((m) => m.g === g)?.mantine ?? 'gray';
+    NIVEIS_RISCO.find((n) => n.nivel === g)?.mantine ?? 'gray';
 
-  const riskBorderColor = (g?: Gravidade) =>
-    MANCHESTER.find((m) => m.g === g)?.oklch ?? 'var(--hh-control)';
+  const riskBorderColor = (g?: Gravidade) => (g ? riscoCSSColor(g) : 'var(--hh-control)');
 
   if (loading) {
     return (
@@ -339,8 +330,8 @@ export const Alerts = () => {
                         )}
                         {p.status === 'Em Triagem (Enfermeiro)' && currentRole === 'Enfermeiro' && (
                           <Stack gap={6}>
-                            <Text size="xs" c="var(--hh-muted)">Classificar risco (Manchester)</Text>
-                            <Text size="xs" c="var(--hh-faint)">Cor escolhida manualmente; os tempos ao lado são só rótulos, sem controle de prazo.</Text>
+                            <Text size="xs" c="var(--hh-muted)">Classificar risco</Text>
+                            <Text size="xs" c="var(--hh-faint)">Cor escolhida manualmente pelo enfermeiro; o sistema não controla prazos.</Text>
                             <TextInput
                               size="xs"
                               aria-label="Justificativa da classificação (opcional)"
@@ -350,20 +341,16 @@ export const Alerts = () => {
                               onChange={(e) => { const v = e.currentTarget.value; setJustificativas((j) => ({ ...j, [p.id]: v })); }}
                             />
                             <Stack gap={4}>
-                              {MANCHESTER.map(({ g, label, mantine, tempo }) => (
+                              {NIVEIS_RISCO.map(({ nivel: g, mantine }) => (
                                 <Button
                                   key={g}
                                   size="xs"
                                   color={mantine}
                                   variant="filled"
-                                  justify="space-between"
-                                  rightSection={
-                                    <Text size="xs" style={{ opacity: 0.9 }}>{tempo}</Text>
-                                  }
                                   onClick={() => { avançarFluxo(p.id, 'Aguardando Atendimento', g, justificativas[p.id]); setJustificativas((j) => ({ ...j, [p.id]: '' })); }}
                                   fullWidth
                                 >
-                                  {label}
+                                  {g}
                                 </Button>
                               ))}
                             </Stack>

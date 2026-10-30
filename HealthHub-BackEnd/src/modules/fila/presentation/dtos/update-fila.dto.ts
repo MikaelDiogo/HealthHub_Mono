@@ -1,5 +1,5 @@
 import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
-import { GRAVIDADES_MANCHESTER, STATUS_ATUALIZACAO } from '../../domain/fila-valores';
+import { GRAVIDADES_RISCO, STATUS_ATUALIZACAO } from '../../domain/fila-valores';
 
 export class UpdateFilaDto {
   @IsString()
@@ -10,7 +10,7 @@ export class UpdateFilaDto {
   @IsOptional()
   @IsString()
   @MaxLength(50)
-  @IsIn(GRAVIDADES_MANCHESTER, { message: 'Categoria de risco inválida (Vermelho, Laranja, Amarelo, Verde ou Azul)' })
+  @IsIn(GRAVIDADES_RISCO, { message: 'Categoria de risco inválida (Vermelho, Laranja, Amarelo, Verde ou Azul)' })
   gravidade?: string;
 
   /** Justificativa livre e opcional do enfermeiro ao classificar (fica no registro de rastreabilidade). */

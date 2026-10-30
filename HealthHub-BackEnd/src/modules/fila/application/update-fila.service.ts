@@ -46,7 +46,7 @@ export class UpdateFilaService {
     }
 
     if (data.gravidade !== undefined) {
-      // A classificação de risco (Protocolo de Manchester) é atribuição exclusiva
+      // A classificação de risco (atribuída pelo enfermeiro, conforme diretrizes de acolhimento com classificação de risco do Ministério da Saúde) é atribuição exclusiva
       // do enfermeiro e depende de sinais vitais já registrados para o paciente.
       if (requesterRole !== 'enfermeiro') {
         throw new ForbiddenException({ error: 'Apenas o enfermeiro pode atribuir a categoria de risco.' });

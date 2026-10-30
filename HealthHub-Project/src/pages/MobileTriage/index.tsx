@@ -18,26 +18,23 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import type { Patient } from '../../types/patient';
 import { useForm as useMantineForm } from '@mantine/form';
+import { NIVEIS_RISCO } from '../../utils/vitalStatus';
 import { formatCPF, formatPhone, onlyDigits, stripMask } from '../../utils/formatters';
 
 // A senha segue a esteira (maior PR-NNN presente + 1), igual ao desktop: não há mais
 // contador local que reiniciava a cada recarga e repetia PR-001.
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const MANCHESTER_MOBILE = [
-  { g: 'Vermelho' as Gravidade, color: '#ef4444', mantine: 'red',    tempo: 'Imediato' },
-  { g: 'Laranja'  as Gravidade, color: '#f97316', mantine: 'orange', tempo: '10 min' },
-  { g: 'Amarelo'  as Gravidade, color: '#eab308', mantine: 'yellow', tempo: '60 min' },
-  { g: 'Verde'    as Gravidade, color: '#22c55e', mantine: 'green',  tempo: '120 min' },
-  { g: 'Azul'     as Gravidade, color: '#3b82f6', mantine: 'blue',   tempo: '240 min' },
-];
+const COR_HEX: Record<string, string> = {
+  Vermelho: '#ef4444', Laranja: '#f97316', Amarelo: '#eab308', Verde: '#22c55e', Azul: '#3b82f6',
+};
 
 function gravColor(g?: Gravidade): string {
-  return MANCHESTER_MOBILE.find((m) => m.g === g)?.color ?? 'var(--mantine-color-slate-3)';
+  return (g && COR_HEX[g]) || 'var(--mantine-color-slate-3)';
 }
 
 function gravBadgeColor(g?: Gravidade) {
-  return MANCHESTER_MOBILE.find((m) => m.g === g)?.mantine ?? 'gray';
+  return NIVEIS_RISCO.find((n) => n.nivel === g)?.mantine ?? 'gray';
 }
 
 function statusBorderColor(p: FilaPaciente): string {
@@ -252,17 +249,16 @@ function FilaCard({
             {showClassificar && (
               <Stack gap="xs">
                 <Text size="10px" fw={700} c="slate.5" tt="uppercase" style={{ fontFamily: "'Manrope', sans-serif", letterSpacing: '0.06em' }}>
-                  Escala de Manchester:
+                  Classificação de risco:
                 </Text>
                 <Stack gap={6}>
-                  {MANCHESTER_MOBILE.map(({ g, mantine, tempo }) => (
+                  {NIVEIS_RISCO.map(({ nivel: g, mantine }) => (
                     <Button
                       key={g}
                       size="md"
                       color={mantine}
                       loading={loading}
                       justify="space-between"
-                      rightSection={<Text size="xs" style={{ opacity: 0.85 }}>{tempo}</Text>}
                       fullWidth
                       onClick={() =>
                         act(() => onAvancar(patient.id, 'Aguardando Atendimento', g))
@@ -293,7 +289,7 @@ function FilaView({
   const [refreshing, setRefreshing] = useState(false);
 
   const sorted = [...carePatients].sort((a, b) => {
-    // Os 5 níveis de Manchester (faltavam Laranja e Azul, que caíam junto com quem não foi triado)
+    // Os 5 níveis da escala de classificação de risco do protótipo (faltavam Laranja e Azul, que caíam junto com quem não foi triado)
     const order: Record<string, number> = { Vermelho: 0, Laranja: 1, Amarelo: 2, Verde: 3, Azul: 4 };
     const aO = a.gravidade ? order[a.gravidade] ?? 5 : 5;
     const bO = b.gravidade ? order[b.gravidade] ?? 5 : 5;

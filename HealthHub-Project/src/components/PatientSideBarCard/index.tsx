@@ -5,7 +5,7 @@ interface PatientSidebarCardProps {
   patient: Patient;
   isActive: boolean;
   onClick: () => void;
-  /** Cor Manchester da triagem (manchesterCSSColor). Cinza se ainda não triado. */
+  /** Cor da classificação de risco (riscoCSSColor). Cinza se ainda não classificado. */
   dotColor?: string;
 }
 

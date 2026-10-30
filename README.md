@@ -2,7 +2,7 @@
 
 Sistema de gestão hospitalar com triagem inteligente para unidades de pequeno e médio porte.
 
-Substitui fichas de papel por um fluxo digital completo: cadastro de pacientes, esteira de cuidado com Protocolo de Manchester, registro seriado de sinais vitais, assistente clínico de IA, chat interno em tempo real e histórico de visitas.
+Substitui fichas de papel por um fluxo digital completo: cadastro de pacientes, esteira de cuidado com registro da classificação de risco, registro seriado de sinais vitais, assistente clínico de IA, chat interno em tempo real e histórico de visitas.
 
 ---
 
