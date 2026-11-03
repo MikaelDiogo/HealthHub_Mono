@@ -1,0 +1,49 @@
+id,vinheta,diagnostico_correto,urgente,triagem_original
+1,"Confused and sleepy for several hours. 48-year-old female; Can't answer where she is or what her name is (but she normally can); ""Takes Tylenol all the time for migraine, but recently took more""",Liver failure,1,Emergent
+2,"Sudden severe abdominal pain. 12-year-old female; Temperature 104 F (40 C); ""Has nausea, vomiting, and diarrhea""",Appendicitis,1,Emergent
+3,Chest pain for 1 day. 64-year-old male; Pain is in middle of chest under breast bone; Sweating and having trouble breathing,Heart attack,1,Emergent
+4,Left-sided pain between armpit and hip for 1 hour. 45-year-old male; Severe pain; Pain starts on left side and travels to groin; Has nausea and vomiting; Squirming in pain,Kidney stones,1,Emergent
+5,Headache for 3 days. 18-year-old male; Has fever 102; Neck stiff; Light bothers him,Meningitis,1,Emergent
+6,Trouble breathing for 30 minutes. 65-year-old male; Has chest pain that worsens when he takes a breath; Had surgery last week; Has swelling and pain in his left calf,Pulmonary embolism,1,Emergent
+7,Fever and rash for 2 days. 8-year-old male; Rash is worse on the ankles and wrists; Has joint pain and headache; Was camping recently,Rocky Mountain Spotted Fever,1,Emergent
+8,Right-sided weakness and difficulty speaking for 10 minutes. 70-year-old male; Can't use his right arm; Has high blood pressure and abnormal heart rhythm; Has nausea and vomiting,Stroke,1,Emergent
+9,Painful muscle spasms for 1 day. 65-year-old male; Having a hard time opening his mouth; Cut himself while gardening; He is restless and irritable,Tetanus,1,Emergent
+10,Trouble breathing for 3 days. 67-year-old female; Has lung disease and smoked cigarettes; Increased cough with green phlegm; Can't speak in complete sentences,COPD exacerbation,1,Emergent
+11,Trouble breathing for 3 days. 27-year-old female; Recent cold; Wheezing and coughing when sitting; Trouble breathing when walking around house; Has asthma; Inhalers don't help her anymore,Asthma exacerbation,1,Emergent
+12,Trouble breathing for 3 days. 78-year-old female; Ate very salty foods recently; Gaining weight and legs are swollen; Had a heart attack several years ago; Trouble breathing when sitting on the couch;,Heart failure exacerbation,1,Emergent
+13,"Front of left leg is red and hurts for one day. 45-year-old man; Redness started quickly over a day; ""He thinks he has a high temperature, but he didn't check""; Leg is swollen; ""Leg hurts to touch it, but he didn't cut it or bump it that he remembers""",Cellulitis,1,1 day
+14,"Fever and sore throat for 2 hours. 7-year-old female; White stuff in back of throat; Painful front of the neck; ""No cough, no congestion""; Temperature 102",Strep throat,1,1 day
+15,"Trouble breathing for 3 days. 27-year-old female; Recent cold; ""Wheezing and coughing, especially at night""; Has asthma; Inhalers only help for a couple of hours",Asthma exacerbation,1,1 day
+16,Trouble breathing for 3 days. 67-year-old female; Has lung disease and smoked cigarettes; Increased cough with green phlegm; Using inhaler every 6 hours,COPD exacerbation,1,1 day
+17,"Right leg pain for 2 days. 65-year-old female; ""Right leg is swollen, red, and painful""; Was in hospital last week for pneumonia; Has mild heart disease",Deep vein thrombosis,1,1 day
+18,Belly pain and diarrhea for 7 days. 4-year-old male; Nothing unusual in diet though did have a hamburger at a cookout 3 days before pain started; Has fever; Diarrhea may have blood in it,Hemolytic uremic syndrome,1,1 day
+19,Fever and chills for 5 days. 18-year-old male; Has fever of 103.1F; Recently returned from Africa,Malaria,1,1 day
+20,Cough and fever for 3 days. 65-year-old male; Cough brings up green phlegm; Breathing fast and shallow,Pneumonia,1,1 day
+21,"Fever, sore throat, enlarged lymph nodes for one week. 16-year-old female; Trouble swallowing ; Extremely tired",Mononucleosis,1,1 day
+22,"Vomiting, diarrhea, and belly pain for 18 hours. 14-year-old male; Had diarrhea 10 times in 18 hours; No blood in diarrhea; Has temperature of 103.1F; Attended a picnic recently and ate undercooked chicken",Salmonella,1,1 day
+23,Pain on right side of chest for 5 days. 77-year-old male; Pain was first and was then followed by rash in same area as pain; Feels unwell in general; Rash becomes clear pockets of fluid on top of skin after 3 days,Shingles,1,1 day
+24,"Painful urination for 2 days. 26-year-old female; Has urgent need to pee; Recent sexual activity; ""No fever, but some back pain"";",Urinary tract infection,1,1 day
+25,Red bumps on forehead for 4 weeks. 17-year-old male; Bumps come and go and then come in new places on face,Acne,0,1 week
+26,Feels congested and face pain for 15 days. 35-year-old female; Has green nose discharge; Has a fever again after thinking she was getting better,Acute sinusitis,0,1 week
+27,"Upper abdominal pain for 2 months. 40-year-old male; ""Feels like a dull, gnawing ache""; Wakes him up at night; Better when drinking milk and eating",Peptic ulcer disease,0,1 week
+28,Sudden episodes of dizziness for 1 month. 65-year-old female; Triggered by tilting her head back to look up; Each attack lasts about 30 seconds; No hearing problems or weakness,Vertigo,0,1 week
+29,Thirsty and peeing a lot for 4 weeks. 52-year-old male; Feels tired all the time; Has blurry vision on and off,Diabetes,0,1 week
+30,"Blood on toilet paper for 1 week. 68-year-old female; Stool is hard and must strain when using the bathroom; ""No weight loss, belly pain, or fever""; Stool is not red or black",Hemorrhoids,0,1 week
+31,"Left knee pain for 4 months. 62-year-old male; ""Worse after walking, better when resting""; Sometimes swells up; Never hit knee against anything or fell",Osteoarthritis,0,1 week
+32,Feeling down for weeks. 32-year-old male; Wakes up early and cannot go back to sleep; Having difficulty concentrating at work; Cannot seem to stop worrying about his family,Depression,0,1 week
+33,Tired for 2 months. 42-year-old female; Overweight; Falls asleep during the day ; Partner complains about snoring at night,Obstructive sleep apnea,0,1 week
+34,"Trouble breathing for 7 days. 78-year-old female; Slowly gaining weight; Had a heart attack several years ago; ""Comfortable when sitting or walking slowly, but has trouble when walking up stairs""",Heart failure exacerbation,0,1 week
+35,"Tired for 2 months. 39-year-old female; ""Has dry skin, weight gain, and constipation""; Feels very cold when others are hot",Hypothyroidism,0,1 week
+36,Upper abdominal pain for 2 months. 40-year-old male; Worse with spicy and fried foods; Worse if he eats late at night before sleeping; Voice is becoming hoarse;,Gastroesophageal reflux disease,0,1 week
+37,Runny nose for 12 days. 34-year-old female; No fever; Had also had a sore throat and cough; No other medical problems,Common cold,0,Self-care
+38,"Red, irritated eye for 3 days. 14-year-old male; Spread from right to left; ""Has watery eye discharge, but no pain""; Has a stuffy nose",Viral conjunctivitis,0,Self-care
+39,Sore throat for 2 days. 26-year-old male; Has a headache; Has a cough; No fever,Viral pharyngitis,0,Self-care
+40,Congestion for many years. 22-year-old male; Worse during spring season; Has sneezing and nose itching; Has eye itching and tearing,Allergic rhinitis,0,Self-care
+41,Back pain for 3 weeks. 35-year-old male; Pain started after shoveling snow; No leg pain or weakness; No fever or weight loss,Musculoskeletal low back pain,0,Self-care
+42,Swollen and tender forehead at site of bee sting for 1 hour. 9-year-old male; Stopped crying after 15 minutes; Tongue looks normal; No wheezing or breathing problems,Bee sting without anaphylaxis,0,Self-care
+43,Mouth sores that come back over several years. 17-year-old male; Has 5 of them in his mouth; No other sores anywhere else; Takes no drugs or medicines,Canker sore,0,Self-care
+44,White stuff coming out of vagina for 2 days. 40-year-old female; Vagina also itchy; Doesn't hurt to pee; No abdominal pain; No fever,Candidal yeast infection,0,Self-care
+45,Dry itchy skin in front of elbows and behind knees for years. 12-year-old female; Brother has asthma; Recently told she has egg and milk allergies,Eczema,0,Self-care
+46,Painful swollen right eyelid for 1 day. 30-year-old male; Pain is at edge of eyelid; Hurts to touch it; No change in vision,Stye,0,Self-care
+47,"Fever, headache, and cough for 4 days. 30-year-old female; Came on very suddenly; Feels weak all over; ""Temperature 102.5 at first, but not now""",Influenza,0,Self-care
+48,Itchy rash on left hand for 1 day. 12-year-old male; Came on hours after playing in woods; Rash red and warm; No fever,Poison Ivy,0,Self-care

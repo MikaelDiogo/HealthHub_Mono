@@ -1,0 +1,577 @@
+modelo,id,repeticao,gabarito,diagnosticos_modelo,dx_top3_rascunho,top1_rascunho
+Groq,1,1,Liver failure,"Acetaminophen overdose with hepatic encephalopathy | Other drug overdose (e.g., opioid or benzodiazepine) | Acute intracranial event (stroke)",true,true
+Groq,1,2,Liver failure,Acetaminophen (Tylenol) overdose with possible acute liver failure | Acute cerebrovascular event (stroke) causing altered mental status | Other medication or toxic ingestion leading to CNS depression,true,true
+Groq,1,3,Liver failure,Acetaminophen (Tylenol) overdose with possible acute liver failure | Acute cerebrovascular event (stroke) causing altered mental status | Other medication or toxic ingestion leading to CNS depression,true,true
+Groq,2,1,Appendicitis,perforated appendicitis with peritonitis | acute gastroenteritis | ovarian torsion,true,true
+Groq,2,2,Appendicitis,perforated appendicitis with peritonitis | acute gastroenteritis | ovarian torsion,true,true
+Groq,2,3,Appendicitis,acute appendicitis with possible perforation | acute gastroenteritis | ovarian torsion,true,true
+Groq,3,1,Heart attack,Acute myocardial infarction (ACS) | Aortic dissection | Pulmonary embolism,true,true
+Groq,3,2,Heart attack,Acute myocardial infarction (ACS) | Aortic dissection | Pulmonary embolism,true,true
+Groq,3,3,Heart attack,acute myocardial infarction | aortic dissection | pulmonary embolism,true,true
+Groq,4,1,Kidney stones,ureteral stone (renal colic) | musculoskeletal strain | abdominal aortic aneurysm,true,true
+Groq,4,2,Kidney stones,ureteral stone (renal colic) | musculoskeletal strain | abdominal aortic aneurysm,true,true
+Groq,4,3,Kidney stones,ureteral stone (renal colic) | musculoskeletal strain | abdominal aortic aneurysm,true,true
+Groq,5,1,Meningitis,bacterial meningitis | viral meningitis | migraine,true,true
+Groq,5,2,Meningitis,bacterial meningitis | viral meningitis | migraine,true,true
+Groq,5,3,Meningitis,bacterial meningitis | viral meningitis | intracranial abscess,true,true
+Groq,6,1,Pulmonary embolism,Pulmonary embolism | Postoperative pneumonia | Myocardial infarction,true,true
+Groq,6,2,Pulmonary embolism,Pulmonary embolism | Pneumonia | Myocardial infarction,true,true
+Groq,6,3,Pulmonary embolism,Pulmonary embolism | Pneumonia | Myocardial infarction,true,true
+Groq,7,1,Rocky Mountain Spotted Fever,Rocky Mountain spotted fever | Ehrlichiosis | Viral exanthem,true,true
+Groq,7,2,Rocky Mountain Spotted Fever,Rocky Mountain spotted fever | Ehrlichiosis | Viral exanthem,true,true
+Groq,7,3,Rocky Mountain Spotted Fever,Rocky Mountain spotted fever | Ehrlichiosis | Viral exanthem,true,true
+Groq,8,1,Stroke,Transient ischemic attack | Ischemic stroke | Todd's paralysis (postictal),true,false
+Groq,8,2,Stroke,transient ischemic attack (TIA) or minor ischemic stroke | seizure with postictal (Todd's) paralysis | migraine with aura,true,true
+Groq,8,3,Stroke,Transient ischemic attack (TIA) | Acute ischemic stroke | Todd's paralysis (postictal focal weakness),true,false
+Groq,9,1,Tetanus,tetanus | dental abscess | temporomandibular joint disorder,true,true
+Groq,9,2,Tetanus,tetanus | dental abscess | temporomandibular joint disorder,true,true
+Groq,9,3,Tetanus,tetanus | dental abscess | temporomandibular joint disorder,true,true
+Groq,10,1,COPD exacerbation,Acute COPD exacerbation | Community-acquired pneumonia | Pulmonary embolism,true,true
+Groq,10,2,COPD exacerbation,Acute COPD exacerbation | Community-acquired pneumonia | Pulmonary embolism,true,true
+Groq,10,3,COPD exacerbation,Acute COPD exacerbation | Community-acquired pneumonia | Pulmonary embolism,true,true
+Groq,11,1,Asthma exacerbation,acute asthma exacerbation | viral bronchitis | pneumonia,true,true
+Groq,11,2,Asthma exacerbation,acute asthma exacerbation | viral lower respiratory infection (bronchitis/pneumonia) | COVID-19 infection,true,true
+Groq,11,3,Asthma exacerbation,acute asthma exacerbation | viral lower respiratory infection (bronchitis/pneumonia) | allergic reaction,true,true
+Groq,12,1,Heart failure exacerbation,acute decompensated heart failure | pulmonary embolism | pneumonia,true,true
+Groq,12,2,Heart failure exacerbation,Congestive heart failure exacerbation | Acute coronary syndrome | Pulmonary embolism,true,true
+Groq,12,3,Heart failure exacerbation,acute decompensated heart failure | pulmonary embolism | pneumonia,true,true
+Groq,13,1,Cellulitis,cellulitis | deep vein thrombosis | erysipelas,true,true
+Groq,13,2,Cellulitis,cellulitis | deep vein thrombosis | erysipelas,true,true
+Groq,13,3,Cellulitis,cellulitis | deep vein thrombosis | erysipelas,true,true
+Groq,14,1,Strep throat,streptococcal pharyngitis | viral pharyngitis | infectious mononucleosis,true,true
+Groq,14,2,Strep throat,streptococcal pharyngitis | viral pharyngitis | infectious mononucleosis,true,true
+Groq,14,3,Strep throat,streptococcal pharyngitis | viral pharyngitis | infectious mononucleosis,true,true
+Groq,15,1,Asthma exacerbation,Acute asthma exacerbation | Viral bronchitis | Pneumonia,true,true
+Groq,15,2,Asthma exacerbation,Acute asthma exacerbation | Viral bronchitis | Pneumonia,true,true
+Groq,15,3,Asthma exacerbation,acute asthma exacerbation | viral bronchitis | early community-acquired pneumonia,true,true
+Groq,16,1,COPD exacerbation,Acute exacerbation of COPD | Community-acquired pneumonia | Acute bronchitis,true,true
+Groq,16,2,COPD exacerbation,Acute exacerbation of COPD | Community-acquired pneumonia | Acute bronchitis,true,true
+Groq,16,3,COPD exacerbation,Acute exacerbation of COPD | Community-acquired pneumonia | Acute bronchitis,true,true
+Groq,17,1,Deep vein thrombosis,deep vein thrombosis | cellulitis | muscle strain,true,true
+Groq,17,2,Deep vein thrombosis,deep vein thrombosis | cellulitis | muscle strain,true,true
+Groq,17,3,Deep vein thrombosis,deep vein thrombosis | cellulitis | muscle strain,true,true
+Groq,18,1,Hemolytic uremic syndrome,Shigella infection (bacterial gastroenteritis) | Ulcerative colitis | Intussusception,false,false
+Groq,18,2,Hemolytic uremic syndrome,"Bacterial gastroenteritis (e.g., Shigella) | Viral gastroenteritis | Inflammatory bowel disease (ulcerative colitis)",false,false
+Groq,18,3,Hemolytic uremic syndrome,"Bacterial gastroenteritis (e.g., Shigella) | Viral gastroenteritis | Inflammatory bowel disease (ulcerative colitis)",false,false
+Groq,19,1,Malaria,Malaria | Typhoid fever | Dengue fever,true,true
+Groq,19,2,Malaria,Malaria | Typhoid fever | Dengue fever,true,true
+Groq,19,3,Malaria,Malaria | Typhoid fever | Dengue fever,true,true
+Groq,20,1,Pneumonia,community-acquired bacterial pneumonia | acute bronchitis | COPD exacerbation,true,true
+Groq,20,2,Pneumonia,community-acquired pneumonia | acute bronchitis | COPD exacerbation,true,true
+Groq,20,3,Pneumonia,community-acquired bacterial pneumonia | acute bronchitis | COPD exacerbation,true,true
+Groq,21,1,Mononucleosis,infectious mononucleosis | streptococcal pharyngitis | viral pharyngitis,true,true
+Groq,21,2,Mononucleosis,infectious mononucleosis | streptococcal pharyngitis | viral pharyngitis,true,true
+Groq,21,3,Mononucleosis,Infectious mononucleosis | Streptococcal pharyngitis | Viral pharyngitis,true,true
+Groq,22,1,Salmonella,Salmonella gastroenteritis | Campylobacter infection | Viral gastroenteritis,true,true
+Groq,22,2,Salmonella,Salmonella gastroenteritis | Campylobacter infection | Viral gastroenteritis,true,true
+Groq,22,3,Salmonella,Salmonella gastroenteritis | Campylobacter infection | Viral gastroenteritis,true,true
+Groq,23,1,Shingles,herpes zoster (shingles) | bullous cellulitis | pulmonary embolism,true,true
+Groq,23,2,Shingles,Herpes zoster (shingles) | Cellulitis | Atypical acute coronary syndrome,true,true
+Groq,23,3,Shingles,herpes zoster (shingles) | cellulitis with bullous formation | contact dermatitis with vesicles,true,true
+Groq,24,1,Urinary tract infection,"Acute uncomplicated cystitis (urinary tract infection) | Acute pyelonephritis | Sexually transmitted urethritis (e.g., chlamydia or gonorrhea)",true,true
+Groq,24,2,Urinary tract infection,"Acute uncomplicated cystitis (urinary tract infection) | Acute pyelonephritis | Sexually transmitted urethritis (e.g., chlamydia or gonorrhea)",true,true
+Groq,24,3,Urinary tract infection,"Acute uncomplicated cystitis (urinary tract infection) | Acute pyelonephritis | Sexually transmitted urethritis (e.g., chlamydia or gonorrhea)",true,true
+Groq,25,1,Acne,Acne vulgaris | Folliculitis | Contact dermatitis,true,true
+Groq,25,2,Acne,Acne vulgaris | Folliculitis | Contact dermatitis,true,true
+Groq,25,3,Acne,Acne vulgaris | Folliculitis | Contact dermatitis,true,true
+Groq,26,1,Acute sinusitis,acute bacterial sinusitis | viral upper respiratory infection | allergic rhinitis,true,true
+Groq,26,2,Acute sinusitis,acute bacterial sinusitis | viral upper respiratory infection | allergic rhinitis,true,true
+Groq,26,3,Acute sinusitis,acute bacterial sinusitis | viral upper respiratory infection | allergic rhinitis,true,true
+Groq,27,1,Peptic ulcer disease,duodenal ulcer (peptic ulcer disease) | gastritis | gastroesophageal reflux disease,true,true
+Groq,27,2,Peptic ulcer disease,duodenal ulcer | gastric ulcer | functional dyspepsia,true,true
+Groq,27,3,Peptic ulcer disease,duodenal ulcer | gastric ulcer | functional dyspepsia,true,true
+Groq,28,1,Vertigo,Benign paroxysmal positional vertigo | Vertebrobasilar transient ischemic attack | Cervical vertigo,true,true
+Groq,28,2,Vertigo,Benign paroxysmal positional vertigo | Vertebrobasilar transient ischemic attack | Cervical vertigo,true,true
+Groq,28,3,Vertigo,Benign paroxysmal positional vertigo | Vertebrobasilar transient ischemic attack | Cervical vertigo,true,true
+Groq,29,1,Diabetes,type 2 diabetes mellitus | diabetes insipidus | hypercalcemia,true,true
+Groq,29,2,Diabetes,Type 2 diabetes mellitus | Diabetes insipidus | Hypercalcemia,true,true
+Groq,29,3,Diabetes,type 2 diabetes mellitus | diabetes insipidus | hypercalcemia,true,true
+Groq,30,1,Hemorrhoids,hemorrhoids | anal fissure | colorectal cancer,true,true
+Groq,30,2,Hemorrhoids,anal fissure | hemorrhoids | colorectal cancer,true,false
+Groq,30,3,Hemorrhoids,hemorrhoids | anal fissure | colorectal cancer,true,true
+Groq,31,1,Osteoarthritis,Knee osteoarthritis | Degenerative meniscal tear | Prepatellar bursitis,true,true
+Groq,31,2,Osteoarthritis,Knee osteoarthritis | Degenerative meniscal tear | Prepatellar bursitis,true,true
+Groq,31,3,Osteoarthritis,Knee osteoarthritis | Degenerative meniscal tear | Prepatellar bursitis,true,true
+Groq,32,1,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder,true,true
+Groq,32,2,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder,true,true
+Groq,32,3,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder,true,true
+Groq,33,1,Obstructive sleep apnea,obstructive sleep apnea | hypothyroidism | depression,true,true
+Groq,33,2,Obstructive sleep apnea,obstructive sleep apnea | hypothyroidism | depression,true,true
+Groq,33,3,Obstructive sleep apnea,obstructive sleep apnea | hypothyroidism | depression,true,true
+Groq,34,1,Heart failure exacerbation,decompensated congestive heart failure | chronic obstructive pulmonary disease exacerbation | pulmonary embolism,true,true
+Groq,34,2,Heart failure exacerbation,heart failure exacerbation | chronic obstructive pulmonary disease exacerbation | pneumonia,true,true
+Groq,34,3,Heart failure exacerbation,Congestive heart failure exacerbation | Chronic obstructive pulmonary disease exacerbation | Pulmonary embolism,true,true
+Groq,35,1,Hypothyroidism,hypothyroidism | depression | iron deficiency anemia,true,true
+Groq,35,2,Hypothyroidism,hypothyroidism | depression | iron deficiency anemia,true,true
+Groq,35,3,Hypothyroidism,hypothyroidism | depression | iron deficiency anemia,true,true
+Groq,36,1,Gastroesophageal reflux disease,gastroesophageal reflux disease (GERD) | peptic ulcer disease | chronic gastritis,true,true
+Groq,36,2,Gastroesophageal reflux disease,gastroesophageal reflux disease (GERD) | peptic ulcer disease | chronic gastritis,true,true
+Groq,36,3,Gastroesophageal reflux disease,gastroesophageal reflux disease (GERD) | peptic ulcer disease | chronic gastritis,true,true
+Groq,37,1,Common cold,viral upper respiratory infection (common cold) | allergic rhinitis | acute viral sinusitis,true,true
+Groq,37,2,Common cold,viral upper respiratory infection (common cold) | allergic rhinitis | acute sinusitis,true,true
+Groq,37,3,Common cold,viral upper respiratory infection (common cold) | allergic rhinitis | acute sinusitis,true,true
+Groq,38,1,Viral conjunctivitis,viral conjunctivitis | allergic conjunctivitis | bacterial conjunctivitis,true,true
+Groq,38,2,Viral conjunctivitis,viral conjunctivitis | allergic conjunctivitis | bacterial conjunctivitis,true,true
+Groq,38,3,Viral conjunctivitis,viral conjunctivitis | allergic conjunctivitis | bacterial conjunctivitis,true,true
+Groq,39,1,Viral pharyngitis,viral upper respiratory infection | allergic rhinitis | streptococcal pharyngitis,true,true
+Groq,39,2,Viral pharyngitis,viral upper respiratory infection | streptococcal pharyngitis | allergic rhinitis,true,true
+Groq,39,3,Viral pharyngitis,viral upper respiratory infection (common cold) | allergic rhinitis | streptococcal pharyngitis,true,true
+Groq,40,1,Allergic rhinitis,seasonal allergic rhinitis | perennial allergic rhinitis | nonallergic rhinitis,true,true
+Groq,40,2,Allergic rhinitis,seasonal allergic rhinitis | perennial allergic rhinitis | nonallergic rhinitis,true,true
+Groq,40,3,Allergic rhinitis,seasonal allergic rhinitis | perennial allergic rhinitis | nonallergic rhinitis,true,true
+Groq,41,1,Musculoskeletal low back pain,lumbar strain | lumbar disc herniation | sacroiliac joint dysfunction,true,true
+Groq,41,2,Musculoskeletal low back pain,lumbar strain | lumbar disc herniation | sacroiliac joint dysfunction,true,true
+Groq,41,3,Musculoskeletal low back pain,lumbar strain | lumbar disc herniation | sacroiliac joint dysfunction,true,true
+Groq,42,1,Bee sting without anaphylaxis,local allergic reaction to bee sting | cellulitis | systemic allergic reaction,true,true
+Groq,42,2,Bee sting without anaphylaxis,local allergic reaction to bee sting | cellulitis | systemic allergic reaction (anaphylaxis),true,true
+Groq,42,3,Bee sting without anaphylaxis,local allergic reaction to bee sting | cellulitis | systemic allergic reaction (anaphylaxis),true,true
+Groq,43,1,Canker sore,"Recurrent aphthous stomatitis | Herpes simplex virus infection | Nutritional deficiency (iron, B12, folate)",true,true
+Groq,43,2,Canker sore,"Recurrent aphthous stomatitis | Herpes simplex virus infection | Nutritional deficiency (iron, B12, folate)",true,true
+Groq,43,3,Canker sore,"Recurrent aphthous stomatitis | Herpes simplex virus infection | Nutritional deficiency (iron, B12, folate)",true,true
+Groq,44,1,Candidal yeast infection,vulvovaginal candidiasis (yeast infection) | bacterial vaginosis | non-specific vaginitis or contact dermatitis,true,true
+Groq,44,2,Candidal yeast infection,vulvovaginal candidiasis (yeast infection) | bacterial vaginosis | non-specific vaginitis or contact dermatitis,true,true
+Groq,44,3,Candidal yeast infection,vulvovaginal candidiasis | bacterial vaginosis | non-specific vaginitis,true,true
+Groq,45,1,Eczema,atopic dermatitis | contact dermatitis | psoriasis,true,true
+Groq,45,2,Eczema,Atopic dermatitis | Contact dermatitis | Psoriasis,true,true
+Groq,45,3,Eczema,Atopic dermatitis | Contact dermatitis | Psoriasis,true,true
+Groq,46,1,Stye,external hordeolum (stye) | chalazion | preseptal cellulitis,true,true
+Groq,46,2,Stye,external hordeolum (stye) | preseptal cellulitis | chalazion,true,true
+Groq,46,3,Stye,external hordeolum (stye) | chalazion | preseptal cellulitis,true,true
+Groq,47,1,Influenza,"influenza (viral upper respiratory infection) | COVID-19 | atypical bacterial pneumonia (e.g., Mycoplasma)",true,true
+Groq,47,2,Influenza,"influenza (viral upper respiratory infection) | COVID-19 | atypical bacterial pneumonia (e.g., Mycoplasma)",true,true
+Groq,47,3,Influenza,influenza (viral upper respiratory infection) | COVID-19 | atypical bacterial pneumonia,true,true
+Groq,48,1,Poison Ivy,allergic contact dermatitis (poison ivy) | insect bite reaction | early cellulitis,true,true
+Groq,48,2,Poison Ivy,poison ivy contact dermatitis | insect bite reaction | cellulitis,true,true
+Groq,48,3,Poison Ivy,allergic contact dermatitis (poison ivy) | insect bite reaction | early cellulitis,true,true
+Sonnet 5,1,1,Liver failure,Acetaminophen (Tylenol) toxicity/overdose | Hepatic encephalopathy | Toxic-metabolic encephalopathy,true,false
+Sonnet 5,1,3,Liver failure,Acetaminophen (Tylenol) toxicity/overdose | Hepatic encephalopathy | Toxic-metabolic encephalopathy,true,false
+Sonnet 5,1,2,Liver failure,Acetaminophen (Tylenol) toxicity/overdose | Hepatic encephalopathy | Other toxic-metabolic encephalopathy,true,false
+Sonnet 5,2,3,Appendicitis,Acute appendicitis | Gastroenteritis with dehydration | Mesenteric lymphadenitis,true,true
+Sonnet 5,2,2,Appendicitis,Acute appendicitis | Gastroenteritis with dehydration | Mesenteric adenitis,true,true
+Sonnet 5,2,1,Appendicitis,Appendicitis | Gastroenteritis with dehydration | Mesenteric lymphadenitis,true,true
+Sonnet 5,3,1,Heart attack,Acute myocardial infarction | Unstable angina | Pulmonary embolism,true,true
+Sonnet 5,3,2,Heart attack,Acute myocardial infarction | Unstable angina | Aortic dissection,true,true
+Sonnet 5,3,3,Heart attack,Acute coronary syndrome (myocardial infarction) | Unstable angina | Pulmonary embolism,true,true
+Sonnet 5,4,2,Kidney stones,Renal colic (kidney stone) | Ureteral obstruction | Abdominal aortic aneurysm,true,true
+Sonnet 5,4,3,Kidney stones,Renal colic (kidney stone) | Abdominal aortic aneurysm | Ureteral obstruction,true,true
+Sonnet 5,4,1,Kidney stones,Renal colic (kidney stone) | Ureteral obstruction | Abdominal aortic aneurysm,true,true
+Sonnet 5,5,1,Meningitis,Bacterial meningitis | Viral meningitis | Subarachnoid hemorrhage,true,true
+Sonnet 5,5,2,Meningitis,Bacterial meningitis | Viral meningitis | Encephalitis,true,true
+Sonnet 5,5,3,Meningitis,Bacterial meningitis | Viral meningitis | Encephalitis,true,true
+Sonnet 5,6,1,Pulmonary embolism,Pulmonary embolism | Deep vein thrombosis | Postoperative complication (atelectasis/pneumonia),true,true
+Sonnet 5,6,2,Pulmonary embolism,"Pulmonary embolism | Deep vein thrombosis | Post-surgical complication (e.g., atelectasis/pneumonia)",true,true
+Sonnet 5,6,3,Pulmonary embolism,"Pulmonary embolism | Deep vein thrombosis | Post-surgical complication (e.g., atelectasis/pneumonia)",true,true
+Sonnet 5,7,1,Rocky Mountain Spotted Fever,Rocky Mountain spotted fever | Lyme disease | Meningococcemia,true,true
+Sonnet 5,7,3,Rocky Mountain Spotted Fever,Rocky Mountain spotted fever | Lyme disease | Meningococcemia,true,true
+Sonnet 5,7,2,Rocky Mountain Spotted Fever,Rocky Mountain spotted fever | Lyme disease | Meningococcemia,true,true
+Sonnet 5,8,3,Stroke,Acute ischemic stroke | Transient ischemic attack | Cardioembolic stroke due to atrial fibrillation,true,true
+Sonnet 5,8,2,Stroke,Acute ischemic stroke | Cardioembolic stroke due to atrial fibrillation | Transient ischemic attack,true,true
+Sonnet 5,8,1,Stroke,Acute ischemic stroke | Hemorrhagic stroke | Cardioembolic stroke from atrial fibrillation,true,true
+Sonnet 5,9,1,Tetanus,Tetanus | Trismus due to wound infection | Dystonic reaction,true,true
+Sonnet 5,9,2,Tetanus,Tetanus | Trismus due to wound infection | Dystonic reaction,true,true
+Sonnet 5,9,3,Tetanus,Tetanus | Trismus due to wound infection | Dystonic reaction,true,true
+Sonnet 5,10,3,COPD exacerbation,COPD exacerbation | Community-acquired pneumonia | Acute bronchitis with respiratory distress,true,true
+Sonnet 5,10,2,COPD exacerbation,COPD exacerbation | Pneumonia | Acute bronchitis,true,true
+Sonnet 5,10,1,COPD exacerbation,COPD exacerbation | Pneumonia | Acute respiratory failure,true,true
+Sonnet 5,11,3,Asthma exacerbation,Acute asthma exacerbation | Viral bronchitis triggering asthma flare | Pneumonia,true,true
+Sonnet 5,11,2,Asthma exacerbation,Acute asthma exacerbation | Viral upper respiratory infection triggering bronchospasm | Bronchitis/pneumonia with asthma exacerbation,true,true
+Sonnet 5,11,1,Asthma exacerbation,Acute asthma exacerbation | Viral-induced asthma flare / bronchitis | Pneumonia,true,true
+Sonnet 5,12,2,Heart failure exacerbation,Acute decompensated heart failure | Fluid overload secondary to high sodium intake | Cardiac ischemia/recurrent cardiac event,true,true
+Sonnet 5,12,3,Heart failure exacerbation,Acute decompensated heart failure | Fluid overload due to dietary sodium intake | Cardiac ischemia/recurrent cardiac event,true,true
+Sonnet 5,12,1,Heart failure exacerbation,Congestive heart failure exacerbation | Pulmonary edema | Cardiac ischemia,true,true
+Sonnet 5,13,1,Cellulitis,Cellulitis | Deep vein thrombosis | Necrotizing fasciitis,true,true
+Sonnet 5,13,2,Cellulitis,Cellulitis | Deep vein thrombosis | Necrotizing fasciitis,true,true
+Sonnet 5,13,3,Cellulitis,Cellulitis | Deep vein thrombosis | Necrotizing fasciitis,true,true
+Sonnet 5,14,2,Strep throat,Streptococcal pharyngitis (strep throat) | Peritonsillar or retropharyngeal abscess | Viral pharyngitis,true,true
+Sonnet 5,14,3,Strep throat,Streptococcal pharyngitis (strep throat) | Peritonsillar abscess | Viral pharyngitis,true,true
+Sonnet 5,14,1,Strep throat,Streptococcal pharyngitis (strep throat) | Peritonsillar/retropharyngeal abscess | Viral pharyngitis,true,true
+Sonnet 5,15,2,Asthma exacerbation,Asthma exacerbation triggered by viral respiratory infection | Acute bronchitis | Reactive airway disease/poor asthma control,true,true
+Sonnet 5,15,3,Asthma exacerbation,Asthma exacerbation triggered by viral respiratory infection | Acute bronchitis | Post-viral airway hyperreactivity,true,true
+Sonnet 5,15,1,Asthma exacerbation,Asthma exacerbation triggered by viral upper respiratory infection | Acute bronchitis | Poorly controlled asthma with inadequate response to rescue inhaler,true,true
+Sonnet 5,16,2,COPD exacerbation,COPD exacerbation | Bacterial bronchitis | Pneumonia,true,true
+Sonnet 5,16,1,COPD exacerbation,COPD exacerbation | Acute bronchitis | Community-acquired pneumonia,true,true
+Sonnet 5,16,3,COPD exacerbation,COPD exacerbation | Bacterial bronchitis/pneumonia | Acute respiratory infection,true,true
+Sonnet 5,17,1,Deep vein thrombosis,Deep vein thrombosis | Cellulitis | Chronic venous insufficiency,true,true
+Sonnet 5,17,2,Deep vein thrombosis,Deep vein thrombosis | Cellulitis | Chronic venous insufficiency,true,true
+Sonnet 5,17,3,Deep vein thrombosis,Deep vein thrombosis | Cellulitis | Chronic venous insufficiency,true,true
+Sonnet 5,18,2,Hemolytic uremic syndrome,"Shiga toxin-producing E. coli (O157:H7) infection | Bacterial gastroenteritis (e.g., Salmonella, Shigella, Campylobacter) | Hemolytic uremic syndrome",true,false
+Sonnet 5,18,3,Hemolytic uremic syndrome,E. coli O157:H7 (Shiga toxin-producing) infection | Bacterial gastroenteritis (Salmonella/Shigella/Campylobacter) | Hemolytic uremic syndrome,true,false
+Sonnet 5,18,1,Hemolytic uremic syndrome,"E. coli O157:H7 (STEC) infection / hemorrhagic colitis | Bacterial gastroenteritis (Salmonella, Shigella, or Campylobacter) | Hemolytic uremic syndrome",true,false
+Sonnet 5,19,3,Malaria,Malaria | Typhoid fever | Dengue fever,true,true
+Sonnet 5,19,1,Malaria,Malaria | Typhoid fever | Dengue fever,true,true
+Sonnet 5,19,2,Malaria,Malaria | Typhoid fever | Dengue fever,true,true
+Sonnet 5,20,2,Pneumonia,Community-acquired pneumonia | Acute bronchitis | COPD exacerbation,true,true
+Sonnet 5,20,1,Pneumonia,Community-acquired pneumonia | Acute bronchitis | COPD exacerbation,true,true
+Sonnet 5,20,3,Pneumonia,Community-acquired pneumonia | Acute bronchitis | COPD exacerbation,true,true
+Sonnet 5,21,1,Mononucleosis,Infectious mononucleosis | Streptococcal pharyngitis | Peritonsillar abscess,true,true
+Sonnet 5,21,3,Mononucleosis,Infectious mononucleosis | Streptococcal pharyngitis | Peritonsillar abscess,true,true
+Sonnet 5,21,2,Mononucleosis,Infectious mononucleosis | Streptococcal pharyngitis | Viral pharyngitis,true,true
+Sonnet 5,22,2,Salmonella,Salmonella gastroenteritis | Campylobacter enteritis | Foodborne bacterial gastroenteritis with dehydration,true,true
+Sonnet 5,22,1,Salmonella,Salmonella gastroenteritis | Campylobacter enteritis | Viral gastroenteritis,true,true
+Sonnet 5,22,3,Salmonella,Salmonella gastroenteritis | Campylobacter enteritis | Foodborne bacterial gastroenteritis with dehydration,true,true
+Sonnet 5,23,3,Shingles,Herpes zoster (shingles) | Post-herpetic neuralgia (early) | Contact dermatitis,true,true
+Sonnet 5,23,1,Shingles,Herpes zoster (shingles) | Post-herpetic neuralgia (early) | Contact dermatitis with secondary infection,true,true
+Sonnet 5,23,2,Shingles,Herpes zoster (shingles) | Postherpetic neuralgia (early) | Contact dermatitis with secondary infection,true,true
+Sonnet 5,24,1,Urinary tract infection,"Urinary tract infection (cystitis) | Pyelonephritis | Sexually transmitted infection (e.g., chlamydia/gonorrhea urethritis)",true,true
+Sonnet 5,24,2,Urinary tract infection,"Urinary tract infection (cystitis) | Pyelonephritis | Sexually transmitted infection (e.g., chlamydia/gonorrhea urethritis)",true,true
+Sonnet 5,24,3,Urinary tract infection,"Urinary tract infection (cystitis) | Pyelonephritis | Sexually transmitted infection (e.g., chlamydia/gonorrhea)",true,true
+Sonnet 5,25,2,Acne,Acne vulgaris | Folliculitis | Allergic contact dermatitis,true,true
+Sonnet 5,25,1,Acne,Acne vulgaris | Folliculitis | Contact dermatitis,true,true
+Sonnet 5,25,3,Acne,Acne vulgaris | Folliculitis | Allergic/contact dermatitis,true,true
+Sonnet 5,26,2,Acute sinusitis,Acute bacterial sinusitis | Viral upper respiratory infection with secondary bacterial infection | Sinusitis with potential complication,true,true
+Sonnet 5,26,1,Acute sinusitis,Acute bacterial sinusitis | Viral sinusitis with secondary bacterial infection | Sinusitis with possible orbital/facial cellulitis complication,true,true
+Sonnet 5,26,3,Acute sinusitis,Acute bacterial sinusitis | Viral sinusitis with secondary bacterial infection | Sinusitis with potential orbital/facial complication,true,true
+Sonnet 5,27,1,Peptic ulcer disease,Duodenal peptic ulcer | Gastritis | Gastroesophageal reflux disease,true,true
+Sonnet 5,27,2,Peptic ulcer disease,Duodenal peptic ulcer | Gastritis | GERD,true,true
+Sonnet 5,27,3,Peptic ulcer disease,Duodenal peptic ulcer | Gastritis | GERD,true,true
+Sonnet 5,28,1,Vertigo,Benign paroxysmal positional vertigo (BPPV) | Vestibular neuritis | Orthostatic hypotension,true,true
+Sonnet 5,28,2,Vertigo,Benign paroxysmal positional vertigo (BPPV) | Vertebrobasilar insufficiency | Orthostatic hypotension,true,true
+Sonnet 5,28,3,Vertigo,"Benign paroxysmal positional vertigo (BPPV) | Vestibular neuritis | Central causes of positional vertigo (e.g., posterior fossa lesion)",true,true
+Sonnet 5,29,3,Diabetes,Type 2 diabetes mellitus | Diabetic hyperglycemia with hyperosmolar state | Diabetes insipidus,true,true
+Sonnet 5,29,2,Diabetes,Type 2 diabetes mellitus | Diabetic hyperglycemia/early diabetic ketoacidosis | Diabetes insipidus,true,true
+Sonnet 5,29,1,Diabetes,Type 2 diabetes mellitus | Diabetic hyperosmolar state | Diabetes insipidus,true,true
+Sonnet 5,30,2,Hemorrhoids,Hemorrhoids | Anal fissure | Diverticulosis,true,true
+Sonnet 5,30,1,Hemorrhoids,Hemorrhoids | Anal fissure | Constipation,true,true
+Sonnet 5,30,3,Hemorrhoids,Hemorrhoids | Anal fissure | Diverticulosis,true,true
+Sonnet 5,31,1,Osteoarthritis,Knee osteoarthritis | Meniscal degeneration/tear | Pes anserine or other bursitis,true,true
+Sonnet 5,31,2,Osteoarthritis,Osteoarthritis of the knee | Meniscal degeneration/tear | Gout or pseudogout,true,true
+Sonnet 5,31,3,Osteoarthritis,Knee osteoarthritis | Meniscal degeneration/tear | Gout or pseudogout,true,true
+Sonnet 5,32,2,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder,true,true
+Sonnet 5,32,1,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder,true,true
+Sonnet 5,32,3,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder with mixed anxiety and depressed mood,true,true
+Sonnet 5,33,1,Obstructive sleep apnea,Obstructive sleep apnea | Hypothyroidism | Depression,true,true
+Sonnet 5,33,2,Obstructive sleep apnea,Obstructive sleep apnea | Hypothyroidism | Depression,true,true
+Sonnet 5,33,3,Obstructive sleep apnea,Obstructive sleep apnea | Hypothyroidism | Depression,true,true
+Sonnet 5,34,3,Heart failure exacerbation,Congestive heart failure | Ischemic cardiomyopathy | Pulmonary edema,true,true
+Sonnet 5,34,2,Heart failure exacerbation,Congestive heart failure exacerbation | Ischemic cardiomyopathy | Pulmonary edema,true,true
+Sonnet 5,34,1,Heart failure exacerbation,Congestive heart failure | Ischemic cardiomyopathy | Pulmonary edema,true,true
+Sonnet 5,35,2,Hypothyroidism,Hypothyroidism | Subclinical hypothyroidism | Anemia,true,true
+Sonnet 5,35,3,Hypothyroidism,Hypothyroidism | Depression | Anemia,true,true
+Sonnet 5,35,1,Hypothyroidism,Hypothyroidism | Depression | Anemia,true,true
+Sonnet 5,36,1,Gastroesophageal reflux disease,GERD (gastroesophageal reflux disease) | Laryngopharyngeal reflux | Peptic ulcer disease,true,true
+Sonnet 5,36,2,Gastroesophageal reflux disease,Gastroesophageal reflux disease (GERD) with laryngopharyngeal reflux | Peptic ulcer disease | Gastritis,true,true
+Sonnet 5,36,3,Gastroesophageal reflux disease,Gastroesophageal reflux disease (GERD) | Laryngopharyngeal reflux | Peptic ulcer disease,true,true
+Sonnet 5,37,1,Common cold,Viral upper respiratory infection | Acute sinusitis | Allergic rhinitis,true,true
+Sonnet 5,37,3,Common cold,Viral upper respiratory infection | Acute sinusitis | Allergic rhinitis,true,true
+Sonnet 5,37,2,Common cold,Viral upper respiratory infection | Acute sinusitis | Allergic rhinitis,true,true
+Sonnet 5,38,2,Viral conjunctivitis,Viral conjunctivitis | Allergic conjunctivitis | Bacterial conjunctivitis,true,true
+Sonnet 5,38,1,Viral conjunctivitis,Viral conjunctivitis | Allergic conjunctivitis | Bacterial conjunctivitis,true,true
+Sonnet 5,38,3,Viral conjunctivitis,Viral conjunctivitis | Allergic conjunctivitis | Bacterial conjunctivitis,true,true
+Sonnet 5,39,2,Viral pharyngitis,Viral pharyngitis | Common cold (upper respiratory infection) | Acute bronchitis,true,true
+Sonnet 5,39,1,Viral pharyngitis,Viral pharyngitis | Common cold | Acute bronchitis,true,true
+Sonnet 5,39,3,Viral pharyngitis,Viral pharyngitis | Common cold (upper respiratory infection) | Acute bronchitis,true,true
+Sonnet 5,40,3,Allergic rhinitis,Allergic rhinitis (seasonal) | Allergic conjunctivitis | Nonallergic rhinitis,true,true
+Sonnet 5,40,2,Allergic rhinitis,Allergic rhinitis | Allergic conjunctivitis | Seasonal rhinoconjunctivitis (hay fever),true,true
+Sonnet 5,40,1,Allergic rhinitis,Allergic rhinitis (seasonal) | Allergic conjunctivitis | Non-allergic rhinitis,true,true
+Sonnet 5,41,3,Musculoskeletal low back pain,Lumbar muscle strain | Mechanical low back pain | Lumbar facet joint strain,true,true
+Sonnet 5,41,2,Musculoskeletal low back pain,Lumbar muscle strain | Mechanical low back pain | Lumbar disc strain,true,true
+Sonnet 5,41,1,Musculoskeletal low back pain,Lumbar muscle strain | Mechanical low back pain | Lumbar disc strain,true,true
+Sonnet 5,42,2,Bee sting without anaphylaxis,Local allergic reaction to bee sting | Insect bite cellulitis | Normal sting inflammatory response,true,true
+Sonnet 5,42,1,Bee sting without anaphylaxis,Local allergic reaction to insect sting | Insect bite cellulitis | Normal sting-site swelling,true,true
+Sonnet 5,42,3,Bee sting without anaphylaxis,Local bee sting reaction | Insect bite cellulitis | Mild allergic reaction,true,true
+Sonnet 5,43,1,Canker sore,Recurrent aphthous stomatitis | Herpes simplex virus (recurrent intraoral) | Behçet's disease,true,true
+Sonnet 5,43,2,Canker sore,Recurrent aphthous stomatitis (canker sores) | Herpes simplex virus infection (recurrent oral herpes) | Behçet's disease,true,true
+Sonnet 5,43,3,Canker sore,Recurrent aphthous stomatitis | Herpes simplex virus infection | Behçet's disease,true,true
+Sonnet 5,44,3,Candidal yeast infection,Vulvovaginal candidiasis (yeast infection) | Bacterial vaginosis | Trichomoniasis,true,true
+Sonnet 5,44,1,Candidal yeast infection,Vulvovaginal candidiasis (yeast infection) | Bacterial vaginosis | Trichomoniasis,true,true
+Sonnet 5,44,2,Candidal yeast infection,Vulvovaginal candidiasis (yeast infection) | Bacterial vaginosis | Trichomoniasis,true,true
+Sonnet 5,45,2,Eczema,Atopic dermatitis (eczema) | Allergic contact dermatitis | Food allergy-associated dermatitis,true,true
+Sonnet 5,45,1,Eczema,Atopic dermatitis (eczema) | Allergic contact dermatitis | Food allergy-associated dermatitis,true,true
+Sonnet 5,45,3,Eczema,Atopic dermatitis (eczema) | Allergic contact dermatitis | Food allergy-related skin manifestation,true,true
+Sonnet 5,46,2,Stye,Hordeolum (stye) | Blepharitis | Preseptal cellulitis,true,true
+Sonnet 5,46,1,Stye,Hordeolum (stye) | Blepharitis | Preseptal cellulitis,true,true
+Sonnet 5,46,3,Stye,Hordeolum (stye) | Blepharitis | Preseptal cellulitis,true,true
+Sonnet 5,47,1,Influenza,Influenza | Viral upper respiratory infection | COVID-19,true,true
+Sonnet 5,47,3,Influenza,Influenza | Viral upper respiratory infection | COVID-19,true,true
+Sonnet 5,47,2,Influenza,Influenza | Viral upper respiratory infection | COVID-19,true,true
+Sonnet 5,48,3,Poison Ivy,"Allergic contact dermatitis (e.g., poison ivy/oak) | Insect bite reaction | Irritant contact dermatitis",true,true
+Sonnet 5,48,2,Poison Ivy,Contact dermatitis (poison ivy/oak) | Insect bite reaction | Allergic contact reaction to plant/allergen,true,true
+Sonnet 5,48,1,Poison Ivy,"Allergic contact dermatitis (e.g., poison ivy/oak) | Insect bite reaction | Irritant contact dermatitis",true,true
+Sonnet 5.5,1,2,Liver failure,"Acetaminophen (paracetamol) overdose with hepatotoxicity/acute liver failure and hepatic encephalopathy | Medication-overuse or combined-drug toxicity (e.g., co-ingestant overdose such as opioids, sedatives, or salicylates) | Intracranial process (stroke, subarachnoid hemorrhage, or meningitis/encephalitis) presenting with altered mental status",true,true
+Sonnet 5.5,1,1,Liver failure,"Acetaminophen (paracetamol) overdose with hepatotoxicity/hepatic encephalopathy | Medication-overuse headache with intentional or unintentional co-ingestant toxicity (e.g., opioid/butalbital combination or other sedative) | Acute neurological event (stroke, intracranial hemorrhage, or migraine-related complication)",true,true
+Sonnet 5.5,1,3,Liver failure,"Acetaminophen (paracetamol) overdose with hepatotoxicity/hepatic encephalopathy | Medication-overuse headache with other co-ingestant toxicity (e.g., combination migraine drugs, opioids, or salicylates) | Metabolic or neurologic emergency (e.g., stroke, intracranial hemorrhage, CNS infection, or hypoglycemia)",true,true
+Sonnet 5.5,2,2,Appendicitis,Acute appendicitis | Acute gastroenteritis | Mesenteric adenitis,true,true
+Sonnet 5.5,2,3,Appendicitis,Acute appendicitis | Acute gastroenteritis | Mesenteric adenitis,true,true
+Sonnet 5.5,2,1,Appendicitis,Acute appendicitis | Acute gastroenteritis | Mesenteric adenitis,true,true
+Sonnet 5.5,3,1,Heart attack,Acute coronary syndrome (myocardial infarction/unstable angina) | Pulmonary embolism | Acute aortic dissection,true,true
+Sonnet 5.5,3,2,Heart attack,Acute coronary syndrome (myocardial infarction/unstable angina) | Pulmonary embolism | Acute aortic dissection,true,true
+Sonnet 5.5,3,3,Heart attack,Acute coronary syndrome (myocardial infarction/unstable angina) | Pulmonary embolism | Acute aortic dissection,true,true
+Sonnet 5.5,4,2,Kidney stones,Renal colic (ureterolithiasis / kidney stone) | Pyelonephritis | Musculoskeletal flank strain,true,true
+Sonnet 5.5,4,3,Kidney stones,Renal colic (ureteral stone / nephrolithiasis) | Pyelonephritis | Musculoskeletal flank strain,true,true
+Sonnet 5.5,4,1,Kidney stones,Renal colic (ureteral stone / nephrolithiasis) | Pyelonephritis | Musculoskeletal flank pain / strain,true,true
+Sonnet 5.5,5,3,Meningitis,Bacterial meningitis | Viral (aseptic) meningitis | Meningoencephalitis,true,true
+Sonnet 5.5,5,2,Meningitis,Bacterial meningitis | Viral (aseptic) meningitis | Meningoencephalitis,true,true
+Sonnet 5.5,5,1,Meningitis,Bacterial meningitis | Viral (aseptic) meningitis | Meningoencephalitis,true,true
+Sonnet 5.5,6,3,Pulmonary embolism,Pulmonary embolism | Deep vein thrombosis with pulmonary embolism | Pneumonia,true,true
+Sonnet 5.5,6,1,Pulmonary embolism,Pulmonary embolism | Deep vein thrombosis with pulmonary embolism | Pneumonia,true,true
+Sonnet 5.5,6,2,Pulmonary embolism,Pulmonary embolism | Deep vein thrombosis with pulmonary embolism | Pneumonia,true,true
+Sonnet 5.5,7,2,Rocky Mountain Spotted Fever,"Rocky Mountain spotted fever | Viral exanthem (e.g., enteroviral infection) | Lyme disease",true,true
+Sonnet 5.5,7,1,Rocky Mountain Spotted Fever,"Rocky Mountain spotted fever | Viral exanthem (e.g., enterovirus) | Lyme disease",true,true
+Sonnet 5.5,7,3,Rocky Mountain Spotted Fever,"Rocky Mountain spotted fever | Viral exanthem (e.g., enterovirus) | Lyme disease (early disseminated)",true,true
+Sonnet 5.5,8,1,Stroke,"Acute ischemic stroke (cardioembolic, likely related to atrial fibrillation) | Transient ischemic attack | Intracerebral hemorrhage",true,true
+Sonnet 5.5,8,3,Stroke,"Acute ischemic stroke (cardioembolic, likely due to atrial fibrillation) | Transient ischemic attack | Intracerebral hemorrhage",true,true
+Sonnet 5.5,8,2,Stroke,"Acute ischemic stroke (cardioembolic, likely due to atrial fibrillation) | Transient ischemic attack | Intracerebral hemorrhage",true,true
+Sonnet 5.5,9,1,Tetanus,Tetanus | Strychnine poisoning or dystonic drug reaction | Temporomandibular joint disorder or peritonsillar/dental abscess,true,true
+Sonnet 5.5,9,2,Tetanus,"Tetanus | Strychnine poisoning or dystonic reaction | Temporomandibular joint disorder / masseter spasm (e.g., peritonsillar abscess with trismus)",true,true
+Sonnet 5.5,9,3,Tetanus,Tetanus | Strychnine poisoning or dystonic drug reaction | Temporomandibular joint disorder or peritonsillar/dental abscess with trismus,true,true
+Sonnet 5.5,10,2,COPD exacerbation,COPD exacerbation | Pneumonia | Acute bronchitis,true,true
+Sonnet 5.5,10,1,COPD exacerbation,COPD exacerbation | Pneumonia | Acute bronchitis,true,true
+Sonnet 5.5,10,3,COPD exacerbation,Acute exacerbation of COPD | Community-acquired pneumonia | Acute bronchitis superimposed on chronic lung disease,true,true
+Sonnet 5.5,11,3,Asthma exacerbation,Acute asthma exacerbation (triggered by viral respiratory infection) | Viral lower respiratory tract infection/bronchitis | Pneumonia,true,true
+Sonnet 5.5,11,2,Asthma exacerbation,"Acute asthma exacerbation (moderate to severe, triggered by viral respiratory infection) | Viral lower respiratory tract infection/acute bronchitis | Pneumonia",true,true
+Sonnet 5.5,11,1,Asthma exacerbation,Acute asthma exacerbation (moderate to severe) triggered by viral upper respiratory infection | Acute bronchitis / viral lower respiratory tract infection | Pneumonia,true,true
+Sonnet 5.5,12,3,Heart failure exacerbation,Acute decompensated congestive heart failure | Acute coronary syndrome / recurrent myocardial ischemia | Pulmonary embolism,true,true
+Sonnet 5.5,12,1,Heart failure exacerbation,Acute decompensated congestive heart failure | Acute coronary syndrome / ischemic cardiomyopathy exacerbation | Pulmonary embolism,true,true
+Sonnet 5.5,12,2,Heart failure exacerbation,"Acute decompensated congestive heart failure | Acute coronary syndrome / ischemic cardiomyopathy exacerbation | Pulmonary edema due to volume overload (e.g., renal dysfunction or fluid retention)",true,true
+Sonnet 5.5,13,1,Cellulitis,Cellulitis of the left leg | Deep vein thrombosis | Erysipelas,true,true
+Sonnet 5.5,13,2,Cellulitis,Cellulitis of the left leg | Deep vein thrombosis | Erysipelas,true,true
+Sonnet 5.5,13,3,Cellulitis,Cellulitis of the left leg | Deep vein thrombosis | Erysipelas,true,true
+Sonnet 5.5,14,2,Strep throat,Streptococcal pharyngitis (strep throat) | Viral pharyngitis/tonsillitis | Infectious mononucleosis,true,true
+Sonnet 5.5,14,1,Strep throat,Streptococcal pharyngitis (strep throat) | Viral pharyngitis/tonsillitis | Infectious mononucleosis,true,true
+Sonnet 5.5,14,3,Strep throat,Streptococcal pharyngitis (strep throat) | Viral pharyngitis/tonsillitis | Infectious mononucleosis,true,true
+Sonnet 5.5,15,2,Asthma exacerbation,Acute asthma exacerbation triggered by viral upper respiratory infection | Acute bronchitis | Pneumonia,true,true
+Sonnet 5.5,15,1,Asthma exacerbation,Acute asthma exacerbation triggered by viral upper respiratory infection | Acute bronchitis | Pneumonia,true,true
+Sonnet 5.5,15,3,Asthma exacerbation,Acute asthma exacerbation triggered by viral upper respiratory infection | Acute bronchitis | Pneumonia,true,true
+Sonnet 5.5,16,3,COPD exacerbation,COPD exacerbation | Acute bronchitis or pneumonia (lower respiratory tract infection) | Congestive heart failure exacerbation,true,true
+Sonnet 5.5,16,2,COPD exacerbation,COPD exacerbation | Acute bronchitis or pneumonia | Congestive heart failure exacerbation,true,true
+Sonnet 5.5,16,1,COPD exacerbation,COPD exacerbation | Acute bronchitis or pneumonia (lower respiratory tract infection) | Congestive heart failure exacerbation,true,true
+Sonnet 5.5,17,2,Deep vein thrombosis,Deep vein thrombosis | Cellulitis | Superficial thrombophlebitis,true,true
+Sonnet 5.5,17,1,Deep vein thrombosis,Deep vein thrombosis | Cellulitis | Venous stasis/heart failure-related edema,true,true
+Sonnet 5.5,17,3,Deep vein thrombosis,Deep vein thrombosis | Cellulitis | Superficial thrombophlebitis,true,true
+Sonnet 5.5,18,1,Hemolytic uremic syndrome,"Shiga toxin-producing E. coli (EHEC) infection / hemorrhagic colitis | Bacterial gastroenteritis (Salmonella, Shigella, or Campylobacter) | Hemolytic uremic syndrome (evolving from STEC infection)",true,false
+Sonnet 5.5,18,3,Hemolytic uremic syndrome,Shiga toxin-producing E. coli (EHEC) hemorrhagic colitis | Bacterial enteritis (Salmonella/Shigella/Campylobacter) | Hemolytic uremic syndrome (evolving),true,false
+Sonnet 5.5,18,2,Hemolytic uremic syndrome,Shiga toxin-producing E. coli (EHEC) hemorrhagic colitis | Bacterial gastroenteritis (Salmonella/Shigella/Campylobacter) | Inflammatory bowel disease,revisar,false
+Sonnet 5.5,19,3,Malaria,Malaria | Typhoid (enteric) fever | Dengue fever,true,true
+Sonnet 5.5,19,2,Malaria,Malaria | Typhoid (enteric) fever | Dengue fever,true,true
+Sonnet 5.5,19,1,Malaria,Malaria | Typhoid (enteric) fever | Dengue fever,true,true
+Sonnet 5.5,20,3,Pneumonia,Community-acquired bacterial pneumonia | Acute bronchitis | Influenza with secondary bacterial infection,true,true
+Sonnet 5.5,20,2,Pneumonia,Community-acquired bacterial pneumonia | Acute bronchitis | Influenza with secondary bacterial infection,true,true
+Sonnet 5.5,20,1,Pneumonia,Community-acquired bacterial pneumonia | Acute bronchitis | Influenza with secondary bacterial infection,true,true
+Sonnet 5.5,21,1,Mononucleosis,Infectious mononucleosis (Epstein-Barr virus) | Streptococcal pharyngitis | Peritonsillar abscess or other deep neck space infection,true,true
+Sonnet 5.5,21,2,Mononucleosis,Infectious mononucleosis (EBV) | Streptococcal pharyngitis | Peritonsillar abscess,true,true
+Sonnet 5.5,21,3,Mononucleosis,Infectious mononucleosis (EBV) | Streptococcal pharyngitis | Peritonsillar abscess,true,true
+Sonnet 5.5,22,1,Salmonella,Bacterial gastroenteritis (Campylobacter or Salmonella) | Foodborne illness from undercooked chicken with dehydration | Viral gastroenteritis,true,true
+Sonnet 5.5,22,3,Salmonella,Bacterial gastroenteritis (Campylobacter or Salmonella from undercooked chicken) | Foodborne illness / food poisoning with dehydration | Viral gastroenteritis,true,true
+Sonnet 5.5,22,2,Salmonella,Bacterial gastroenteritis (Campylobacter or Salmonella) | Foodborne illness from undercooked chicken (Salmonella enteritidis) | Viral gastroenteritis,true,true
+Sonnet 5.5,23,2,Shingles,Herpes zoster (shingles) | Contact dermatitis | Bullous impetigo,true,true
+Sonnet 5.5,23,1,Shingles,Herpes zoster (shingles) | Contact dermatitis | Herpes simplex infection,true,true
+Sonnet 5.5,23,3,Shingles,Herpes zoster (shingles) | Contact dermatitis | Bacterial skin infection (cellulitis/impetigo),true,true
+Sonnet 5.5,24,2,Urinary tract infection,Acute uncomplicated cystitis (urinary tract infection) | Acute pyelonephritis | Sexually transmitted infection urethritis (chlamydia/gonorrhea),true,true
+Sonnet 5.5,24,1,Urinary tract infection,Urinary tract infection (acute cystitis) | Acute pyelonephritis | Sexually transmitted infection (chlamydia/gonorrhea urethritis),true,true
+Sonnet 5.5,24,3,Urinary tract infection,Acute uncomplicated cystitis (urinary tract infection) | Pyelonephritis | Sexually transmitted infection urethritis (chlamydia/gonorrhea),true,true
+Sonnet 5.5,25,3,Acne,Acne vulgaris | Folliculitis | Contact or irritant dermatitis,true,true
+Sonnet 5.5,25,1,Acne,Acne vulgaris | Folliculitis | Contact or irritant dermatitis,true,true
+Sonnet 5.5,25,2,Acne,Acne vulgaris | Folliculitis | Contact dermatitis,true,true
+Sonnet 5.5,26,2,Acute sinusitis,Acute bacterial rhinosinusitis | Viral upper respiratory infection with sinusitis | Allergic rhinitis with secondary sinusitis,true,true
+Sonnet 5.5,26,3,Acute sinusitis,Acute bacterial rhinosinusitis | Viral upper respiratory infection with sinusitis | Allergic rhinitis with secondary sinusitis,true,true
+Sonnet 5.5,26,1,Acute sinusitis,Acute bacterial rhinosinusitis | Viral upper respiratory infection with sinusitis | Allergic rhinitis with secondary sinusitis,true,true
+Sonnet 5.5,27,2,Peptic ulcer disease,Duodenal peptic ulcer | Gastric ulcer / H. pylori gastritis | Gastroesophageal reflux disease / functional dyspepsia,true,true
+Sonnet 5.5,27,1,Peptic ulcer disease,Duodenal ulcer | Gastric ulcer | Gastritis,true,true
+Sonnet 5.5,27,3,Peptic ulcer disease,Duodenal peptic ulcer disease | Gastric ulcer / Helicobacter pylori gastritis | Gastroesophageal reflux disease / functional dyspepsia,true,true
+Sonnet 5.5,28,1,Vertigo,Benign paroxysmal positional vertigo | Vertebrobasilar insufficiency (bow hunter's/cervical vertigo) | Cervicogenic dizziness,true,true
+Sonnet 5.5,28,2,Vertigo,Benign paroxysmal positional vertigo | Vertebrobasilar insufficiency (bow hunter's/positional vertebral artery compromise) | Cervicogenic dizziness,true,true
+Sonnet 5.5,28,3,Vertigo,Benign paroxysmal positional vertigo | Vertebrobasilar insufficiency (bow hunter's/positional vertebral artery compromise) | Cervicogenic dizziness,true,true
+Sonnet 5.5,29,3,Diabetes,"Type 2 diabetes mellitus (new onset, hyperglycemia) | Type 1 diabetes mellitus / LADA | Diabetes insipidus",true,true
+Sonnet 5.5,29,2,Diabetes,Type 2 diabetes mellitus | Hyperglycemia from uncontrolled diabetes (early diabetic ketoacidosis/hyperosmolar state risk) | Diabetes insipidus,true,true
+Sonnet 5.5,29,1,Diabetes,Type 2 diabetes mellitus | Type 1 diabetes mellitus / latent autoimmune diabetes in adults | Diabetes insipidus,true,true
+Sonnet 5.5,30,1,Hemorrhoids,Hemorrhoids | Anal fissure | Colorectal cancer or polyp,true,true
+Sonnet 5.5,30,2,Hemorrhoids,Hemorrhoids | Anal fissure | Colorectal cancer or polyp,true,true
+Sonnet 5.5,30,3,Hemorrhoids,Hemorrhoids | Anal fissure | Colorectal cancer or polyp,true,true
+Sonnet 5.5,31,2,Osteoarthritis,Knee osteoarthritis | Degenerative meniscal tear | Chronic knee bursitis or tendinopathy,true,true
+Sonnet 5.5,31,3,Osteoarthritis,Knee osteoarthritis | Degenerative meniscal tear | Gout or pseudogout (calcium pyrophosphate deposition disease),true,true
+Sonnet 5.5,31,1,Osteoarthritis,Knee osteoarthritis | Degenerative meniscal tear | Gout or pseudogout (calcium pyrophosphate arthritis),true,true
+Sonnet 5.5,32,1,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder with mixed anxiety and depressed mood,true,true
+Sonnet 5.5,32,3,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder with mixed anxiety and depressed mood,true,true
+Sonnet 5.5,32,2,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder with mixed anxiety and depressed mood,true,true
+Sonnet 5.5,33,2,Obstructive sleep apnea,Obstructive sleep apnea | Hypothyroidism | Depression,true,true
+Sonnet 5.5,33,3,Obstructive sleep apnea,Obstructive sleep apnea | Hypothyroidism | Depression,true,true
+Sonnet 5.5,33,1,Obstructive sleep apnea,Obstructive sleep apnea | Hypothyroidism | Depression,true,true
+Sonnet 5.5,34,1,Heart failure exacerbation,Congestive heart failure (chronic heart failure exacerbation) | Coronary artery disease / ischemic cardiomyopathy | Chronic obstructive pulmonary disease or other chronic lung disease,true,true
+Sonnet 5.5,34,2,Heart failure exacerbation,Congestive heart failure (chronic heart failure exacerbation) | Coronary artery disease / ischemic cardiomyopathy | Chronic obstructive pulmonary disease or other chronic lung disease,true,true
+Sonnet 5.5,34,3,Heart failure exacerbation,"Congestive heart failure (chronic, decompensating) | Coronary artery disease / ischemic cardiomyopathy | Chronic obstructive pulmonary disease or other lung disease",true,true
+Sonnet 5.5,35,2,Hypothyroidism,Hypothyroidism | Iron deficiency anemia | Depression,true,true
+Sonnet 5.5,35,3,Hypothyroidism,Hypothyroidism | Iron deficiency anemia | Depression,true,true
+Sonnet 5.5,35,1,Hypothyroidism,Hypothyroidism | Iron deficiency anemia | Depression,true,true
+Sonnet 5.5,36,1,Gastroesophageal reflux disease,Gastroesophageal reflux disease (with laryngopharyngeal reflux) | Peptic ulcer disease / gastritis | Functional dyspepsia,true,true
+Sonnet 5.5,36,2,Gastroesophageal reflux disease,Gastroesophageal reflux disease (GERD) with laryngopharyngeal reflux | Peptic ulcer disease / gastritis | Functional dyspepsia,true,true
+Sonnet 5.5,36,3,Gastroesophageal reflux disease,Gastroesophageal reflux disease (GERD) with laryngopharyngeal reflux | Peptic ulcer disease / gastritis | Functional dyspepsia,true,true
+Sonnet 5.5,37,2,Common cold,Viral upper respiratory infection (common cold) with prolonged course | Allergic rhinitis | Acute bacterial or viral rhinosinusitis,true,true
+Sonnet 5.5,37,3,Common cold,Viral upper respiratory infection (common cold) | Acute rhinosinusitis | Allergic rhinitis,true,true
+Sonnet 5.5,37,1,Common cold,Viral upper respiratory infection (common cold) | Acute rhinosinusitis | Allergic rhinitis,true,true
+Sonnet 5.5,38,1,Viral conjunctivitis,Viral conjunctivitis | Allergic conjunctivitis | Bacterial conjunctivitis,true,true
+Sonnet 5.5,38,2,Viral conjunctivitis,Viral conjunctivitis | Allergic conjunctivitis | Bacterial conjunctivitis,true,true
+Sonnet 5.5,38,3,Viral conjunctivitis,Viral conjunctivitis | Allergic conjunctivitis | Bacterial conjunctivitis,true,true
+Sonnet 5.5,39,3,Viral pharyngitis,Viral upper respiratory tract infection (common cold) | Acute viral pharyngitis | Influenza or COVID-19,true,true
+Sonnet 5.5,39,1,Viral pharyngitis,Viral upper respiratory tract infection (common cold) | Acute viral pharyngitis | Influenza or COVID-19,true,true
+Sonnet 5.5,39,2,Viral pharyngitis,Viral upper respiratory tract infection (common cold) | Acute viral pharyngitis | Acute bronchitis,true,true
+Sonnet 5.5,40,3,Allergic rhinitis,"Allergic rhinitis (seasonal, with allergic conjunctivitis) | Allergic conjunctivitis | Chronic non-allergic rhinitis / vasomotor rhinitis",true,true
+Sonnet 5.5,40,1,Allergic rhinitis,"Allergic rhinitis (seasonal, with allergic conjunctivitis) | Allergic conjunctivitis | Chronic non-allergic (vasomotor) rhinitis",true,true
+Sonnet 5.5,40,2,Allergic rhinitis,Seasonal allergic rhinitis (allergic rhinoconjunctivitis) | Perennial allergic rhinitis | Chronic non-allergic rhinitis,true,true
+Sonnet 5.5,41,1,Musculoskeletal low back pain,Lumbar muscle strain | Lumbar facet joint sprain/dysfunction | Lumbar disc herniation without radiculopathy,true,true
+Sonnet 5.5,41,3,Musculoskeletal low back pain,Lumbar muscle strain | Lumbar facet joint sprain or dysfunction | Lumbar disc herniation without radiculopathy,true,true
+Sonnet 5.5,41,2,Musculoskeletal low back pain,Lumbar muscle strain | Lumbar facet joint sprain | Lumbar disc herniation without radiculopathy,true,true
+Sonnet 5.5,42,1,Bee sting without anaphylaxis,Local reaction to bee sting | Large local allergic reaction | Localized cellulitis or early secondary infection,true,true
+Sonnet 5.5,42,2,Bee sting without anaphylaxis,Local reaction to bee sting | Insect sting cellulitis or secondary skin infection | Large local allergic reaction,true,true
+Sonnet 5.5,42,3,Bee sting without anaphylaxis,Local reaction to bee sting | Insect sting cellulitis or secondary skin infection | Mild allergic reaction (large local reaction),true,true
+Sonnet 5.5,43,2,Canker sore,Recurrent aphthous stomatitis | Herpes simplex virus (recurrent oral herpes) | Behçet's disease,true,true
+Sonnet 5.5,43,1,Canker sore,Recurrent aphthous stomatitis | Herpetic stomatitis (recurrent herpes simplex) | Behçet's disease,true,true
+Sonnet 5.5,43,3,Canker sore,Recurrent aphthous stomatitis (canker sores) | Herpetic stomatitis (recurrent oral herpes simplex) | Behçet disease,true,true
+Sonnet 5.5,44,1,Candidal yeast infection,Vulvovaginal candidiasis (yeast infection) | Bacterial vaginosis | Trichomoniasis,true,true
+Sonnet 5.5,44,2,Candidal yeast infection,Vulvovaginal candidiasis (yeast infection) | Bacterial vaginosis | Trichomoniasis,true,true
+Sonnet 5.5,44,3,Candidal yeast infection,Vulvovaginal candidiasis (yeast infection) | Bacterial vaginosis | Trichomoniasis,true,true
+Sonnet 5.5,45,1,Eczema,Atopic dermatitis (eczema) | Contact dermatitis | Psoriasis,true,true
+Sonnet 5.5,45,3,Eczema,Atopic dermatitis (eczema) | Contact dermatitis | Psoriasis,true,true
+Sonnet 5.5,45,2,Eczema,Atopic dermatitis (eczema) | Contact dermatitis | Psoriasis,true,true
+Sonnet 5.5,46,2,Stye,Hordeolum (stye) | Chalazion | Preseptal cellulitis,true,true
+Sonnet 5.5,46,3,Stye,Hordeolum (stye) | Chalazion | Preseptal cellulitis,true,true
+Sonnet 5.5,46,1,Stye,Hordeolum (stye) | Chalazion | Blepharitis,true,true
+Sonnet 5.5,47,1,Influenza,Influenza | COVID-19 or other viral upper respiratory infection | Acute bronchitis,true,true
+Sonnet 5.5,47,2,Influenza,Influenza | Viral upper respiratory infection / acute bronchitis | COVID-19,true,true
+Sonnet 5.5,47,3,Influenza,Influenza | Viral upper respiratory infection / acute bronchitis | COVID-19,true,true
+Sonnet 5.5,48,1,Poison Ivy,Allergic contact dermatitis (poison ivy/oak) | Insect bite or sting reaction | Irritant contact dermatitis,true,true
+Sonnet 5.5,48,3,Poison Ivy,Contact dermatitis (poison ivy/plant-induced) | Insect bite or sting reaction | Cellulitis,true,true
+Sonnet 5.5,48,2,Poison Ivy,Contact dermatitis (poison ivy/plant-induced) | Insect bite or sting reaction | Cellulitis,true,true
+Opus 5.5,1,2,Liver failure,"Acetaminophen toxicity with acute liver failure and hepatic encephalopathy | Intentional or unintentional polysubstance overdose (e.g., co-ingested opioid/butalbital combination analgesics) | Intracranial pathology (e.g., hemorrhage or stroke) presenting with altered mental status",true,true
+Opus 5.5,1,3,Liver failure,"Acetaminophen toxicity with acute liver failure and hepatic encephalopathy | Intentional or mixed drug overdose (e.g., co-ingestants such as opioid- or butalbital-containing migraine medications) | Intracranial pathology (e.g., hemorrhage, stroke) or metabolic encephalopathy (e.g., hypoglycemia)",true,true
+Opus 5.5,1,1,Liver failure,Acetaminophen toxicity with acute liver failure and hepatic encephalopathy | Hypoglycemia secondary to acute liver failure | Intentional mixed overdose or other toxic/metabolic encephalopathy,true,true
+Opus 5.5,2,3,Appendicitis,Acute appendicitis (possibly perforated) | Acute bacterial gastroenteritis | Ovarian torsion,true,true
+Opus 5.5,2,1,Appendicitis,Acute appendicitis (possibly perforated) | Acute bacterial gastroenteritis | Ovarian torsion,true,true
+Opus 5.5,2,2,Appendicitis,Acute appendicitis (possibly perforated) | Acute bacterial gastroenteritis | Ovarian torsion,true,true
+Opus 5.5,3,3,Heart attack,Acute coronary syndrome (myocardial infarction) | Pulmonary embolism | Aortic dissection,true,true
+Opus 5.5,3,1,Heart attack,Acute coronary syndrome (myocardial infarction) | Pulmonary embolism | Aortic dissection,true,true
+Opus 5.5,3,2,Heart attack,Acute coronary syndrome (myocardial infarction) | Pulmonary embolism | Aortic dissection,true,true
+Opus 5.5,4,3,Kidney stones,Renal colic (ureteral stone) | Acute pyelonephritis | Abdominal aortic aneurysm rupture/dissection,true,true
+Opus 5.5,4,1,Kidney stones,Renal colic due to ureteral stone (nephrolithiasis/ureterolithiasis) | Acute pyelonephritis | Abdominal aortic aneurysm (leaking/rupture) or aortic dissection,true,true
+Opus 5.5,4,2,Kidney stones,Renal colic (ureteral stone) | Pyelonephritis | Abdominal aortic aneurysm rupture/dissection,true,true
+Opus 5.5,5,1,Meningitis,Bacterial meningitis | Viral meningitis | Encephalitis,true,true
+Opus 5.5,5,2,Meningitis,Bacterial meningitis | Viral meningitis | Encephalitis,true,true
+Opus 5.5,5,3,Meningitis,Bacterial meningitis | Viral meningitis | Subarachnoid hemorrhage,true,true
+Opus 5.5,6,3,Pulmonary embolism,Pulmonary embolism | Deep vein thrombosis | Pneumonia,true,true
+Opus 5.5,6,2,Pulmonary embolism,Pulmonary embolism | Deep vein thrombosis | Postoperative pneumonia,true,true
+Opus 5.5,6,1,Pulmonary embolism,Pulmonary embolism | Deep vein thrombosis | Postoperative pneumonia,true,true
+Opus 5.5,7,3,Rocky Mountain Spotted Fever,Rocky Mountain spotted fever | Meningococcemia | Ehrlichiosis,true,true
+Opus 5.5,7,2,Rocky Mountain Spotted Fever,Rocky Mountain spotted fever | Meningococcemia | Ehrlichiosis,true,true
+Opus 5.5,7,1,Rocky Mountain Spotted Fever,Rocky Mountain spotted fever | Meningococcemia | Lyme disease,true,true
+Opus 5.5,8,1,Stroke,"Acute ischemic stroke (cardioembolic, atrial fibrillation) | Hemorrhagic stroke (intracerebral hemorrhage) | Transient ischemic attack",true,true
+Opus 5.5,8,2,Stroke,"Acute ischemic stroke (cardioembolic, atrial fibrillation) | Hemorrhagic stroke (intracerebral hemorrhage) | Transient ischemic attack",true,true
+Opus 5.5,8,3,Stroke,"Acute ischemic stroke (cardioembolic, likely from atrial fibrillation) | Hemorrhagic stroke (intracerebral hemorrhage) | Transient ischemic attack",true,true
+Opus 5.5,9,2,Tetanus,Tetanus | Dystonic reaction | Strychnine poisoning,true,true
+Opus 5.5,9,1,Tetanus,Tetanus | Dystonic reaction (drug-induced) | Hypocalcemic tetany,true,true
+Opus 5.5,9,3,Tetanus,Tetanus | Dystonic reaction | Hypocalcemia (tetany),true,true
+Opus 5.5,10,1,COPD exacerbation,COPD exacerbation | Community-acquired pneumonia | Acute bronchitis,true,true
+Opus 5.5,10,2,COPD exacerbation,Acute exacerbation of COPD | Community-acquired pneumonia | Acute hypercapnic respiratory failure,true,true
+Opus 5.5,10,3,COPD exacerbation,Acute exacerbation of COPD | Community-acquired pneumonia | Acute hypercapnic respiratory failure,true,true
+Opus 5.5,11,3,Asthma exacerbation,Acute asthma exacerbation triggered by viral upper respiratory infection | Viral bronchitis | Community-acquired pneumonia,true,true
+Opus 5.5,11,1,Asthma exacerbation,Acute asthma exacerbation triggered by viral upper respiratory infection | Viral bronchitis | Community-acquired pneumonia,true,true
+Opus 5.5,11,2,Asthma exacerbation,Acute asthma exacerbation triggered by viral upper respiratory infection | Pneumonia | Acute bronchitis,true,true
+Opus 5.5,12,2,Heart failure exacerbation,Acute decompensated congestive heart failure | Acute coronary syndrome | Pulmonary embolism,true,true
+Opus 5.5,12,3,Heart failure exacerbation,Acute decompensated congestive heart failure | Acute coronary syndrome | Pulmonary embolism,true,true
+Opus 5.5,12,1,Heart failure exacerbation,Acute decompensated heart failure | Acute coronary syndrome | Pulmonary embolism,true,true
+Opus 5.5,13,2,Cellulitis,Cellulitis | Deep vein thrombosis | Erysipelas,true,true
+Opus 5.5,13,3,Cellulitis,Cellulitis | Deep vein thrombosis | Erysipelas,true,true
+Opus 5.5,13,1,Cellulitis,Cellulitis | Deep vein thrombosis | Erysipelas,true,true
+Opus 5.5,14,1,Strep throat,Streptococcal pharyngitis | Viral pharyngitis | Infectious mononucleosis,true,true
+Opus 5.5,14,2,Strep throat,"Streptococcal pharyngitis | Viral pharyngitis (e.g., adenovirus) | Infectious mononucleosis",true,true
+Opus 5.5,14,3,Strep throat,Streptococcal pharyngitis | Viral pharyngitis | Infectious mononucleosis,true,true
+Opus 5.5,15,1,Asthma exacerbation,Asthma exacerbation triggered by viral upper respiratory infection | Acute bronchitis | Community-acquired pneumonia,true,true
+Opus 5.5,15,2,Asthma exacerbation,Asthma exacerbation triggered by viral upper respiratory infection | Acute bronchitis | Community-acquired pneumonia,true,true
+Opus 5.5,15,3,Asthma exacerbation,Acute asthma exacerbation triggered by viral upper respiratory infection | Acute bronchitis | Community-acquired pneumonia,true,true
+Opus 5.5,16,3,COPD exacerbation,Acute exacerbation of COPD | Community-acquired pneumonia | Acute bronchitis,true,true
+Opus 5.5,16,1,COPD exacerbation,COPD exacerbation | Pneumonia | Acute bronchitis,true,true
+Opus 5.5,16,2,COPD exacerbation,COPD exacerbation | Pneumonia | Acute bronchitis,true,true
+Opus 5.5,17,1,Deep vein thrombosis,Deep vein thrombosis | Cellulitis | Superficial thrombophlebitis,true,true
+Opus 5.5,17,2,Deep vein thrombosis,Deep vein thrombosis | Cellulitis | Superficial thrombophlebitis,true,true
+Opus 5.5,17,3,Deep vein thrombosis,Deep vein thrombosis | Cellulitis | Superficial thrombophlebitis,true,true
+Opus 5.5,18,1,Hemolytic uremic syndrome,"Shiga toxin-producing E. coli (E. coli O157:H7) enterocolitis with risk of hemolytic uremic syndrome | Bacterial gastroenteritis (Salmonella, Shigella, or Campylobacter) | Intussusception",true,true
+Opus 5.5,18,2,Hemolytic uremic syndrome,"Shiga toxin-producing E. coli (O157:H7) hemorrhagic colitis with risk of hemolytic uremic syndrome | Bacterial enterocolitis (Salmonella, Shigella, or Campylobacter) | Intussusception",true,true
+Opus 5.5,18,3,Hemolytic uremic syndrome,"Shiga toxin-producing E. coli (E. coli O157:H7) hemorrhagic colitis with risk of hemolytic uremic syndrome | Bacterial enterocolitis (Salmonella, Shigella, or Campylobacter) | Intussusception",true,true
+Opus 5.5,19,2,Malaria,Malaria | Typhoid fever (enteric fever) | Dengue fever,true,true
+Opus 5.5,19,3,Malaria,Malaria | Typhoid fever (enteric fever) | Dengue fever,true,true
+Opus 5.5,19,1,Malaria,Malaria | Typhoid fever (enteric fever) | Dengue fever,true,true
+Opus 5.5,20,2,Pneumonia,Community-acquired pneumonia | Acute bronchitis | COPD exacerbation,true,true
+Opus 5.5,20,1,Pneumonia,Community-acquired pneumonia | Acute bronchitis | COPD exacerbation,true,true
+Opus 5.5,20,3,Pneumonia,Community-acquired pneumonia | Acute bronchitis | Acute exacerbation of COPD,true,true
+Opus 5.5,21,3,Mononucleosis,Infectious mononucleosis (EBV) | Streptococcal pharyngitis | Peritonsillar abscess,true,true
+Opus 5.5,21,2,Mononucleosis,Infectious mononucleosis (EBV) | Streptococcal pharyngitis | Peritonsillar abscess,true,true
+Opus 5.5,21,1,Mononucleosis,Infectious mononucleosis (EBV) | Streptococcal pharyngitis | Peritonsillar abscess,true,true
+Opus 5.5,22,1,Salmonella,Campylobacter enteritis | Salmonella gastroenteritis | Viral gastroenteritis,true,false
+Opus 5.5,22,2,Salmonella,Bacterial gastroenteritis (Campylobacter food poisoning) | Salmonella gastroenteritis | Viral gastroenteritis,true,false
+Opus 5.5,22,3,Salmonella,Bacterial gastroenteritis (Salmonella or Campylobacter food poisoning) | Viral gastroenteritis | Acute appendicitis,true,true
+Opus 5.5,23,1,Shingles,"Herpes zoster (shingles), thoracic dermatome | Contact dermatitis | Bullous impetigo",true,true
+Opus 5.5,23,3,Shingles,Herpes zoster (shingles) | Contact dermatitis | Herpes simplex virus infection (zosteriform),true,true
+Opus 5.5,23,2,Shingles,Herpes zoster (shingles) | Contact dermatitis | Bullous impetigo,true,true
+Opus 5.5,24,2,Urinary tract infection,Acute cystitis (uncomplicated urinary tract infection) | Early acute pyelonephritis | Sexually transmitted urethritis (chlamydia/gonorrhea),true,true
+Opus 5.5,24,1,Urinary tract infection,Acute cystitis (uncomplicated urinary tract infection) | Early acute pyelonephritis | Sexually transmitted urethritis (chlamydia/gonorrhea),true,true
+Opus 5.5,24,3,Urinary tract infection,Acute uncomplicated cystitis (lower urinary tract infection) | Early acute pyelonephritis | Sexually transmitted urethritis/cervicitis (chlamydia or gonorrhea),true,true
+Opus 5.5,25,2,Acne,Acne vulgaris | Folliculitis | Seborrheic dermatitis,true,true
+Opus 5.5,25,1,Acne,Acne vulgaris | Folliculitis | Perioral/periorificial dermatitis,true,true
+Opus 5.5,25,3,Acne,Acne vulgaris | Folliculitis | Perioral/periorificial dermatitis,true,true
+Opus 5.5,26,2,Acute sinusitis,Acute bacterial rhinosinusitis | Acute viral rhinosinusitis | Dental abscess with secondary maxillary sinusitis,true,true
+Opus 5.5,26,1,Acute sinusitis,Acute bacterial rhinosinusitis | Viral rhinosinusitis | Allergic rhinitis with secondary sinusitis,true,true
+Opus 5.5,26,3,Acute sinusitis,Acute bacterial rhinosinusitis | Acute viral rhinosinusitis | Allergic rhinitis with secondary sinusitis,true,true
+Opus 5.5,27,2,Peptic ulcer disease,Duodenal ulcer | Gastritis | Gastroesophageal reflux disease,true,true
+Opus 5.5,27,1,Peptic ulcer disease,Duodenal ulcer (peptic ulcer disease) | Gastritis | Gastroesophageal reflux disease,true,true
+Opus 5.5,27,3,Peptic ulcer disease,Duodenal ulcer (peptic ulcer disease) | Gastritis | Gastroesophageal reflux disease,true,true
+Opus 5.5,28,2,Vertigo,Benign paroxysmal positional vertigo | Vertebrobasilar insufficiency | Vestibular migraine,true,true
+Opus 5.5,28,3,Vertigo,Benign paroxysmal positional vertigo | Vertebrobasilar insufficiency | Vestibular migraine,true,true
+Opus 5.5,28,1,Vertigo,Benign paroxysmal positional vertigo | Vertebrobasilar insufficiency | Vestibular migraine,true,true
+Opus 5.5,29,2,Diabetes,Type 2 diabetes mellitus (new-onset symptomatic hyperglycemia) | Hyperosmolar hyperglycemic state (early) | Diabetes insipidus,true,true
+Opus 5.5,29,1,Diabetes,"Type 2 diabetes mellitus (new onset, symptomatic hyperglycemia) | Hyperosmolar hyperglycemic state (early) | Diabetes insipidus",true,true
+Opus 5.5,29,3,Diabetes,Type 2 diabetes mellitus | Diabetes insipidus | Hypercalcemia,true,true
+Opus 5.5,30,3,Hemorrhoids,Anal fissure | Hemorrhoids | Colorectal cancer,true,false
+Opus 5.5,30,1,Hemorrhoids,Anal fissure | Hemorrhoids | Colorectal cancer,true,false
+Opus 5.5,30,2,Hemorrhoids,Anal fissure | Hemorrhoids | Colorectal cancer,true,false
+Opus 5.5,31,1,Osteoarthritis,Knee osteoarthritis | Degenerative meniscal tear | Crystal arthropathy (gout or pseudogout/CPPD),true,true
+Opus 5.5,31,2,Osteoarthritis,Knee osteoarthritis | Degenerative meniscal tear | Gout or pseudogout (crystal arthropathy),true,true
+Opus 5.5,31,3,Osteoarthritis,Knee osteoarthritis | Degenerative meniscal tear | Crystal arthropathy (gout or pseudogout),true,true
+Opus 5.5,32,3,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder with mixed anxiety and depressed mood,true,true
+Opus 5.5,32,1,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder with mixed anxiety and depressed mood,true,true
+Opus 5.5,32,2,Depression,Major depressive disorder | Generalized anxiety disorder | Adjustment disorder with mixed anxiety and depressed mood,true,true
+Opus 5.5,33,2,Obstructive sleep apnea,Obstructive sleep apnea | Hypothyroidism | Depression,true,true
+Opus 5.5,33,1,Obstructive sleep apnea,Obstructive sleep apnea | Hypothyroidism | Depression,true,true
+Opus 5.5,33,3,Obstructive sleep apnea,Obstructive sleep apnea | Hypothyroidism | Depression,true,true
+Opus 5.5,34,3,Heart failure exacerbation,Congestive heart failure | Chronic obstructive pulmonary disease | Unstable angina / ischemic heart disease,true,true
+Opus 5.5,34,2,Heart failure exacerbation,Congestive heart failure (ischemic cardiomyopathy) | Coronary artery disease / anginal equivalent | Chronic obstructive pulmonary disease exacerbation,true,true
+Opus 5.5,34,1,Heart failure exacerbation,Congestive heart failure (ischemic cardiomyopathy) | Recurrent myocardial ischemia / angina equivalent | COPD or other chronic lung disease,true,true
+Opus 5.5,35,2,Hypothyroidism,Hypothyroidism (Hashimoto's thyroiditis) | Iron deficiency anemia | Depression,true,true
+Opus 5.5,35,1,Hypothyroidism,Hypothyroidism (likely Hashimoto's thyroiditis) | Iron deficiency anemia | Depression,true,true
+Opus 5.5,35,3,Hypothyroidism,Hypothyroidism (Hashimoto's thyroiditis) | Iron deficiency anemia | Depression,true,true
+Opus 5.5,36,1,Gastroesophageal reflux disease,Gastroesophageal reflux disease (GERD) with laryngopharyngeal reflux | Peptic ulcer disease / gastritis | Functional dyspepsia,true,true
+Opus 5.5,36,3,Gastroesophageal reflux disease,Gastroesophageal reflux disease with laryngopharyngeal reflux | Peptic ulcer disease | Functional dyspepsia,true,true
+Opus 5.5,36,2,Gastroesophageal reflux disease,Gastroesophageal reflux disease (GERD) with laryngopharyngeal reflux | Peptic ulcer disease / functional dyspepsia | Gastritis,true,true
+Opus 5.5,37,3,Common cold,Viral upper respiratory infection (common cold) | Acute bacterial rhinosinusitis | Allergic rhinitis,true,true
+Opus 5.5,37,1,Common cold,Viral upper respiratory infection (common cold) | Acute bacterial rhinosinusitis | Allergic rhinitis,true,true
+Opus 5.5,37,2,Common cold,Viral upper respiratory infection (common cold) | Acute bacterial rhinosinusitis | Allergic rhinitis,true,true
+Opus 5.5,38,3,Viral conjunctivitis,Viral conjunctivitis | Allergic conjunctivitis | Bacterial conjunctivitis,true,true
+Opus 5.5,38,1,Viral conjunctivitis,Viral conjunctivitis | Allergic conjunctivitis | Bacterial conjunctivitis,true,true
+Opus 5.5,38,2,Viral conjunctivitis,Viral conjunctivitis | Allergic conjunctivitis | Bacterial conjunctivitis,true,true
+Opus 5.5,39,1,Viral pharyngitis,Viral upper respiratory tract infection (common cold) | Viral pharyngitis | Acute bronchitis,true,true
+Opus 5.5,39,2,Viral pharyngitis,Viral upper respiratory infection (common cold) | Viral pharyngitis | Streptococcal pharyngitis,true,true
+Opus 5.5,39,3,Viral pharyngitis,Viral upper respiratory infection (common cold) | Viral pharyngitis | Acute bronchitis,true,true
+Opus 5.5,40,2,Allergic rhinitis,Seasonal allergic rhinitis with allergic conjunctivitis | Perennial allergic rhinitis with seasonal exacerbation | Chronic rhinosinusitis,true,true
+Opus 5.5,40,1,Allergic rhinitis,Seasonal allergic rhinitis with allergic conjunctivitis | Perennial allergic rhinitis with seasonal exacerbation | Chronic rhinosinusitis,true,true
+Opus 5.5,40,3,Allergic rhinitis,Allergic rhinitis (seasonal) | Allergic conjunctivitis | Chronic rhinosinusitis,true,true
+Opus 5.5,41,2,Musculoskeletal low back pain,Acute mechanical low back pain (lumbar muscle strain) | Lumbar disc herniation without radiculopathy | Lumbar facet joint syndrome,true,true
+Opus 5.5,41,3,Musculoskeletal low back pain,Mechanical low back pain (lumbar muscle strain) | Lumbar disc herniation without radiculopathy | Lumbar facet joint syndrome,true,true
+Opus 5.5,41,1,Musculoskeletal low back pain,Mechanical low back pain (lumbar muscle strain) | Lumbar disc herniation without radiculopathy | Lumbar facet joint syndrome,true,true
+Opus 5.5,42,3,Bee sting without anaphylaxis,Local reaction to bee sting | Large local allergic reaction to bee sting | Cellulitis secondary to insect sting,true,true
+Opus 5.5,42,2,Bee sting without anaphylaxis,Local reaction to bee sting | Large local reaction to insect sting | Cellulitis at sting site,true,true
+Opus 5.5,42,1,Bee sting without anaphylaxis,Local reaction to bee sting | Large local allergic reaction to insect sting | Cellulitis (secondary infection of sting site),true,true
+Opus 5.5,43,1,Canker sore,Recurrent aphthous stomatitis | Recurrent herpes labialis/intraoral HSV | Behçet disease,true,true
+Opus 5.5,43,3,Canker sore,Recurrent aphthous stomatitis | Recurrent herpes simplex (herpes labialis/intraoral) | Behçet disease,true,true
+Opus 5.5,43,2,Canker sore,Recurrent aphthous stomatitis | Recurrent herpes labialis/intraoral herpes simplex | Behçet disease,true,true
+Opus 5.5,44,1,Candidal yeast infection,Vulvovaginal candidiasis | Bacterial vaginosis | Trichomoniasis,true,true
+Opus 5.5,44,2,Candidal yeast infection,Vulvovaginal candidiasis | Bacterial vaginosis | Trichomoniasis,true,true
+Opus 5.5,44,3,Candidal yeast infection,Vulvovaginal candidiasis | Bacterial vaginosis | Trichomoniasis,true,true
+Opus 5.5,45,3,Eczema,Atopic dermatitis (eczema) | Allergic contact dermatitis | Psoriasis,true,true
+Opus 5.5,45,2,Eczema,Atopic dermatitis (eczema) | Allergic contact dermatitis | Psoriasis,true,true
+Opus 5.5,45,1,Eczema,Atopic dermatitis (eczema) | Allergic contact dermatitis | Psoriasis,true,true
+Opus 5.5,46,3,Stye,Hordeolum (stye) | Chalazion | Preseptal (periorbital) cellulitis,true,true
+Opus 5.5,46,1,Stye,Hordeolum (stye) | Chalazion | Preseptal (periorbital) cellulitis,true,true
+Opus 5.5,46,2,Stye,Hordeolum (stye) | Chalazion | Preseptal (periorbital) cellulitis,true,true
+Opus 5.5,47,2,Influenza,Influenza | COVID-19 | Acute bronchitis,true,true
+Opus 5.5,47,1,Influenza,Influenza | COVID-19 | Community-acquired pneumonia,true,true
+Opus 5.5,47,3,Influenza,Influenza | COVID-19 | Community-acquired pneumonia,true,true
+Opus 5.5,48,1,Poison Ivy,Allergic contact dermatitis (poison ivy/Toxicodendron dermatitis) | Insect bite or sting local reaction | Cellulitis,true,true
+Opus 5.5,48,2,Poison Ivy,Allergic contact dermatitis (poison ivy/oak) | Insect bite reaction | Cellulitis,true,true
+Opus 5.5,48,3,Poison Ivy,Allergic contact dermatitis (poison ivy/oak) | Insect bite or sting reaction | Cellulitis,true,true

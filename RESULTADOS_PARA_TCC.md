@@ -315,3 +315,20 @@ Pendente de você: depende de `GROQ_API_KEY` real apenas em variável de ambient
 
 ### (c) Transcrição de áudio — NÃO FEITO
 Pendente de você: exige a chave real e um áudio fictício curto (a gravação pelo microfone não funciona no navegador automatizado sem dispositivo de áudio).
+
+
+---
+
+## Tarefa 7 — Benchmark: harness e CSVs por chamada no repositório; pensamento estendido
+
+**Onde estava o harness:** `eval/` na raiz do repositório (pasta **não versionada**; o `.env` dela é ignorado pelo Git e **não foi lido nem copiado**). Não precisei pedir caminho.
+
+**O que foi publicado:** pasta `benchmark/` com o código do harness (`runner.ts`, `relatorio.ts`, `prompt.ts`, `adapters/`, `validate.ts`, `types.ts`, `package.json` e lock, `.env.example` sem valores), as **48 vinhetas** (`harness/vinhetas.csv`), os **CSVs por chamada** (um por modelo, **144 chamadas cada**: 48 vinhetas × 3 repetições) e o `resumo.md`, mais um `README.md` com instruções de reprodução (versões, comandos, parâmetros). Varredura por chaves, tokens, caminhos pessoais e o nome do autor: **nada encontrado**.
+
+**Pensamento estendido (resposta objetiva, com a evidência no `benchmark/README.md`):**
+- **Claude Sonnet 5, Sonnet 5.5 e Opus 5.5:** o harness **não configura pensamento nem esforço** (nenhuma flag no CLI em `adapters/claudeCode.ts`; a variável `CLAUDE_EFFORT` é removida do ambiente do subprocesso). O padrão do CLI para cada modelo **não é determinável** pelo harness. Indício indireto (inferência): `tokens_out` médio de 64, 73 e 97, compatível com só a resposta visível, sem pensamento estendido relevante.
+- **Groq `gpt-oss-120b`:** o pedido **não envia `reasoning_effort`** (só `temperature: 0` e `max_tokens: 512`); vale o padrão do provedor, não registrado. `tokens_out` médio 230 para uma resposta de ~65 tokens indica tokens de raciocínio (inferência).
+- **Não foi possível determinar** se o CLI aplicou pensamento por padrão nem o nível padrão do Groq. Para fechar, só rodando de novo com o parâmetro explícito, o que consome cota e **não foi feito**.
+
+**Conferência da Tabela 2 (recalculada dos CSVs): nenhuma diferença.** Groq 132/144 e 978 ms; Sonnet 5 132/144 e 3.658 ms; Sonnet 5.5 138/144 e 1.811 ms; Opus 5.5 137/144 e 2.709 ms. Há ainda uma execução anterior do Sonnet 5 (`-run1`: 132/144, 3.590 ms), preservada e fora da Tabela 2.
+**Cuidado:** o tempo dos modelos Claude é `duration_api_ms` do CLI, e o do Groq é medido pelo harness (grandezas parecidas, não idênticas).
