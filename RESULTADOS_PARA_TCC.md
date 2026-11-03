@@ -332,3 +332,72 @@ Pendente de você: exige a chave real e um áudio fictício curto (a gravação 
 
 **Conferência da Tabela 2 (recalculada dos CSVs): nenhuma diferença.** Groq 132/144 e 978 ms; Sonnet 5 132/144 e 3.658 ms; Sonnet 5.5 138/144 e 1.811 ms; Opus 5.5 137/144 e 2.709 ms. Há ainda uma execução anterior do Sonnet 5 (`-run1`: 132/144, 3.590 ms), preservada e fora da Tabela 2.
 **Cuidado:** o tempo dos modelos Claude é `duration_api_ms` do CLI, e o do Groq é medido pelo harness (grandezas parecidas, não idênticas).
+
+
+---
+
+## Tarefa 8 — Limiares de alerta de sinais vitais
+
+**Não alterei nenhum valor e não escolhi nenhum valor clínico.** Levantamento completo em `evidencias_tcc/rodada_final/limiares_sinais_vitais.md` (commit `77d8e90`).
+
+| Sinal | Crítico | Atenção | Onde no código | Fonte registrada? |
+|---|---|---|---|---|
+| SpO₂ | `< 92` | `< 95` | `vitalStatus.ts` (frontend); crítico também em `calcular-metricas.ts` (backend) | Não |
+| Frequência cardíaca | `> 100` ou `< 60` | `> 90` | idem | Não |
+| Temperatura | `> 38,5 °C` | `>= 37,8 °C` | idem | Não |
+| Pressão arterial | — | — | texto livre (`varchar(20)`), **sem limiar e sem alerta** | — |
+
+Faixas de recusa no servidor (não são alertas): FC 0–300 bpm (inteiro), SpO₂ 0–100 %, temperatura 25–45 °C, PA até 20 caracteres. Nenhuma tem fonte registrada.
+
+**Achados:**
+- **Nenhuma fonte clínica** aparece em comentários, testes ou documentos. O teste do frontend só diz "Limiares exigidos: …" sem dizer por quem; o do backend diz que os limites estão "sem fonte clínica documentada".
+- **A referência do HC-UFTM citada no TCC não existe no repositório** (busca por `UFTM`): não sei que valores ela traz e não extrapolei.
+- **Duplicação:** os limiares de crítico estão em dois lugares (frontend e backend) e o backend não tem o nível "atenção"; mudar um sem o outro faz a tela e a lista "atenção"/métricas divergirem.
+
+**As duas opções estão em branches separadas, a partir de `77d8e90`; a branch principal (`evolucao-estrutura`) não recebeu código novo:**
+- **Opção A — `limiares-opcao-a-pressao-estruturada`** (commit `6d102f4`): limiares centralizados em um arquivo por pacote (`fonte: null` em todos, valores idênticos aos atuais); campos `pressao_sistolica` e `pressao_diastolica` (migration reversível, testada com aplicar, reverter e reaplicar, `t8_opcao_a_migration.log`; entidade, DTO, serviço); **nenhum limiar de pressão definido** e **nenhum teto de validação** (só "inteiro, não negativo"). **Pendente:** os três formulários do frontend (cadastro, edição e triagem mobile) ainda não têm os campos novos. Testes: backend 157, frontend 25 (o spec existente de `vitalStatus` confirma que os alertas não mudaram).
+- **Opção B — `limiares-opcao-b-chave-de-alertas`** (commit `5773fdb`): chave `ALERTAS_SINAIS_VITAIS=false` (backend) e `VITE_ALERTAS_SINAIS_VITAIS=false` (frontend) que desliga os alertas, mantendo o registro e a exibição dos sinais; padrão ligado (comportamento atual). Testes: backend 156, frontend 27.
+- As duas opções não foram combinadas entre si nem mescladas.
+
+**Pendente de você:** a fonte clínica dos limiares (ou de um profissional), os valores de pressão (se for a Opção A) e a escolha entre as opções.
+
+
+---
+
+## Tarefa 9 — ver acima (feita junto com a Tarefa 5)
+
+---
+
+## Tarefa 10 — Instrumentos do ensaio cronometrado papel × HealthHub (preparados; **o ensaio é seu e não foi executado**)
+
+Pasta: `evidencias_tcc/rodada_final/ensaio_cronometrado/`. **Nenhum resultado, tempo ou número do ensaio foi preenchido ou estimado.**
+
+| Arquivo | Função |
+|---|---|
+| `casos_fonte.csv` | Os 5 casos (`FICTÍCIO-01` a `-05`): categorias e chegadas do seu roteiro (amarela 08:00 e 08:05; laranja 08:10; verde 08:15; azul 08:20) e CPFs fictícios; **idade, sexo, motivo e sinais vitais artificiais estão em branco** |
+| `gerar_instrumentos.mjs` | Gera, a partir do CSV acima, os cartões, a ficha de papel, a planilha de coleta e o roteiro |
+| `cartoes_caso.html` | Um cartão imprimível por paciente (A4), com a categoria artificial e o aviso de que **não é classificação clínica nem gabarito** |
+| `formulario_papel.html` | Ficha de papel com os mesmos campos do sistema (cadastro, sinais vitais, motivo, cor de risco) |
+| `coleta_ensaio.csv` | Planilha com colunas caso, repetição, tentativa, método, ordem de execução, início, fim, tempo em segundos, campos obrigatórios completos, erros/omissões, falhas, ajuda e observações; 30 linhas válidas (5 casos × 3 repetições × 2 métodos) + 2 de familiarização (fora do cálculo), **todas com tempos em branco** |
+| `roteiro_execucao.md` | Ordem **alternada** das modalidades por caso e repetição, regras de cronometragem, familiarização, preservação de todas as tentativas e as declarações obrigatórias (ensaio solo, viés de familiaridade) |
+| `reiniciar_sistema_limpo.mjs` | Deixa o sistema limpo entre repetições (apaga fila e pacientes `FICTÍCIO-*` do banco de teste isolado; recusa rodar se o banco não parecer de teste) |
+| `analisar_ensaio.mjs` | **Para depois da coleta:** média, mediana, mínimo, máximo, desvio-padrão, taxa de completude, erros, diferença e razão papel ÷ sistema, tabela e gráfico de barras (SVG). Avisa quando n é pequeno e não afirma significância estatística |
+
+**O que ficou pendente de você:**
+1. **Os dados clínicos dos casos** (idade, sexo, motivo, sinais vitais artificiais): o Apêndice A do TCC **não está no repositório** e eu não inventei valores. Preencha `casos_fonte.csv` e rode `node gerar_instrumentos.mjs` de novo para regenerar os cartões.
+2. Executar o ensaio com cronômetro e preencher `coleta_ensaio.csv`; depois rodar `node analisar_ensaio.mjs`.
+3. Com 3 repetições (ímpar) a alternância não fica perfeitamente balanceada por caso (cada caso começa 2 vezes por um método e 1 pelo outro); o roteiro sugere 4 repetições.
+**Teste do código de análise:** rodei `analisar_ensaio.mjs` com um CSV **sintético, rotulado e descartado** (em pasta temporária, fora das evidências) só para ver se o cálculo funciona; esses números não existem em nenhum arquivo de resultado.
+
+---
+
+## Pendências que dependem de você
+
+1. **Chave real da Groq (opcional, só se autorizar):** medir a latência do chat de IA e da transcrição (Tarefa 5), e fazer as capturas do chat com CID e da transcrição de áudio (Tarefa 6).
+2. **Fonte clínica dos limiares de sinais vitais** (e o limiar de pressão, se escolher a Opção A) e a **escolha entre as Opções A e B** da Tarefa 8.
+3. **Metas finais** de desempenho e disponibilidade (as da Tarefa 5 são só sugestões).
+4. **Preço de hospedagem:** não pesquisado; os recursos medidos estão na Tarefa 9.
+5. **Execução do ensaio cronometrado** e os dados clínicos dos 5 casos (Tarefa 10).
+6. **Nome real do autor no seed** (`HealthHub-BackEnd/src/database/seed.ts`, usuário enfermeiro): decidir se troca no código. Enquanto isso, nos bancos de teste eu renomeio o usuário para não vazar o nome nas capturas.
+7. **Decidir o que commitar ou ignorar** das pastas soltas (`coleta_tcc/`, `eval/`, `Print_healthhub/` etc.) e se faz **push** e merge: nada desta rodada foi enviado ao GitHub.
+8. Itens de produto apontados nos testes: o salto de estado na esteira é aceito (Tarefa 3); o histórico da IA não é limitado no backend (Tarefa 3); a recepção recebe a mensagem genérica do guard no S4; a rota de fechar visita não registra evento.
