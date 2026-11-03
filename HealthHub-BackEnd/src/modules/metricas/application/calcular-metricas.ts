@@ -57,7 +57,12 @@ function media(nums: number[]): number | null {
   return nums.length ? Math.round(nums.reduce((a, b) => a + b, 0) / nums.length) : null;
 }
 
-/** Mesmos limiares de "crítico" do frontend (utils/vitalStatus.ts). */
+/**
+ * Mesmos limiares de "crítico" do frontend (utils/vitalStatus.ts), que traz o detalhe da fonte consultada
+ * (POP.HC-UFTM-DENF.003 v6, Ebserh, 2025). Resumo: FC 60/100 e SpO₂ coincidem com o POP/NEWS 2; a temperatura
+ * > 38,5 °C NÃO aparece no POP (ele usa 38,1 e 39,1) e é valor adotado pelo desenvolvedor, sem fonte registrada.
+ * Valores não alterados; mudar um lado exige mudar o outro.
+ */
 export function motivoCritico(s: SinaisInput | undefined): string | null {
   if (!s) return null;
   const spo2 = Number(s.saturacao_oxigenio ?? 0);
