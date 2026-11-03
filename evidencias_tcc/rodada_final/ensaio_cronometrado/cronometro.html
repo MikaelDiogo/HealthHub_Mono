@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cronômetro do ensaio</title>
+<style>
+  :root { --fundo:#f7f8fa; --tinta:#14202e; --suave:#5b6b7c; --borda:#d9dee5; --azul:#1d4ed8; --verde:#15803d; --vermelho:#b91c1c; --amarelo:#a16207; }
+  @media (prefers-color-scheme: dark) { :root { --fundo:#0f1720; --tinta:#e8edf3; --suave:#9aa8b8; --borda:#2a3644; --azul:#6ea0ff; --verde:#4ade80; --vermelho:#f87171; --amarelo:#facc15; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font:16px/1.5 system-ui, Arial, sans-serif; background:var(--fundo); color:var(--tinta); }
+  main { max-width: 980px; margin: 0 auto; padding: 20px 16px 60px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  .suave { color: var(--suave); font-size: 14px; }
+  .painel { border:1px solid var(--borda); border-radius:8px; padding:16px; margin:14px 0; background: color-mix(in srgb, var(--fundo) 60%, transparent); }
+  .linha { display:flex; flex-wrap:wrap; gap:12px; align-items:center; }
+  .etiqueta { display:inline-block; padding:2px 10px; border:1px solid var(--borda); border-radius:6px; font-weight:600; }
+  .papel { color: var(--amarelo); } .sistema { color: var(--azul); }
+  .tempo { font: 700 56px/1.1 ui-monospace, Consolas, monospace; letter-spacing: 1px; margin: 6px 0; }
+  button { font: inherit; padding: 10px 18px; border-radius:8px; border:1px solid var(--borda); background:transparent; color:var(--tinta); cursor:pointer; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline:3px solid var(--azul); outline-offset:2px; }
+  button.principal { background:var(--azul); color:#fff; border-color:var(--azul); font-weight:600; }
+  button.parar { background:var(--vermelho); color:#fff; border-color:var(--vermelho); font-weight:600; }
+  button[disabled] { opacity:.45; cursor:not-allowed; }
+  table { border-collapse: collapse; width:100%; font-size:14px; }
+  td, th { border:1px solid var(--borda); padding:5px 8px; text-align:left; }
+  th { color: var(--suave); font-weight:600; }
+  .cartao td:first-child { width: 38%; color: var(--suave); }
+  label { display:block; margin:10px 0 4px; font-weight:600; }
+  input[type=number], input[type=text], textarea { width:100%; padding:8px; border:1px solid var(--borda); border-radius:6px; background:transparent; color:var(--tinta); font:inherit; }
+  .opcoes label { display:inline-block; margin-right:16px; font-weight:400; }
+  .atual { background: color-mix(in srgb, var(--azul) 14%, transparent); }
+  .feito { color: var(--verde); }
+  .aviso { border-left:4px solid var(--amarelo); padding:8px 12px; margin:10px 0; font-size:14px; }
+  .erro { color: var(--vermelho); font-weight:600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Cronômetro do ensaio — papel × HealthHub</h1>
+  <div class="suave">Ensaio exploratório feito por você, com viés de familiaridade. Os tempos são gravados sozinhos na planilha. Nenhuma medição é apagada.</div>
+
+  <div id="progresso" class="painel suave">Carregando…</div>
+
+  <div id="rodada" class="painel" hidden>
+    <div class="linha">
+      <strong id="rotulo"></strong>
+      <span id="metodo" class="etiqueta"></span>
+      <span id="tentativa" class="suave"></span>
+      <span id="ordem" class="suave"></span>
+    </div>
+    <div id="avisoMetodo" class="aviso"></div>
+    <table class="cartao" id="cartao"></table>
+
+    <div class="tempo" id="tempo" aria-live="off">00:00.0</div>
+    <div class="linha">
+      <button id="btnLimpar" type="button">1. Deixar o sistema limpo</button>
+      <button id="btnIniciar" class="principal" type="button">2. Iniciar (barra de espaço)</button>
+      <button id="btnParar" class="parar" type="button" disabled>3. Parar (barra de espaço)</button>
+      <button id="btnCancelar" type="button" disabled>Cancelar esta medição</button>
+    </div>
+    <div id="msgLimpar" class="suave"></div>
+
+    <form id="form" hidden>
+      <h2 style="font-size:17px;margin:18px 0 0">4. Como foi? (preencha e salve)</h2>
+      <div class="suave">Tempo medido: <strong id="tempoFinal"></strong></div>
+      <label>Todos os campos obrigatórios ficaram completos e iguais ao cartão?</label>
+      <div class="opcoes"><label><input type="radio" name="completo" value="sim" required> Sim</label><label><input type="radio" name="completo" value="nao"> Não</label></div>
+      <label for="erros">Quantos erros de digitação ou campos omitidos? (0 se nenhum)</label>
+      <input type="number" id="erros" min="0" step="1" value="0" required>
+      <label for="falhas">Falhas (sistema travou, mensagem de erro, etc.)</label>
+      <input type="text" id="falhas" placeholder="Deixe em branco se não houve">
+      <label>Precisou de ajuda?</label>
+      <div class="opcoes"><label><input type="radio" name="ajuda" value="nao" checked> Não</label><label><input type="radio" name="ajuda" value="sim"> Sim</label></div>
+      <label for="obs">Observações</label>
+      <textarea id="obs" rows="2"></textarea>
+      <p><button class="principal" type="submit">Salvar e ir para a próxima rodada</button></p>
+    </form>
+    <div id="msg" class="suave" role="status"></div>
+  </div>
+
+  <div class="painel">
+    <strong>Todas as rodadas</strong> <span class="suave">(clique em uma linha para escolher; a linha azul é a atual)</span>
+    <table id="tabela"></table>
+  </div>
+  <p class="suave">Planilha: <span id="csv"></span></p>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+let estado = { linhas: [], casos: [] }, atual = 0, inicio = null, raf = null, parada = null;
+const hhmmss = (d) => d.toLocaleTimeString('pt-BR', { hour12: false });
+const fmt = (ms) => { const s = ms / 1000; return String(Math.floor(s / 60)).padStart(2, '0') + ':' + (s % 60).toFixed(1).padStart(4, '0'); };
+const chave = 'ensaio_inicio';
+
+async function carregar(escolher) {
+  estado = await (await fetch('/api/estado')).json();
+  $('csv').textContent = estado.csv;
+  if (escolher === undefined) { const i = estado.linhas.findIndex((l) => !l.tempo_segundos); atual = i < 0 ? estado.linhas.length : i; }
+  else atual = escolher;
+  desenhar();
+}
+function cartaoDe(caso) { return estado.casos.find((c) => c.caso === caso); }
+function desenhar() {
+  const total = estado.linhas.length, feitas = estado.linhas.filter((l) => l.tempo_segundos).length;
+  $('progresso').innerHTML = `<strong>${feitas} de ${total}</strong> medições gravadas. ` + (atual >= total ? '<span class="feito">Todas as rodadas foram gravadas. Avise o Claude para rodar a análise.</span>' : 'Próxima: linha ' + (atual + 1) + '.');
+  $('tabela').innerHTML = '<tr><th>#</th><th>Caso</th><th>Rep.</th><th>Tentativa</th><th>Método</th><th>Ordem</th><th>Tempo (s)</th></tr>' + estado.linhas.map((l, i) => `<tr data-i="${i}" class="${i === atual ? 'atual' : ''}" style="cursor:pointer"><td>${i + 1}</td><td>${l.caso}</td><td>${l.repeticao}</td><td>${l.tentativa}</td><td>${l.metodo}</td><td>${l.ordem_execucao || ''}</td><td>${l.tempo_segundos ? '<span class="feito">' + l.tempo_segundos + '</span>' : '—'}</td></tr>`).join('');
+  for (const tr of $('tabela').querySelectorAll('tr[data-i]')) tr.onclick = () => { if (inicio) return; atual = Number(tr.dataset.i); desenhar(); };
+  const l = estado.linhas[atual]; $('rodada').hidden = !l; if (!l) return;
+  $('rotulo').textContent = l.tentativa === 'familiarizacao' ? 'Tentativa de familiarização (fora do cálculo)' : `${l.caso} — repetição ${l.repeticao}`;
+  $('metodo').textContent = l.metodo === 'papel' ? 'PAPEL' : 'SISTEMA (HealthHub)'; $('metodo').className = 'etiqueta ' + l.metodo;
+  $('tentativa').textContent = l.tentativa; $('ordem').textContent = l.ordem_execucao ? `${l.ordem_execucao}º método deste caso` : '';
+  $('avisoMetodo').innerHTML = l.metodo === 'papel'
+    ? 'Use a <strong>ficha de papel</strong> (formulario_papel.html impresso). Cronometre da apresentação do cartão até a ficha preenchida e conferida.'
+    : 'Use o <strong>HealthHub</strong> em outra aba (<a href="http://localhost:5173" target="_blank" rel="noopener">http://localhost:5173</a>, perfil recepção/enfermagem). Cronometre do cartão até a confirmação do registro (cadastro, sinais vitais e cor escolhida).';
+  $('btnLimpar').hidden = l.metodo !== 'sistema';
+  const c = cartaoDe(l.caso);
+  $('cartao').innerHTML = c ? `<tr><td>Nome</td><td>${c.nome}</td></tr><tr><td>CPF (fictício)</td><td>${c.cpf_ficticio}</td></tr><tr><td>Idade / sexo</td><td>${c.idade} / ${c.sexo}</td></tr><tr><td>Chegada</td><td>${c.chegada}</td></tr><tr><td>Motivo</td><td>${c.motivo_visita}</td></tr><tr><td>FC (bpm)</td><td>${c.frequencia_cardiaca}</td></tr><tr><td>SpO₂ (%)</td><td>${c.saturacao_oxigenio}</td></tr><tr><td>Temperatura (°C)</td><td>${c.temperatura}</td></tr><tr><td>Pressão arterial</td><td>${c.pressao_arterial}</td></tr><tr><td>Categoria (artificial)</td><td><strong>${c.categoria_artificial}</strong> — não é classificação clínica</td></tr>` : '<tr><td colspan="2" class="suave">Tentativa de familiarização: use qualquer um dos cartões (ex.: FICTÍCIO-01).</td></tr>';
+  $('tempo').textContent = '00:00.0'; $('form').hidden = true; $('btnIniciar').disabled = false; $('btnParar').disabled = true; $('btnCancelar').disabled = true; $('msg').textContent = ''; parada = null;
+}
+function tique() { $('tempo').textContent = fmt(Date.now() - inicio); raf = requestAnimationFrame(tique); }
+function iniciar() { if (inicio || $('form').hidden === false) return; inicio = Date.now(); localStorage.setItem(chave, String(inicio)); $('btnIniciar').disabled = true; $('btnParar').disabled = false; $('btnCancelar').disabled = false; $('btnLimpar').disabled = true; tique(); }
+function parar() { if (!inicio) return; cancelAnimationFrame(raf); const fim = Date.now(); parada = { inicio, fim }; inicio = null; localStorage.removeItem(chave); $('tempo').textContent = fmt(fim - parada.inicio); $('tempoFinal').textContent = ((fim - parada.inicio) / 1000).toFixed(1) + ' s'; $('btnParar').disabled = true; $('btnCancelar').disabled = true; $('form').hidden = false; $('btnLimpar').disabled = false; $('erros').focus(); }
+$('btnIniciar').onclick = iniciar; $('btnParar').onclick = parar;
+$('btnCancelar').onclick = async () => { if (!inicio) return; cancelAnimationFrame(raf); inicio = null; localStorage.removeItem(chave); await fetch('/api/cancelar', { method: 'POST', body: JSON.stringify({ indice: atual, motivo: 'cancelada pelo executor' }) }); desenhar(); $('msg').textContent = 'Medição cancelada (registrada no log, nada gravado na planilha).'; };
+$('btnLimpar').onclick = async () => { $('msgLimpar').textContent = 'Limpando…'; const r = await (await fetch('/api/limpar-sistema', { method: 'POST', body: '{}' })).json(); $('msgLimpar').innerHTML = r.ok ? `<span class="feito">Sistema limpo (${r.db}).</span>` : `<span class="erro">${r.erro}</span>`; };
+document.addEventListener('keydown', (e) => { if (e.code !== 'Space') return; const t = e.target.tagName; if (['INPUT', 'TEXTAREA', 'BUTTON', 'SELECT'].includes(t)) return; e.preventDefault(); inicio ? parar() : iniciar(); });
+$('form').onsubmit = async (e) => {
+  e.preventDefault(); if (!parada) return;
+  const corpo = { indice: atual, hora_inicio: hhmmss(new Date(parada.inicio)), hora_fim: hhmmss(new Date(parada.fim)), tempo_segundos: (parada.fim - parada.inicio) / 1000, campos_completos: document.querySelector('input[name=completo]:checked')?.value, erros: $('erros').value, falhas: $('falhas').value, ajuda: document.querySelector('input[name=ajuda]:checked')?.value, observacoes: $('obs').value };
+  const r = await (await fetch('/api/salvar', { method: 'POST', body: JSON.stringify(corpo) })).json();
+  if (!r.ok) { $('msg').innerHTML = `<span class="erro">Não gravou: ${r.erro}</span>`; return; }
+  $('form').reset(); $('erros').value = 0; parada = null; await carregar(); $('msg').innerHTML = '<span class="feito">Gravado na planilha.</span>';
+};
+window.addEventListener('beforeunload', (e) => { if (inicio) { e.preventDefault(); e.returnValue = ''; } });
+carregar();
+</script>
+</body>
+</html>

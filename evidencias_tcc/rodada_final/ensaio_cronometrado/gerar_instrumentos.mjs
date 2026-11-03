@@ -46,6 +46,8 @@ fs.writeFileSync(DIR + 'roteiro_execucao.md', `# Roteiro de execução do ensaio
 
 Ensaio **exploratório, feito pelo próprio desenvolvedor**, com viés de familiaridade; **não estima satisfação de usuários nem demonstra redução de tempo para enfermeiros**. Pacientes 100% fictícios. Não alterar o relógio do servidor. Não preencher tempos estimados nem usar tempos de automação como tempo humano.
 
+> **Jeito mais fácil:** dê dois cliques em \`INICIAR_ENSAIO.bat\` e siga o \`LEIA-ME_CRONOMETRO.md\`. A página do cronômetro mostra a rodada, o cartão e grava os tempos sozinha na planilha. Este roteiro é a versão detalhada do método.
+
 ## Antes de começar
 1. Os dados dos casos estão em \`casos_fonte.csv\` (cópia em \`../casos_ficticios.csv\`): categorias e chegadas vêm do Apêndice A; idade, sexo, motivo e sinais vitais são **fictícios, gerados para o ensaio**, usando os valores de fronteira do Apêndice (sem interpretação clínica). Imprima \`cartoes_caso.html\` (um por página) e \`formulario_papel.html\` (imprima ${casos.length * REPS * 1 + 2} cópias, ou reaproveite a ficha).
 2. Suba o sistema local com banco de teste isolado e dados fictícios (sem a IA real).
