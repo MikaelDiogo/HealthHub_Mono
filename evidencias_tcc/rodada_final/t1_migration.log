@@ -1,0 +1,10 @@
+## migration:run
+query: CREATE UNIQUE INDEX "UQ_fila_pacientes_paciente" ON "fila_pacientes" ("paciente_id")
+Migration UniqueFilaPorPaciente1783400000000 has been executed successfully.
+## migration:revert
+query: DROP INDEX "UQ_fila_pacientes_paciente"
+Migration UniqueFilaPorPaciente1783400000000 has been reverted successfully.
+## migration:run
+query: CREATE UNIQUE INDEX "UQ_fila_pacientes_paciente" ON "fila_pacientes" ("paciente_id")
+Migration UniqueFilaPorPaciente1783400000000 has been executed successfully.
+    "UQ_fila_pacientes_paciente" UNIQUE, btree (paciente_id)

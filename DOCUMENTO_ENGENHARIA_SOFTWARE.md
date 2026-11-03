@@ -310,7 +310,7 @@ flowchart TB
 1. Usuário abre a Esteira de Cuidado (`/main/alertas`) ou a triagem mobile.
 2. Usuário aciona *Admitir* e o sistema lista todos os pacientes do banco — inclusive os que já receberam alta.
 3. Usuário seleciona o paciente.
-4. O sistema gera senha sequencial (`PR-001`, `REC-001`) e a hora local de chegada.
+4. O cliente envia a hora local de chegada; a senha sequencial (`PR-001`, `PR-002`...) é **gerada pelo servidor**, de forma atômica (o campo `senha` enviado pelo cliente é ignorado).
 5. O sistema envia `POST /fila` com `paciente_id`, `nome`, `idade`, `senha`, `chegada`, `status`.
 6. O backend valida o DTO e verifica ausência prévia do paciente na fila.
 7. O backend persiste a entrada na fila.
@@ -321,7 +321,7 @@ flowchart TB
 
 | Código | Condição | Tratamento |
 |---|---|---|
-| A1 | Paciente já está na fila | `400` — "Paciente já está na fila de atendimento." |
+| A1 | Paciente já está na fila (inclui admissões simultâneas do mesmo paciente) | `409` — "Paciente já está na fila de atendimento." |
 | A2 | `paciente_id` não é UUID | `400` — falha de validação do DTO |
 | A3 | Token expirado | `401` + logout automático no frontend |
 | A4 | Paciente ainda não cadastrado | Estende para UC02 (cadastro na hora) |
@@ -907,7 +907,7 @@ erDiagram
         uuid paciente_id FK "ON DELETE CASCADE · unicidade só na aplicação"
         varchar nome "denormalizado de pacientes"
         int idade "denormalizado de pacientes"
-        varchar senha "PR-001 · gerada no cliente"
+        varchar senha "PR-001 · gerada no servidor"
         varchar chegada "HH:MM local · não é timestamp"
         varchar status "máquina de estados sem CHECK"
         varchar gravidade "NULL até a triagem"
@@ -1132,29 +1132,19 @@ sequenceDiagram
     G->>FC: requisição autorizada
     FC->>FC: ValidationPipe (CreateFilaDto)
     FC->>CFS: execute(dto)
-    CFS->>FR: findByPacienteId(paciente_id)
-    FR->>DB: SELECT
-    alt já está na fila
-        CFS-->>SPA: 400 "Paciente já está na fila de atendimento."
+    CFS->>FR: admitirAtomico(dto, motivo_visita)
+    Note over FR,DB: uma transação: pg_advisory_xact_lock; paciente já na fila?; senha = maior PR-NNN + 1; INSERT fila; visita ativa ou INSERT visitas; UPDATE pacientes.ativo
+    alt já está na fila (ou violação do índice único UQ_fila_pacientes_paciente)
+        CFS-->>SPA: 409 "Paciente já está na fila de atendimento."
     else livre
-        CFS->>FR: createAndSave(dto)
-        FR->>DB: INSERT INTO fila_pacientes
-        CFS->>CVS: execute(paciente_id, motivo_visita)
-        CVS->>VR: findActiveByPacienteId()
-        VR->>DB: SELECT WHERE alta IS NULL AND desfecho='Em Atendimento'
-        alt visita ativa existe
-            CVS-->>CFS: reutiliza visita (idempotente)
-        else nenhuma visita ativa
-            CVS->>VR: create({desfecho:'Em Atendimento'})
-            VR->>DB: INSERT INTO visitas
-        end
+        FR-->>CFS: FilaPaciente (com a senha gerada)
         CFS-->>SPA: 201 FilaPaciente
         SPA->>SPA: atualiza estado local do Kanban
         SPA-->>R: cartão em "Aguardando Triagem"
     end
 ```
 
-> ⚠️ **Nota de integridade:** os dois `INSERT` (fila e visita) não estão sob uma transação única. Falha no segundo deixa a fila preenchida sem visita correspondente. Ver [DEB-03](#13-débito-técnico-e-defeitos-identificados).
+> ✅ **Integridade:** a admissão (fila, visita e reativação do paciente) roda em **uma transação**, com bloqueio da fila, senha gerada no servidor e índice único em `fila_pacientes(paciente_id)` (migration `1783400000000`). Admissões simultâneas não duplicam senha nem entrada (evidência: `evidencias_tcc/rodada_final/`). Isto resolve o ponto do [DEB-03](#13-débito-técnico-e-defeitos-identificados) para a admissão.
 
 ### 9.3 Sequência — Mensagem em tempo real com degradação para REST
 
@@ -1626,7 +1616,7 @@ Itens levantados por leitura do código, com severidade e correção proposta.
 |---|:--:|---|---|---|---|
 | **DEB-01** | 🔴 Alta | **Visitas nunca são fechadas pelo fluxo de alta.** `CareContext.avançarFluxo` traduz `status = 'Alta'` em `DELETE /fila/:id`, e `DeleteFilaService` não chama `CloseVisitaService`. O código de fechamento em `UpdateFilaService` é inalcançável por esse caminho. | `context/CareContext.tsx` (`if (novoStatus === 'Alta') → api.delete`) vs. `update-fila.service.ts` (`ALTA_STATUSES`) | Toda visita permanece `Em Atendimento` com `alta = NULL`. O histórico de visitas — base declarada para o trabalho futuro de ML — nasce inconsistente. | Fechar a visita em `DeleteFilaService`, **ou** fazer o frontend enviar `PUT` com `status='Alta'` antes do `DELETE`. Preferir a primeira: mantém a regra no servidor. |
 | **DEB-02** | 🟠 Média | **Rotas de visita sem `@Roles`.** `VisitasController` só é protegido pelo `JwtAuthGuard` global. | `visitas/presentation/visitas.controller.ts` | Recepcionista lê histórico clínico (gravidade, desfecho, observações) e pode fechar visita — contradiz a política aplicada em `patients`. | `@Roles('medico','enfermeiro')` na leitura e no fechamento. |
-| **DEB-03** | 🟠 Média | **Admissão não é atômica.** `INSERT fila_pacientes` e `INSERT visitas` ocorrem em conexões independentes. | `create-fila.service.ts` | Falha no segundo insert deixa fila sem visita; estado precisa de reconciliação manual. | Envolver o caso de uso em `DataSource.transaction()`. |
+| **DEB-03** | 🟠 Média | **[Resolvido em 03/11/2026 — migration 1783400000000 e transação em `admitirAtomico`] Admissão não era atômica.** `INSERT fila_pacientes` e `INSERT visitas` ocorrem em conexões independentes. | `create-fila.service.ts` | Falha no segundo insert deixa fila sem visita; estado precisa de reconciliação manual. | Envolver o caso de uso em `DataSource.transaction()`. |
 | **DEB-04** | 🟠 Média | **`removerPaciente` exposto a papéis sem permissão.** O ícone de remoção aparece nas colunas do Kanban para qualquer papel, mas `DELETE /fila/:id` exige `medico`. | `pages/Alerts/index.tsx` vs. `fila.controller.ts` | Enfermeiro e recepcionista recebem `403` sem tratamento visível — falha silenciosa de UX. | Ocultar o controle conforme `role` e tratar `403` com aviso. |
 | **DEB-05** | 🟠 Média | **URL de API fixa em código.** `http://localhost:3001` aparece literal em dois arquivos. | `services/api.ts`, `services/chatService.ts` | Impede build para homologação/produção sem editar o código. | `import.meta.env.VITE_API_URL` com fallback local. |
 | **DEB-06** | 🟠 Média | **Sem trilha de auditoria.** `audit_logs` estava previsto no plano e não existe. | Ausência de migration/módulo | Acesso a prontuário e emissão de PDF não deixam rastro — fragiliza a posição LGPD e a irretratabilidade. | Interceptor NestJS gravando `(user_id, ação, recurso, timestamp, IP)`. |

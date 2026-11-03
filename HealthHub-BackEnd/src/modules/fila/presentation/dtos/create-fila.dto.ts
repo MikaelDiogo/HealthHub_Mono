@@ -14,9 +14,11 @@ export class CreateFilaDto {
   @IsInt()
   idade!: number;
 
+  // Ignorada: a senha (PR-NNN) é gerada pelo servidor, de forma atômica. Mantida por compatibilidade com clientes antigos.
+  @IsOptional()
   @IsString()
   @MaxLength(20)
-  senha!: string;
+  senha?: string;
 
   @IsString()
   @MaxLength(30)

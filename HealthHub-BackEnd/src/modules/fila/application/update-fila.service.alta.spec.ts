@@ -17,7 +17,7 @@ function montar() {
   } as FilaPaciente;
   const filaRepository: IFilaRepository = {
     findAll: vi.fn(), findById: vi.fn().mockResolvedValue(entrada), findByPacienteId: vi.fn(),
-    createAndSave: vi.fn(), save: vi.fn().mockImplementation(async (e) => e), remove: vi.fn(),
+    createAndSave: vi.fn(), admitirAtomico: vi.fn(), save: vi.fn().mockImplementation(async (e) => e), remove: vi.fn(),
   };
   const patientsRepository: IPatientsRepository = {
     findByCpf: vi.fn(), findById: vi.fn(), findByIdWithVitals: vi.fn(), findAllWithVitals: vi.fn(),

@@ -1,0 +1,13 @@
+Ambiente: 2026-11-03T11:50:57Z | commit base d34768f (antes da correção) | MINGW64_NT-10.0-26200 v24.20.0 | PostgreSQL 16.15
+# concorrencia.mjs — rótulo=ANTES repetições=5 — 2026-11-03T11:50:58.717Z
+rep 1 A: status=[201,201] senhas=[PR-001,PR-001] DUPLICADA
+rep 1 B: respostas={"201":2,"400":6} entradas_na_fila=2
+rep 2 A: status=[201,201] senhas=[PR-001,PR-001] DUPLICADA
+rep 2 B: respostas={"201":8} entradas_na_fila=8
+rep 3 A: status=[201,201] senhas=[PR-001,PR-001] DUPLICADA
+rep 3 B: respostas={"201":8} entradas_na_fila=8
+rep 4 A: status=[201,201] senhas=[PR-001,PR-001] DUPLICADA
+rep 4 B: respostas={"201":8} entradas_na_fila=8
+rep 5 A: status=[201,201] senhas=[PR-001,PR-001] DUPLICADA
+rep 5 B: respostas={"201":8} entradas_na_fila=8
+RESUMO ANTES: repetições=5; repetições com senha duplicada=5; repetições com entrada duplicada=5; respostas 5xx=0

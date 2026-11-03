@@ -1,4 +1,4 @@
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { Roles } from '../../../shared/decorators/roles.decorator';
@@ -32,7 +32,8 @@ export class FilaController {
     return this.listFila.execute();
   }
 
-  @ApiOperation({ summary: "Admite paciente na esteira", description: "Perfis permitidos: medico, enfermeiro, recepcionista." })
+  @ApiOperation({ summary: "Admite paciente na esteira", description: "Perfis permitidos: medico, enfermeiro, recepcionista. A senha (PR-NNN) é gerada pelo servidor; o campo senha enviado é ignorado." })
+  @ApiResponse({ status: 409, description: "Paciente já está na fila de atendimento." })
   @Post()
   @Roles('medico', 'enfermeiro', 'recepcionista')
   create(@Body() body: CreateFilaDto, @Req() req: AuthedRequest) {

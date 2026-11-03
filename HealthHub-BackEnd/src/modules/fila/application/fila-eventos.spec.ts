@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException, ConflictException } from '@nestjs/common';
 import { UpdateFilaService } from './update-fila.service';
 import { CreateFilaService } from './create-fila.service';
 import { DeleteFilaService } from './delete-fila.service';
@@ -78,9 +78,30 @@ describe('UpdateFilaService — registra quem fez cada etapa (autoria e horário
 describe('Admissão, alta e remoção registram evento (a cor fica preservada mesmo ao sair da fila)', () => {
   it('admitir → "admitido" com o usuário e o status de entrada', async () => {
     const r = repos(entrada('Aguardando Triagem'));
-    const svc = new CreateFilaService(r.fila as any, r.pacientes, { execute: vi.fn() } as any, r.rt, r.eventos as any);
+    const fila = { ...r.fila, admitirAtomico: vi.fn().mockImplementation(async (d) => ({ ...entrada('Aguardando Triagem'), ...d, senha: 'PR-007' })) };
+    const svc = new CreateFilaService(fila as any, r.rt, r.eventos as any);
     await svc.execute({ paciente_id: 'pac-1', nome: 'TESTE A', idade: 34, senha: 'PR-001', chegada: 'x', status: 'Aguardando Triagem' } as any, { id: 'u-rec', role: 'recepcionista' });
     expect(r.eventos.registrar).toHaveBeenCalledWith(expect.objectContaining({ tipo: 'admitido', paciente_id: 'pac-1', status_novo: 'Aguardando Triagem', usuario: { id: 'u-rec', role: 'recepcionista' } }));
+  });
+
+  it('a senha enviada pelo cliente é ignorada (o servidor gera PR-NNN) e o motivo vai para a visita', async () => {
+    const r = repos(entrada('Aguardando Triagem'));
+    const fila = { ...r.fila, admitirAtomico: vi.fn().mockImplementation(async (d) => ({ ...entrada('Aguardando Triagem'), ...d, senha: 'PR-007' })) };
+    const svc = new CreateFilaService(fila as any, r.rt, r.eventos as any);
+    const out = await svc.execute({ paciente_id: 'pac-1', nome: 'TESTE A', idade: 34, senha: 'PR-001', chegada: 'x', status: 'Aguardando Triagem', motivo_visita: 'dor (fictício)' } as any);
+    const [dados, motivo] = fila.admitirAtomico.mock.calls[0];
+    expect(dados).not.toHaveProperty('senha');
+    expect(motivo).toBe('dor (fictício)');
+    expect(out.senha).toBe('PR-007');
+  });
+
+  it('paciente já na fila: 409 e nenhum evento nem broadcast', async () => {
+    const r = repos(entrada('Aguardando Triagem'));
+    const fila = { ...r.fila, admitirAtomico: vi.fn().mockRejectedValue(new ConflictException({ error: 'Paciente já está na fila de atendimento.' })) };
+    const svc = new CreateFilaService(fila as any, r.rt, r.eventos as any);
+    await expect(svc.execute({ paciente_id: 'pac-1', nome: 'TESTE A', idade: 34, chegada: 'x', status: 'Aguardando Triagem' } as any)).rejects.toBeInstanceOf(ConflictException);
+    expect(r.eventos.registrar).not.toHaveBeenCalled();
+    expect(r.rt.broadcastFilaChanged).not.toHaveBeenCalled();
   });
 
   it('alta (PATCH) → "alta" guardando a cor no momento da alta', async () => {

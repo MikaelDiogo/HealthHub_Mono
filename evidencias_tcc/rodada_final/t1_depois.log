@@ -1,0 +1,43 @@
+Ambiente: 2026-11-03T11:54:35Z | base d34768f + correção da Tarefa 1 (não commitada) | MINGW64_NT-10.0-26200 v24.20.0 | PostgreSQL 16.15
+# concorrencia.mjs — rótulo=DEPOIS repetições=20 — 2026-11-03T11:54:36.029Z
+rep 1 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 1 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 2 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 2 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 3 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 3 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 4 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 4 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 5 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 5 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 6 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 6 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 7 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 7 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 8 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 8 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 9 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 9 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 10 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 10 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 11 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 11 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 12 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 12 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 13 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 13 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 14 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 14 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 15 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 15 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 16 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 16 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 17 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 17 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 18 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 18 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 19 A: status=[201,201] senhas=[PR-002,PR-001] distintas
+rep 19 B: respostas={"201":1,"409":7} entradas_na_fila=1
+rep 20 A: status=[201,201] senhas=[PR-001,PR-002] distintas
+rep 20 B: respostas={"201":1,"409":7} entradas_na_fila=1
+RESUMO DEPOIS: repetições=20; repetições com senha duplicada=0; repetições com entrada duplicada=0; respostas 5xx=0

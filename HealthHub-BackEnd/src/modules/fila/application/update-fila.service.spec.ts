@@ -29,6 +29,7 @@ function buildService(sinaisExistem: boolean) {
     findById: vi.fn().mockResolvedValue(entrada),
     findByPacienteId: vi.fn(),
     createAndSave: vi.fn(),
+    admitirAtomico: vi.fn(),
     save: vi.fn().mockImplementation(async (e) => e),
     remove: vi.fn(),
   };
