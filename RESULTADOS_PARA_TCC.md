@@ -324,6 +324,37 @@ Pasta: `evidencias_tcc/rodada_final/ensaio_cronometrado/`. **Nenhum resultado, t
 3. Com 3 repetições (ímpar) a alternância não fica perfeitamente balanceada por caso (cada caso começa 2 vezes por um método e 1 pelo outro); o roteiro sugere 4 repetições.
 **Teste do código de análise:** rodei `analisar_ensaio.mjs` com um CSV **sintético, rotulado e descartado** (em pasta temporária, fora das evidências) só para ver se o cálculo funciona; esses números não existem em nenhum arquivo de resultado.
 
+
+---
+
+## Casos TF01–TF08 do Apêndice A (Quadro 16) + dados dos casos do ensaio
+
+O Apêndice A (`APENDICE_A_TCC_TESTE.md`, lido em 03/11/2026) lista os casos TF01 a TF08 como "não executados" e manda gerar dados fictícios para os 5 registros do ensaio. Eu tinha rodado os 22 cenários e o S1–S8, que cobrem comportamentos parecidos, mas **não os casos TF por esse nome**; este bloco fecha essa lacuna. O arquivo de tarefas citado no Apêndice (`TAREFAS_CLAUDE_CODE_TCC.md`) não existe no repositório; segui o `TAREFAS_TCC_CLAUDECODE.md`.
+
+**Ficha da execução:** versão `3dd886d` (branch `evolucao-estrutura`); 03/11/2026; executor: Claude Code (automação), a pedido do autor; ambiente: API local, banco de teste isolado novo (`healthhub_test_tf`, 10 migrations do zero), PostgreSQL 16.15, Node 24.20.0, IA **simulada**, dados 100% fictícios. Evidências em `evidencias_tcc/rodada_final/tf/` (`tf_resultados.json`, `t_tf_execucao.log`, `tf05_fronteiras.md`, `tf07_matriz_perfis.md`, `tf08_ui.md`, capturas `tf08-*.png`). Dados dos casos: `evidencias_tcc/rodada_final/casos_ficticios.csv`.
+
+| ID / regra | Entrada | Esperado (Apêndice) | Obtido | Resultado |
+|---|---|---|---|---|
+| TF01 · Cadastro / RF02 | Cadastrar FICTÍCIO-01 | Salvar e recuperar sem trocar a identidade | id criado = id lido; nome, CPF, idade e sexo iguais | **Aprovado** |
+| TF02 · Classificação / RF09 | 5 registros na fila (amarelo ×2, laranja, verde, azul), classificados pelo enfermeiro | Ordem por cor entre os classificados | Laranja (03), Amarelo (01), Amarelo (02), Verde (04), Azul (05); não triado (FICTÍCIO-06) em último, registrado à parte | **Aprovado** |
+| TF03 · Desempate / RF09 | Os dois amarelos | FICTÍCIO-01 antes de FICTÍCIO-02 | posições 2 e 3 | **Aprovado** |
+| TF04 · Pré-condição / RF11 | Classificar sem sinais vitais | Bloquear | HTTP 400 "Registre os sinais vitais do paciente antes de classificar o risco."; nenhuma cor gravada | **Aprovado** |
+| TF05 · Alertas / RF19 | 15 valores de fronteira do roteiro (SpO₂ 91–96; FC 59–101; temperatura 37,7–38,6) | Conferir níveis nas fronteiras, sem validar clinicamente | 15/15 coincidem com os limiares **implementados** (frontend e backend) | **Aprovado** (ver limite 1) |
+| TF06 · Estados / RF10/RF12 | Fluxo completo e transições não previstas | Documentar o backend atual (sem validação), sem inventar bloqueio | Fluxo normal aceito; "Aguardando Triagem" → "Em Consulta (Médico)" e → "Em Observação" **aceitos** (HTTP 200); retroceder também | **Documentado** (sem critério de aprovação) |
+| TF07 · Acesso / RNF04 | 14 operações × 3 perfis | Só o que a matriz autoriza (matriz ainda a documentar) | Matriz observada em `tf07_matriz_perfis.md` (por exemplo: classificar cor só enfermeiro; alta, fechar visita só médico; recepção só cadastra, admite e lê fila/métricas); sem login → 401 | **Observado** (sem matriz aprovada para comparar) |
+| TF08 · Falha de integração / RF16/RF17 | IA simulada com 429, 500, timeout e resposta vazia | Mostrar a falha sem inventar resposta clínica e sem perder o registro local | API: nenhuma resposta clínica inventada; sinais vitais intactos. Tela: "Erro ao conectar com o assistente." (falha) e "Resposta da IA em formato inesperado. Tente novamente." (vazia); sinais vitais continuam na tela | **Aprovado** |
+
+**Achados e limites (não ajustei nada para "passar"):**
+1. **TF05:** não tenho o texto da seção 4.2.3 do TCC; o "esperado" é o limiar **implementado** (SpO₂ < 92 crítico, < 95 atenção; FC < 60 ou > 100 crítico, > 90 atenção; temperatura > 38,5 crítico, ≥ 37,8 atenção). O resultado prova que o código faz o que está implementado, não que os pontos de corte estejam corretos.
+2. **TF02:** a ordem de chegada vem do **instante de gravação no servidor**, não do texto de horário informado ("08:00" etc.). Como o roteiro proíbe mexer no relógio do servidor, os cinco foram admitidos em sequência.
+3. **TF06:** todas as transições são aceitas hoje; a matriz de transições aprovada não existe. O teste de correção futura continua pendente.
+4. **TF07:** a matriz é só observada; o 404 do `DELETE` do médico veio do estado (a alta anterior já tinha retirado o paciente da fila). O chat de IA respondeu 201 para médico e enfermeiro porque o provedor era o simulado.
+5. **TF08:** o erro 429 do provedor vira **HTTP 500** com mensagem genérica ("Assistente clínico indisponível."); e uma resposta vazia do provedor volta como **HTTP 201 com texto vazio** (a tela trata como "formato inesperado"). Falha simulada (mock), não queda real da Groq.
+6. **O Apêndice diz que resultados TF não devem ser preenchidos "com valores produzidos pela automação" e, ao mesmo tempo, que TF01–TF05, TF07 e TF08 podem ser automatizados.** Executei por automação, registrando só o observado. Se o orientador exigir execução humana dos TF, é preciso repetir à mão.
+7. TF01 foi feito por API; o cadastro pela tela já foi coberto pelo cenário F03.
+
+**Ensaio cronometrado — dados dos casos:** o Apêndice não traz idade, sexo, motivo nem sinais por caso e autoriza gerá-los. Gerei dados **claramente fictícios** em `casos_ficticios.csv`, com os valores de fronteira do Apêndice (sem interpretação clínica): categorias e chegadas conforme o roteiro (amarelo 08:00 e 08:05; laranja 08:10; verde 08:15; azul 08:20). Os cartões, a ficha de papel, a planilha e o roteiro foram regenerados com esses dados (0 campos pendentes). **O ensaio em si continua sendo seu.**
+
 ---
 
 ## Pendências que dependem de você
@@ -332,7 +363,7 @@ Pasta: `evidencias_tcc/rodada_final/ensaio_cronometrado/`. **Nenhum resultado, t
 2. **Fonte clínica dos limiares de sinais vitais** (e o limiar de pressão, se escolher a Opção A) e a **escolha entre as Opções A e B** da Tarefa 8.
 3. **Metas finais** de desempenho e disponibilidade (as da Tarefa 5 são só sugestões).
 4. **Preço de hospedagem:** não pesquisado; os recursos medidos estão na Tarefa 9.
-5. **Execução do ensaio cronometrado** e os dados clínicos dos 5 casos (Tarefa 10).
+5. **Execução do ensaio cronometrado** (Tarefa 10). Os dados fictícios dos 5 casos já foram gerados a partir do Apêndice A; falta você cronometrar as 30 rodadas.
 6. **Nome real do autor no seed** (`HealthHub-BackEnd/src/database/seed.ts`, usuário enfermeiro): decidir se troca no código. Enquanto isso, nos bancos de teste eu renomeio o usuário para não vazar o nome nas capturas.
 7. **Decidir o que commitar ou ignorar** das pastas soltas (`coleta_tcc/`, `eval/`, `Print_healthhub/` etc.) e se faz **push** e merge: nada desta rodada foi enviado ao GitHub.
 8. Itens de produto apontados nos testes: o salto de estado na esteira é aceito (Tarefa 3); o histórico da IA não é limitado no backend (Tarefa 3); a recepção recebe a mensagem genérica do guard no S4; a rota de fechar visita não registra evento.

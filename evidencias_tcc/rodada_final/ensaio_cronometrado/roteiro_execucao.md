@@ -3,7 +3,7 @@
 Ensaio **exploratório, feito pelo próprio desenvolvedor**, com viés de familiaridade; **não estima satisfação de usuários nem demonstra redução de tempo para enfermeiros**. Pacientes 100% fictícios. Não alterar o relógio do servidor. Não preencher tempos estimados nem usar tempos de automação como tempo humano.
 
 ## Antes de começar
-1. Preencha em `casos_fonte.csv` os dados em branco (idade, sexo, motivo, sinais vitais artificiais) **copiando do Apêndice A do TCC**; rode `node gerar_instrumentos.mjs` de novo e imprima `cartoes_caso.html` (um por página) e `formulario_papel.html` (imprima 17 cópias, ou reaproveite a ficha).
+1. Os dados dos casos estão em `casos_fonte.csv` (cópia em `../casos_ficticios.csv`): categorias e chegadas vêm do Apêndice A; idade, sexo, motivo e sinais vitais são **fictícios, gerados para o ensaio**, usando os valores de fronteira do Apêndice (sem interpretação clínica). Imprima `cartoes_caso.html` (um por página) e `formulario_papel.html` (imprima 17 cópias, ou reaproveite a ficha).
 2. Suba o sistema local com banco de teste isolado e dados fictícios (sem a IA real).
 3. **Tentativa de familiarização:** uma execução em papel e uma no sistema, **fora do cálculo** (linhas `(familiarizacao)` da planilha).
 

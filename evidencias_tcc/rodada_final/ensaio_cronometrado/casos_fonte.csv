@@ -1,6 +1,6 @@
 caso,nome,chegada,categoria_artificial,cpf_ficticio,idade,sexo,motivo_visita,frequencia_cardiaca,saturacao_oxigenio,temperatura,pressao_arterial
-FICTÍCIO-01,FICTÍCIO-01,08:00,Amarelo,90000000001,,,,,,,
-FICTÍCIO-02,FICTÍCIO-02,08:05,Amarelo,90000000002,,,,,,,
-FICTÍCIO-03,FICTÍCIO-03,08:10,Laranja,90000000003,,,,,,,
-FICTÍCIO-04,FICTÍCIO-04,08:15,Verde,90000000004,,,,,,,
-FICTÍCIO-05,FICTÍCIO-05,08:20,Azul,90000000005,,,,,,,
+FICTÍCIO-01,FICTÍCIO-01,08:00,Amarelo,90000000001,34,F,Dor lombar após esforço (texto fictício),90,96,37.7,120/80
+FICTÍCIO-02,FICTÍCIO-02,08:05,Amarelo,90000000002,52,M,Tosse seca há dois dias (texto fictício),91,95,37.8,130/85
+FICTÍCIO-03,FICTÍCIO-03,08:10,Laranja,90000000003,61,F,Falta de ar leve ao caminhar (texto fictício),101,94,38.5,140/90
+FICTÍCIO-04,FICTÍCIO-04,08:15,Verde,90000000004,28,M,Dor de garganta (texto fictício),100,92,38.6,110/70
+FICTÍCIO-05,FICTÍCIO-05,08:20,Azul,90000000005,45,F,Renovação de receita (texto fictício),59,91,37.7,118/76
