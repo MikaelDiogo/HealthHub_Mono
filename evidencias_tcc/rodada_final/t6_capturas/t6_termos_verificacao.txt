@@ -1,0 +1,14 @@
+modal de termos aberto no primeiro acesso: true
+Groq: true | gpt-oss-120b: true | Whisper: true
+Ollama: false | Qwen: false | Llama: false
+texto cita que o nome NÃO é enviado: true
+texto ainda diz que o nome é enviado: false
+área de rolagem: {"h":3336,"c":488}
+captura termos-uso.png
+captura termos-uso-2.png
+captura termos-uso-3.png
+captura termos-uso-4.png
+captura termos-uso-5.png
+captura termos-uso-6.png
+captura termos-uso-7.png
+captura termos-uso-8.png

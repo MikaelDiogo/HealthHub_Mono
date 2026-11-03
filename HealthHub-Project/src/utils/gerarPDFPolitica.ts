@@ -194,7 +194,7 @@ export function gerarPDFPolitica() {
   // 6
   sectionTitle('6. Uso da Inteligencia Artificial e Dados Clinicos');
   paragraph('Como o assistente clinico de IA do HealthHub trata os dados:');
-  subBox('Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo) para transcricao', 'As perguntas ao assistente sao enviadas a plataforma Groq (operador externo), com o contexto do paciente selecionado: nome, alergias, medicamentos em uso, anamnese e ultimos sinais vitais, alem de ate 4 mensagens anteriores da conversa. Nao ha anonimizacao: o nome completo e enviado. CPF, RG, telefone e endereco nao sao enviados. O audio da transcricao e enviado a Groq para virar texto e nao e gravado pelo HealthHub.', 255, 247, 237);
+  subBox('Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo) para transcricao', 'As perguntas ao assistente sao enviadas a plataforma Groq (operador externo), com o contexto clinico do paciente selecionado: alergias, medicamentos em uso, anamnese e ultimos sinais vitais, alem de ate 4 mensagens anteriores da conversa. O nome, o CPF, o RG, o telefone e o endereco nao sao enviados. Os textos livres (como a anamnese e a pergunta) sao enviados como foram escritos: nao digite dados de identificacao neles. O audio da transcricao e enviado a Groq para virar texto e nao e gravado pelo HealthHub.', 255, 247, 237);
   paragraph('Em qualquer cenario, a responsabilidade pela decisao clinica permanece integralmente do profissional de saude. O assistente de IA e uma ferramenta de apoio e nunca substitui o julgamento clinico.');
 
   divider();

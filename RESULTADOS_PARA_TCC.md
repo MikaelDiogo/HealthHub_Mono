@@ -294,3 +294,24 @@ Exigiriam a chave real da Groq, que não foi autorizada. Com o provedor simulado
 **Disco do Docker** (`docker system df`, máquina inteira, não só o HealthHub): imagens 3,46 GB, contêineres 222 MB, volumes locais 710 MB. A imagem `postgres:16-alpine` ocupa 420 MB. Não medi a imagem da API (ela roda como processo Node, fora de contêiner).
 
 **Recomendação de tamanho mínimo (estimativa a partir dos números acima, não validada por teste de carga em hospedagem):** uma máquina com **2 vCPU, 2 GB de RAM e 10 GB de disco** comportaria este uso com folga: a API pediu ≈ 350 MiB e o banco ≈ 75 MiB no pico medido (soma ≈ 0,4 GB, cerca de 5 vezes de folga em 2 GB), e 10 GB cobririam a imagem do banco, o sistema operacional e algumas centenas de milhares de atendimentos. A CPU é o recurso mais sensível: o `GET /metricas` com fila grande ocupou perto de 1 núcleo da API. Os valores finais dependem do perfil de uso real (número de usuários simultâneos), que não foi medido.
+
+
+---
+
+## Tarefa 6 — Capturas: termos de uso, chat de IA com CID e transcrição de áudio
+
+**Só a parte (a) foi feita. As partes (b) e (c) NÃO foram feitas**, porque exigem a chave real da Groq (e, para o áudio, um microfone real), que não foi autorizada. Não gerei imagens com provedor simulado para ocupar o lugar delas.
+
+### (a) Termos de uso — feito
+- **Captura:** modal aberto no primeiro acesso, conta fictícia (médico do seed), viewport 1280 × 800, tema claro; o texto longo foi rolado e capturado em 8 partes: `evidencias_tcc/rodada_final/t6_capturas/termos-uso.png` (início) até `termos-uso-8.png`. **A seção do assistente de IA está em `termos-uso-5.png`** (cópia: `termos-uso-secao-ia.png`). Nenhum dado real na tela (o nome no canto é o médico fictício do seed).
+- **Busca `Ollama|Qwen|Llama`:** **zero ocorrências** no código-fonte do backend e do frontend, no `index.html`, nos READMEs e no `DOCUMENTO_ENGENHARIA_SOFTWARE.md`, e **zero** no texto efetivamente exibido no modal (`t6_termos_verificacao.txt`).
+- **Texto cita:** Groq, `gpt-oss-120b` e Whisper (modal, página Política de Dados e PDF da política).
+- **Achado corrigido nesta tarefa:** o **PDF** da política (`gerarPDFPolitica.ts`) ainda dizia "o nome completo é enviado" (a Tarefa 2 pedia revisar o PDF e eu só tinha ajustado o modal e a página). Corrigido para o mesmo texto do modal. O PDF não foi regenerado/capturado.
+- **Legenda sugerida (parte 5):** "Figura X — Seção do Termo de Uso sobre o assistente clínico: contexto enviado à Groq (alergias, medicamentos, anamnese e sinais vitais; sem nome, CPF, RG, telefone e endereço), modelo `openai/gpt-oss-120b` e transcrição por Whisper."
+- Registro: 03/11/2026, commit base `437e700` + correção do PDF; provedor de IA não é usado nesta captura.
+
+### (b) Chat de IA com sugestão de CID, provedor real — NÃO FEITO
+Pendente de você: depende de `GROQ_API_KEY` real apenas em variável de ambiente (nunca em arquivo). Quando autorizar, o passo é: paciente fictício com sinais vitais, pergunta clínica fictícia, captura da resposta com hipóteses e CID, e registro do modelo usado, tempo de resposta e data.
+
+### (c) Transcrição de áudio — NÃO FEITO
+Pendente de você: exige a chave real e um áudio fictício curto (a gravação pelo microfone não funciona no navegador automatizado sem dispositivo de áudio).
