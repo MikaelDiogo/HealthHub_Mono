@@ -48,3 +48,27 @@ Limite: o teste de concorrência é um script HTTP (não roda no `npm test`, que
 Busca no código por `ctx.nome`/`patientContext.nome`: sem resultados.
 
 **Limites.** O texto livre (anamnese, pergunta) continua sem filtro: um nome digitado nele seria enviado. A medição usou o provedor simulado, não a Groq real.
+
+---
+
+## Tarefa 3 — Testes dos RF sem cobertura (RF07, RF15, RF16, RF17, RF22) + desempate e salto de estado
+
+Numeração dos RF = a do TCC (Seção 4.1.1). Contagem de testes: **backend 117 → 149 (+32)**; **frontend 20 → 25 (+5)**. Builds e `tsc` sem erro.
+
+| RF / item | Arquivo | Testes (nomes resumidos) |
+|---|---|---|
+| RF07 histórico de sinais vitais | `HealthHub-BackEnd/src/rf-cobertura.http.spec.ts` | pede as 12 últimas e devolve na ordem do repositório; paciente inexistente → 400; perfis medico/enfermeiro 200 e recepcionista 403 (as duas rotas de histórico); sem login 401 |
+| RF15 fechar visita | idem | 4 desfechos (Alta, Internacao, Transferencia, Saida Voluntaria) gravam desfecho e data de alta; padrão "Alta"; enfermeiro e recepcionista 403 sem gravar; desfecho inválido 400; sem visita aberta nada é gravado |
+| RF16 assistente de IA | idem | médico/enfermeiro recebem a resposta e o contexto chega ao provedor; recepcionista 403; pergunta vazia 400; nome não chega ao provedor; **documenta que o backend não limita o histórico** |
+| RF17 transcrição de áudio | idem | devolve o texto; arquivo chega só em memória (buffer, sem `path`); aceita 25 MiB−1 e recusa 25 MiB (413); não-áudio 400; recepcionista 403; sem arquivo 400 |
+| RF22 termos de uso | `HealthHub-Project/src/utils/termosAceitos.spec.ts` | primeiro acesso = não aceito; aceitar grava a chave por versão e a data; continua aceito nos acessos seguintes; versão nova pede novo aceite; revogar remove |
+| Desempate por chegada (mesma cor) | já existia: `list-fila.service.spec.ts` ("na mesma categoria, desempata por ordem de chegada") e cenário S2 | — |
+| Salto de estado | `update-fila.transicoes.spec.ts` | 4 testes que documentam o comportamento atual (abaixo) |
+
+**Achados reais (não ajustei testes para esconder):**
+1. **Salto de estado é ACEITO hoje:** "Aguardando Triagem → Em Consulta (Médico)" e "→ Em Observação" passam, e retroceder também; só "Alta" pelo PUT é restrita ao médico. Não há regra de transição (como diz `fila-valores.ts`).
+2. **RF16 — limite de 4 mensagens de histórico é só do frontend** (`messages.slice(-4)` em `Monitoring`); o backend repassa o que recebe (teste com 12 mensagens). O texto dos termos ("até 4 mensagens") vale para o app, não é garantia do servidor.
+3. **RF17 — limite de 25 MB:** o arquivo de exatamente 25 MiB já é recusado (413); o efetivo é "abaixo de 25 MiB".
+4. **RF15 — a rota `PATCH /patients/:id/visitas/fechar` não registra evento na esteira.** O evento `alta` existe no fluxo `PATCH /fila/:id/alta` (testado em `fila-eventos.spec.ts`). Não alterei o comportamento.
+
+**Limites.** Os testes HTTP usam app Nest mínimo, o RolesGuard real e autenticação simulada (cabeçalho `x-role`); não passam pelo JWT real nem pelo banco. RF22: testei a lógica de gravação; a janela do modal não foi renderizada (o projeto não tem jsdom/Testing Library e não adicionei dependências). Para viabilizar o teste do RF22, movi as funções de aceite para `src/utils/termosAceitos.ts` (reexportadas pelo modal, sem mudar comportamento).

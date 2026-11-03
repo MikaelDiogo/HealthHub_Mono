@@ -24,23 +24,9 @@ import {
   IconUserShield,
 } from '@tabler/icons-react';
 import { gerarPDFPolitica } from '../../utils/gerarPDFPolitica';
+import { VERSAO_TERMOS, useTermosAceitos, marcarTermosAceitos, revogarTermosAceitos } from '../../utils/termosAceitos';
 
-const VERSAO_TERMOS = '1.0';
-const STORAGE_KEY = `healthhub_termos_aceitos_v${VERSAO_TERMOS}`;
-
-export function useTermosAceitos() {
-  return localStorage.getItem(STORAGE_KEY) === 'true';
-}
-
-export function marcarTermosAceitos() {
-  localStorage.setItem(STORAGE_KEY, 'true');
-  localStorage.setItem('healthhub_termos_data_aceite', new Date().toISOString());
-}
-
-export function revogarTermosAceitos() {
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem('healthhub_termos_data_aceite');
-}
+export { useTermosAceitos, marcarTermosAceitos, revogarTermosAceitos };
 
 interface TermosUsoModalProps {
   opened: boolean;
