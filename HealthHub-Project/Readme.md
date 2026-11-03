@@ -134,3 +134,7 @@ O WebSocket do chat autentica pelo mesmo JWT no handshake:
 ```ts
 io(BASE_URL, { auth: { token } })
 ```
+
+## Alertas de sinais vitais (chave de configuração)
+
+Os limiares de alerta de sinais vitais não têm fonte clínica registrada. `ALERTAS_SINAIS_VITAIS=false` (backend) e `VITE_ALERTAS_SINAIS_VITAIS=false` (frontend, em `.env`) desligam os alertas; o registro e a exibição dos sinais continuam. Padrão: ligado.

@@ -57,9 +57,17 @@ function media(nums: number[]): number | null {
   return nums.length ? Math.round(nums.reduce((a, b) => a + b, 0) / nums.length) : null;
 }
 
+/**
+ * Chave de configuração (Opção B): ALERTAS_SINAIS_VITAIS=false desliga os alertas de sinais vitais sem fonte clínica
+ * registrada. Padrão: ligado (comportamento atual). O registro dos sinais continua normalmente.
+ */
+export function alertasSinaisVitaisAtivos(env: Record<string, string | undefined> = process.env): boolean {
+  return env.ALERTAS_SINAIS_VITAIS !== 'false';
+}
+
 /** Mesmos limiares de "crítico" do frontend (utils/vitalStatus.ts). */
-export function motivoCritico(s: SinaisInput | undefined): string | null {
-  if (!s) return null;
+export function motivoCritico(s: SinaisInput | undefined, ativos: boolean = alertasSinaisVitaisAtivos()): string | null {
+  if (!s || !ativos) return null;
   const spo2 = Number(s.saturacao_oxigenio ?? 0);
   const fc = Number(s.frequencia_cardiaca ?? 0);
   const temp = Number(s.temperatura ?? 0);

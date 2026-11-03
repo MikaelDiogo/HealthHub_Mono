@@ -208,3 +208,7 @@ Cada módulo segue **Clean Architecture**: `domain → application → infrastru
 ## Verificação de saúde (`GET /health`)
 
 Rota pública, sem autenticação e sem dados: devolve `200 {"status":"ok","database":"up"}` quando a API e o banco respondem e `503 {"status":"error","database":"down"}` quando o banco não responde. Serve para monitoramento e para medir a disponibilidade (tempo até a API voltar após reiniciar).
+
+## Alertas de sinais vitais (chave de configuração)
+
+Os limiares de alerta de sinais vitais não têm fonte clínica registrada. `ALERTAS_SINAIS_VITAIS=false` (backend) e `VITE_ALERTAS_SINAIS_VITAIS=false` (frontend, em `.env`) desligam os alertas; o registro e a exibição dos sinais continuam. Padrão: ligado.

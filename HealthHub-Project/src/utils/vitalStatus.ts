@@ -2,8 +2,18 @@ import type { SinalVital } from '../types/patient';
 
 export type VitalStatus = 'critical' | 'warning' | 'normal' | 'unknown';
 
+/**
+ * Chave de configuração (Opção B): VITE_ALERTAS_SINAIS_VITAIS=false desliga os alertas de sinais vitais sem fonte
+ * clínica registrada (tudo passa a "unknown", sem cor de alerta). Padrão: ligado (comportamento atual).
+ * Os sinais continuam sendo registrados e exibidos.
+ */
+export function alertasSinaisVitaisAtivos(): boolean {
+  return import.meta.env.VITE_ALERTAS_SINAIS_VITAIS !== 'false';
+}
+
 /** Calcula o status clínico a partir do último registro de sinais vitais */
 export function getVitalStatus(sinaisVitais?: SinalVital[]): VitalStatus {
+  if (!alertasSinaisVitaisAtivos()) return 'unknown';
   const latest = sinaisVitais?.[0];
   if (!latest) return 'unknown';
 
@@ -58,20 +68,20 @@ export function dispatchVitalsUpdated(patientId: string) {
 
 // ─── Status por métrica individual (para CardDashboard) ───────────────────────
 export function spo2Status(v: number): VitalStatus {
-  if (v <= 0) return 'unknown';
+  if (v <= 0 || !alertasSinaisVitaisAtivos()) return 'unknown';
   if (v < 92) return 'critical';
   if (v < 95) return 'warning';
   return 'normal';
 }
 export function fcStatus(v: number): VitalStatus {
-  if (v <= 0) return 'unknown';
+  if (v <= 0 || !alertasSinaisVitaisAtivos()) return 'unknown';
   // Bradicardia (<60) é tão clinicamente relevante quanto taquicardia (>100) — faltava esse lado.
   if (v > 100 || v < 60) return 'critical';
   if (v > 90)  return 'warning';
   return 'normal';
 }
 export function tempStatus(v: number): VitalStatus {
-  if (v <= 0)   return 'unknown';
+  if (v <= 0 || !alertasSinaisVitaisAtivos()) return 'unknown';
   if (v > 38.5) return 'critical';
   // >= 37.8, não > 37.8 — o limiar em si já conta como febre/alerta.
   if (v >= 37.8) return 'warning';
