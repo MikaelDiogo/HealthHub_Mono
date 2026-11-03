@@ -126,93 +126,6 @@ Os scripts dos cenários **não estão versionados no repositório** (ficam em `
 
 ## Tarefa 5 — Desempenho e disponibilidade (RNF de desempenho e de disponibilidade)
 
-**Ambiente da medição:** AMD Ryzen 7 170 (8 núcleos / 16 threads), 15,3 GB de RAM, Windows 11 Pro; Node 24.20.0; PostgreSQL 16.15 em contêiner Docker (porta 5435, banco novo `healthhub_test_perf`); API em modo desenvolvimento (`NODE_ENV=development`, `node dist/main`, provedor de IA simulado); cliente de medição **na mesma máquina** (sem rede). Base: commit `429e75e` + endpoint `/health` (esta tarefa). Dados fictícios. Nenhum outro processo pesado de propósito, mas o contêiner do banco de desenvolvimento e outros contêineres do usuário estavam ligados. Medição por script próprio (`fetch` do Node, 10 requisições de aquecimento descartadas), não por `autocannon`/`k6` (não instalados; evitei dependência nova).
-**Comandos exatos** (em `evidencias_tcc/rodada_final/`, com `source /tmp/testenv_perf.sh`): `node desempenho.mjs fila`, `node desempenho.mjs escrita`, `node desempenho.mjs disp` (CSVs: `desempenho.csv`, `disponibilidade.csv`; logs `t5_*.log`).
-
-**Endpoint de saúde (novo):** `GET /health`, público, sem dados: `200 {"status":"ok","database":"up"}` ou `503 {"status":"error","database":"down"}` (3 testes unitários; documentado no Swagger e no Readme do backend). Implementado com `DataSource.query('SELECT 1')`, sem a dependência `@nestjs/terminus`.
-
-### Leitura (milissegundos; 200 requisições por linha; "conc." = 10 simultâneas, 200 no total)
-
-| Fila | Endpoint | Modo | mín | p50 | p95 | p99 | máx |
-|---|---|---|---|---|---|---|---|
-| 20 | GET /fila | seq. | 2,5 | 15,2 | 16,7 | 20,9 | 42,5 |
-| 20 | GET /fila | conc. | 6,8 | 12,1 | 19,4 | 39,1 | 41,1 |
-| 20 | GET /metricas | seq. | 4,5 | 15,0 | 18,6 | 25,2 | 31,8 |
-| 20 | GET /metricas | conc. | 10,7 | 30,9 | 43,7 | 46,8 | 52,6 |
-| 100 | GET /fila | seq. | 3,4 | 15,2 | 17,2 | 21,1 | 26,8 |
-| 100 | GET /fila | conc. | 5,9 | 23,6 | 32,7 | 37,1 | 39,6 |
-| 100 | GET /metricas | seq. | 10,0 | 15,8 | 28,3 | 31,6 | 43,9 |
-| 100 | GET /metricas | conc. | 22,0 | 96,7 | 136,1 | 147,2 | 152,0 |
-| 500 | GET /fila | seq. | 8,1 | 15,6 | 27,9 | 46,9 | 66,4 |
-| 500 | GET /fila | conc. | 20,6 | 53,3 | 67,5 | 71,0 | 74,6 |
-| 500 | GET /metricas | seq. | 28,3 | 45,1 | 59,0 | 66,9 | 67,9 |
-| 500 | GET /metricas | conc. | 98,6 | 318,6 | 389,0 | 412,0 | 861,1 |
-
-Vazão com 10 simultâneas: GET /fila 716, 406 e 183 req/s (20, 100, 500 entradas); GET /metricas 310, 98 e 31 req/s. Nenhuma resposta diferente de 200.
-
-### Escrita (100 repetições sequenciais cada, ms)
-
-| Operação | mín | p50 | p95 | p99 | máx |
-|---|---|---|---|---|---|
-| POST /fila (admissão, transacional com senha no servidor) | 16,6 | 29,8 | 37,1 | 44,7 | 45,1 |
-| PUT /fila/:id (classificar a cor, registra evento) | 10,4 | 17,6 | 30,9 | 33,2 | 34,9 |
-
-### Disponibilidade — tempo até `GET /health` voltar a 200 após reiniciar (5 repetições, s)
-
-| O que foi reiniciado | Medidas | Mediana | Máx |
-|---|---|---|---|
-| Só o banco (`docker restart`) | 1,5 · 2,2 · 1,1 · 1,1 · 1,2 | 1,2 | 2,2 |
-| Só a API (processo Node) | 6,5 · 5,6 · 5,0 · 5,1 · 5,6 | 5,6 | 6,5 |
-| Banco e API | 6,4 · 5,6 · 6,2 · 5,8 · 5,6 | 5,8 | 6,4 |
-
-A API **reconectou sozinha** depois do reinício do banco (nenhuma rodada ficou sem resposta). **Não medi disponibilidade como percentual de tempo no ar** (isso exigiria operação contínua); medi só o tempo de recuperação.
-
-### Chat de IA e transcrição de áudio — NÃO medidos
-Exigiriam a chave real da Groq, que não foi autorizada. Com o provedor simulado a latência não representa a do modelo. Fica pendente de você.
-
-### SUGESTÕES de meta (marcadas como sugestão; **você decide a meta final**)
-- **Desempenho:** "a listagem da esteira responde em até 100 ms no p95 com até 500 pacientes na fila e 10 usuários simultâneos" (medido: 67,5 ms); "as métricas do painel respondem em até 500 ms no p95 nas mesmas condições" (medido: 389 ms, com máx de 861 ms); "admissão e classificação de cor em até 100 ms no p95" (medido: 37 ms e 31 ms).
-- **Disponibilidade:** "a API volta a responder em até 15 s após um reinício (medido: máx 6,5 s) e `GET /health` serve de verificação". Uma meta em percentual (por exemplo 99%) só faz sentido com monitoramento em operação real.
-
-### Limites e cuidados na leitura dos números
-- Ambiente de desenvolvimento, tudo na mesma máquina, sem rede: em hospedagem real a latência de rede se soma.
-- O p50 sequencial ≈ 15 ms aparece igual em quase todas as linhas, enquanto o mínimo chega a 2,5 ms: parece um piso do cliente/sistema operacional (temporizador do Windows), não custo do endpoint. Por isso olho mais p95/p99 e o modo concorrente.
-- As filas de teste foram criadas por SQL (pacientes, fila e visitas), **sem** sinais vitais nem eventos; o custo real com sinais e eventos pode ser um pouco maior.
-- `GET /metricas` é o ponto que mais cresce com a fila (31 req/s com 500 entradas e 10 simultâneos).
-- Um único cliente de medição, uma máquina: não é teste de carga de produção.
-
----
-
-## Tarefa 9 — Dimensionamento de recursos (para o custo de hospedagem; preços não pesquisados)
-
-**Medições durante os testes da Tarefa 5** (amostras a cada ~2 a 3 s; `recursos_*.csv`; resolução baixa: 8 amostras em repouso, 11 sob carga de leitura, 4 sob escrita):
-
-| Componente | Em repouso | Sob a carga de leitura (pico = p95 das amostras) | Sob a carga de escrita (pico) |
-|---|---|---|---|
-| PostgreSQL (`docker stats`) | CPU ≈ 0 %, memória ≈ 54 MiB | CPU 23 % de 1 núcleo, memória 74 MiB | CPU 15 %, memória 57 MiB |
-| API Node (processo, modo desenvolvimento) | memória ≈ 95 MiB | memória 343 MiB; ≈ 20 s de CPU em 29 s (cerca de 70 % de 1 núcleo) | memória 345 MiB |
-
-**Tamanho do banco** (`pg_database_size`): 8,5 MB com o seed e sem dados.
-**Crescimento por 1.000 atendimentos** (gerado por SQL com dados fictícios, `t9_crescimento_banco.txt`; **as quantidades por atendimento são premissa minha, não medida de uso real**: 1 paciente, 1 visita, 6 eventos, 3 leituras de sinais vitais, 5 mensagens de chat de ~80 caracteres):
-
-| Tabela | Crescimento |
-|---|---|
-| fila_eventos | 1.384 KiB |
-| messages | 1.344 KiB |
-| sinais_vitais | 464 KiB |
-| pacientes | 376 KiB |
-| visitas | 192 KiB |
-| **Total** | **≈ 3,7 MiB por 1.000 atendimentos** (≈ 3,7 GB por milhão) |
-
-**Disco do Docker** (`docker system df`, máquina inteira, não só o HealthHub): imagens 3,46 GB, contêineres 222 MB, volumes locais 710 MB. A imagem `postgres:16-alpine` ocupa 420 MB. Não medi a imagem da API (ela roda como processo Node, fora de contêiner).
-
-**Recomendação de tamanho mínimo (estimativa a partir dos números acima, não validada por teste de carga em hospedagem):** uma máquina com **2 vCPU, 2 GB de RAM e 10 GB de disco** comportaria este uso com folga: a API pediu ≈ 350 MiB e o banco ≈ 75 MiB no pico medido (soma ≈ 0,4 GB, ou seja, cerca de 5 vezes de folga em 2 GB), e 10 GB cobririam a imagem do banco, o sistema operacional e algumas centenas de milhares de atendimentos. A CPU é o recurso mais sensível: o `GET /metricas` com fila grande ocupou perto de 1 núcleo da API. Valores finais dependem do perfil de uso real (número de usuários simultâneos), que não foi medido.
-
-
----
-
-## Tarefa 5 — Desempenho e disponibilidade (RNF de desempenho e de disponibilidade)
-
 **Ambiente da medição:** AMD Ryzen 7 170 (8 núcleos / 16 threads), 15,3 GB de RAM, Windows 11 Pro; Node 24.20.0; PostgreSQL 16.15 em contêiner Docker (porta 5435, banco novo `healthhub_test_perf`); API em modo desenvolvimento (`NODE_ENV=development`, `node dist/main`, provedor de IA simulado); cliente de medição **na mesma máquina** (sem rede). Base: commit `429e75e` + endpoint `/health` (esta tarefa). Dados fictícios. Não rodei outros processos pesados de propósito, mas outros contêineres do usuário estavam ligados. Medição por script próprio (`fetch` do Node, 10 requisições de aquecimento descartadas), não por `autocannon`/`k6` (não instalados; evitei dependência nova).
 **Comandos exatos** (em `evidencias_tcc/rodada_final/`, com `source /tmp/testenv_perf.sh`): `node desempenho.mjs fila`, `node desempenho.mjs escrita`, `node desempenho.mjs disp` (CSVs: `desempenho.csv`, `disponibilidade.csv`; logs `t5_*.log`).
 
@@ -254,8 +167,21 @@ Vazão com 10 simultâneas: GET /fila 716, 406 e 183 req/s (20, 100, 500 entrada
 
 A API **reconectou sozinha** depois do reinício do banco (nenhuma rodada ficou sem resposta). **Não medi disponibilidade como percentual de tempo no ar** (isso exigiria operação contínua); medi só o tempo de recuperação.
 
-### Chat de IA e transcrição de áudio — NÃO medidos
-Exigiriam a chave real da Groq, que não foi autorizada. Com o provedor simulado a latência não representa a do modelo. Fica pendente de você.
+### Chat de IA e transcrição de áudio — medidos com o provedor REAL (Groq), 03/11/2026
+Autorizado pelo autor. A chave ficou só no processo da API (carregada do `.env` do backend, ignorado pelo Git); os scripts não a leem nem a imprimem. Modelos (constantes do backend): chat `openai/gpt-oss-120b`, transcrição `whisper-large-v3-turbo`. Paciente 100% fictício; prompt real do aplicativo (contexto: alergias, medicamentos, anamnese e sinais vitais fictícios, sem nome); áudio: voz sintética do Windows ("Maria", pt-BR), 41,9 s, ditado fictício. Script `t5_ia_real.mjs`; dados `t5_ia_real_latencias.csv`; log `t5_ia_real.log`.
+
+| Chamada | n | mín | p50 | p95 | p99 | máx |
+|---|---|---|---|---|---|---|
+| `POST /patients/:id/chat` (texto) | 30 | 2.545 | 2.795 | 5.723 | 6.137 | 6.137 ms |
+| `POST /patients/:id/chat/audio` (áudio de 41,9 s) | 30 | 559 | 765 | 1.640 | 1.878 | 1.878 ms |
+
+Todas as 60 chamadas devolveram HTTP 201 (espaçadas em 13 s no chat e 4 s no áudio).
+
+**Achado importante (execução 1, preservada em `execucao1_com_429_*`):** com apenas 2 s de intervalo, **14 das 30 chamadas de chat e 3 das 30 de áudio falharam**. A Groq respondeu **429** (limite de **8.000 tokens por minuto** do modelo nesta conta, com cada chamada "pedindo" ~1.417 tokens, o que dá cerca de 5 chamadas de chat por minuto; no áudio, limite de requisições). O **backend converte esse 429 em HTTP 500** para o usuário, sem mensagem útil. Na prática, vários profissionais usando o assistente ao mesmo tempo podem receber erro. É limitação do plano/conta e do tratamento de erro; não alterei o código.
+
+**Custo estimado (não medido no painel da Groq):** abaixo de US$ 0,05 para todas as chamadas desta rodada.
+
+Limites: ambiente local, um cliente, conta e plano da Groq do autor; a latência de rede até a Groq varia.
 
 ### SUGESTÕES de meta (marcadas como sugestão; **você decide a meta final**)
 - **Desempenho:** "a listagem da esteira responde em até 100 ms no p95 com até 500 pacientes na fila e 10 usuários simultâneos" (medido: 67,5 ms); "as métricas do painel respondem em até 500 ms no p95 nas mesmas condições" (medido: 389 ms, com máximo de 861 ms); "admissão e classificação de cor em até 100 ms no p95" (medido: 37 ms e 31 ms).
@@ -300,7 +226,7 @@ Exigiriam a chave real da Groq, que não foi autorizada. Com o provedor simulado
 
 ## Tarefa 6 — Capturas: termos de uso, chat de IA com CID e transcrição de áudio
 
-**Só a parte (a) foi feita. As partes (b) e (c) NÃO foram feitas**, porque exigem a chave real da Groq (e, para o áudio, um microfone real), que não foi autorizada. Não gerei imagens com provedor simulado para ocupar o lugar delas.
+**As três partes foram feitas** ((b) e (c) com o provedor real da Groq, autorizado pelo autor depois da primeira entrega).
 
 ### (a) Termos de uso — feito
 - **Captura:** modal aberto no primeiro acesso, conta fictícia (médico do seed), viewport 1280 × 800, tema claro; o texto longo foi rolado e capturado em 8 partes: `evidencias_tcc/rodada_final/t6_capturas/termos-uso.png` (início) até `termos-uso-8.png`. **A seção do assistente de IA está em `termos-uso-5.png`** (cópia: `termos-uso-secao-ia.png`). Nenhum dado real na tela (o nome no canto é o médico fictício do seed).
@@ -310,12 +236,19 @@ Exigiriam a chave real da Groq, que não foi autorizada. Com o provedor simulado
 - **Legenda sugerida (parte 5):** "Figura X — Seção do Termo de Uso sobre o assistente clínico: contexto enviado à Groq (alergias, medicamentos, anamnese e sinais vitais; sem nome, CPF, RG, telefone e endereço), modelo `openai/gpt-oss-120b` e transcrição por Whisper."
 - Registro: 03/11/2026, commit base `437e700` + correção do PDF; provedor de IA não é usado nesta captura.
 
-### (b) Chat de IA com sugestão de CID, provedor real — NÃO FEITO
-Pendente de você: depende de `GROQ_API_KEY` real apenas em variável de ambiente (nunca em arquivo). Quando autorizar, o passo é: paciente fictício com sinais vitais, pergunta clínica fictícia, captura da resposta com hipóteses e CID, e registro do modelo usado, tempo de resposta e data.
+### (b) Chat de IA com sugestão de CID, provedor real — FEITO
+- **Captura:** `evidencias_tcc/rodada_final/t6_capturas_ia/chat-ia-cid.png` (viewport 1280 × 800, tema claro). Paciente fictício com sinais vitais; pergunta: "Quais os diagnósticos diferenciais mais prováveis, os sinais de alerta a pesquisar e a conduta inicial? Sugira o CID provável." A resposta real traz hipóteses e **CID** (na captura: lombalgia mecânica aguda, M54.5).
+- **Modelo:** `openai/gpt-oss-120b` na Groq (constante do backend; a API não devolve o nome do modelo na resposta). **Tempo de resposta na captura:** em torno de 2 a 3 s (a medição das 30 chamadas está na Tarefa 5). **Data:** 03/11/2026. Resposta de exemplo completa (1ª chamada da medição): `t5_ia_real_exemplo_resposta_chat.md`.
+- **Legenda sugerida:** "Figura X — Assistente de caso clínico respondendo a um paciente fictício com diagnósticos diferenciais, sinais de alerta, conduta inicial e sugestão de CID (modelo openai/gpt-oss-120b, via Groq)."
+- **Achado visual:** a tabela Markdown da resposta aparece na tela como barras verticais (`|`) em texto corrido: a interface **não renderiza tabelas Markdown**. A captura mostra isso; se o TCC usar a figura, convém comentar ou corrigir a renderização antes.
+- A captura mostra o começo da resposta; o texto é longo e o painel rola.
 
-### (c) Transcrição de áudio — NÃO FEITO
-Pendente de você: exige a chave real e um áudio fictício curto (a gravação pelo microfone não funciona no navegador automatizado sem dispositivo de áudio).
-
+### (c) Transcrição de áudio — FEITO
+- **Capturas:** `t6_capturas_ia/transcricao-audio-1-gravando.png` (gravando), `transcricao-audio-2-transcrevendo.png` (transcrevendo) e `transcricao-audio.png` (texto transcrito preenchendo o campo da pergunta). Mesmo viewport.
+- **Como foi gravado:** o navegador automatizado usou um **microfone falso** que reproduz um WAV de voz sintética do Windows (pt-BR, ditado fictício de 41,9 s). Não é a voz de uma pessoa nem um microfone real.
+- **Modelo:** `whisper-large-v3-turbo` (Groq). **Resultado:** texto transcrito de 486 caracteres, quase idêntico ao ditado; **houve um erro**: "alteração na urina" saiu como "alterar calnaurina" (o resto, correto). Texto completo: `t5_ia_real_exemplo_transcricao.txt`.
+- **Legenda sugerida:** "Figura X — Gravação de um ditado (voz sintética) e o texto transcrito preenchendo a pergunta ao assistente (Whisper large-v3-turbo, via Groq)."
+- Verificação automática e log: `t6_capturas_ia_verificacao.txt`. Nenhuma chave de API aparece nas imagens.
 
 ---
 
@@ -393,7 +326,7 @@ Pasta: `evidencias_tcc/rodada_final/ensaio_cronometrado/`. **Nenhum resultado, t
 
 ## Pendências que dependem de você
 
-1. **Chave real da Groq (opcional, só se autorizar):** medir a latência do chat de IA e da transcrição (Tarefa 5), e fazer as capturas do chat com CID e da transcrição de áudio (Tarefa 6).
+1. ~~Chave real da Groq~~ — **feito** (medições e capturas reais; ver tarefas 5 e 6). Resta decidir o que fazer com o limite de 8.000 tokens/min da Groq e com o 429 virando 500 no backend.
 2. **Fonte clínica dos limiares de sinais vitais** (e o limiar de pressão, se escolher a Opção A) e a **escolha entre as Opções A e B** da Tarefa 8.
 3. **Metas finais** de desempenho e disponibilidade (as da Tarefa 5 são só sugestões).
 4. **Preço de hospedagem:** não pesquisado; os recursos medidos estão na Tarefa 9.

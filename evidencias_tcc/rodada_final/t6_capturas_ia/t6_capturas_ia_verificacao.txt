@@ -1,0 +1,12 @@
+2026-11-03T13:32:26.412Z
+paciente fictício criado: Paciente Ficticio Captura 676510
+(b) paciente selecionado na tela: true
+(b) resposta apareceu em ~2 s; contém "CID": true; contém "SIMULADA": false
+captura chat-ia-cid.png
+(c) paciente selecionado na tela: true
+(c) clique no microfone: Gravar áudio
+captura transcricao-audio-1-gravando.png
+(c) parar gravação: Parar gravação
+captura transcricao-audio-2-transcrevendo.png
+(c) texto transcrito no campo (486 caracteres): " Paciente fictício do sexo feminino, 40 anos, relata dor lombar há dois dias, que comecou depois de um esforco ao carregar peso. Nega febre, nega perda de forca…"
+captura transcricao-audio.png
