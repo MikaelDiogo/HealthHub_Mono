@@ -355,6 +355,42 @@ O Apêndice A (`APENDICE_A_TCC_TESTE.md`, lido em 03/11/2026) lista os casos TF0
 
 **Ensaio cronometrado — dados dos casos:** o Apêndice não traz idade, sexo, motivo nem sinais por caso e autoriza gerá-los. Gerei dados **claramente fictícios** em `casos_ficticios.csv`, com os valores de fronteira do Apêndice (sem interpretação clínica): categorias e chegadas conforme o roteiro (amarelo 08:00 e 08:05; laranja 08:10; verde 08:15; azul 08:20). Os cartões, a ficha de papel, a planilha e o roteiro foram regenerados com esses dados (0 campos pendentes). **O ensaio em si continua sendo seu.**
 
+
+---
+
+## Texto sugerido para o TCC — limiares de sinais vitais e o POP do HC-UFTM
+
+**Referência:** HOSPITAL DE CLÍNICAS DA UFTM (HC-UFTM/EBSERH). *POP.HC-UFTM-DENF.003: Rotina de Registro de Sinais Vitais e Controles*, versão 6. Uberaba: Ebserh, 14 nov. 2025. Disponível em: https://www.gov.br/hubrasil/pt-br/hospitais-universitarios/regiao-sudeste/hc-uftm/documentos/procedimentos-e-rotinas-operacionais-padrao/pops/POP.HCUFTMDENF.003RotinadeRegistrodeSinaisVitaiseControlesversao6.pdf (conferir os números nos anexos A, D, E, F e H do PDF antes de citar).
+
+**Texto (adapte ao seu estilo):**
+
+> Os alertas de sinais vitais do HealthHub usam limiares fixos para frequência cardíaca (FC), saturação periférica de oxigênio (SpO₂) e temperatura. Como referência documental, consultou-se o POP.HC-UFTM-DENF.003 (versão 6, 2025), da Ebserh, que define a rotina de registro de sinais vitais de pacientes internados e traz valores de referência e a escala NEWS 2. O POP afirma que as escalas de alerta são complemento ao julgamento clínico e não o substituem.
+>
+> Dos limiares implementados, os seguintes **têm correspondência no POP** para adultos: FC entre 60 e 100 bpm como faixa de referência, com bradicardia abaixo de 60 e taquicardia acima de 100; SpO₂ de 95% a 100% como faixa normal; e temperatura a partir de 37,8 °C como início da faixa de febre baixa. Os seguintes **não têm correspondência direta no POP e foram adotados pelo desenvolvedor, sem fonte clínica registrada**: FC acima de 90 bpm como nível de atenção; temperatura acima de 38,5 °C como nível crítico (o POP e o NEWS 2 usam cortes em 38,1 e 39,1 °C); e SpO₂ abaixo de 92% como nível crítico (coincide com o NEWS 2, mas o POP classifica 91% como hipóxia leve). A pressão arterial é registrada como texto livre e **não gera alerta**.
+>
+> O POP é um procedimento de enfermaria para pacientes internados, e não de triagem, e não utiliza os termos "atenção" e "crítico"; essa classificação é própria do protótipo. Por isso, os limiares do HealthHub **não constituem validação clínica** e devem ser revistos por profissional de saúde antes de qualquer uso real. A adoção do NEWS 2 completo, que exige frequência respiratória, oxigênio suplementar e nível de consciência (campos que o sistema não registra), e dos demais controles do POP (balanço hídrico, glicemia, dor, entre outros) ficam como **trabalho futuro**.
+
+**Fundamento no repositório:** comparação detalhada em `evidencias_tcc/rodada_final/limiares_sinais_vitais.md` (seção 5) e comentário no código em `vitalStatus.ts`. Nenhum valor foi alterado.
+
+---
+
+## Metas PROPOSTAS para os requisitos de desempenho e disponibilidade (você decide a versão final)
+
+Baseadas nas medições da Tarefa 5 (ambiente local, mesma máquina, sem rede; ver os limites lá descritos). Cada meta deixa folga sobre o valor medido. São **propostas**, não resultado.
+
+| Requisito | Meta proposta | Medido | Folga |
+|---|---|---|---|
+| Listagem da esteira (`GET /fila`), até 500 pacientes e 10 usuários simultâneos | p95 ≤ 100 ms | 67,5 ms | 1,5× |
+| Métricas do painel (`GET /metricas`), mesmas condições | p95 ≤ 500 ms | 389 ms | 1,3× (ponto mais apertado) |
+| Admissão na esteira (`POST /fila`) | p95 ≤ 100 ms | 37,1 ms | 2,7× |
+| Classificar a cor (`PUT /fila/:id`) | p95 ≤ 100 ms | 30,9 ms | 3,2× |
+| Chat de IA (texto), um usuário | p95 ≤ 10 s | 5,7 s | 1,7× (depende da Groq e do limite de 8.000 tokens/min da conta) |
+| Transcrição de áudio de ~40 s | p95 ≤ 5 s | 1,6 s | 3× |
+| Recuperação após reinício da API ou do banco | até 15 s para `GET /health` voltar a 200 | máx. 6,5 s | 2,3× |
+| Disponibilidade em percentual | **sem meta numérica sugerida** | não medida | só faz sentido com monitoramento em operação real |
+
+Observação: com 500 entradas e 10 simultâneos o `GET /metricas` entregou só 31 req/s; se a meta de 500 ms for importante em produção, a consulta de métricas é o ponto a otimizar. Essas metas valem para o ambiente medido, não para a VPS (a medir depois de contratada).
+
 ---
 
 ## Pendências que dependem de você
