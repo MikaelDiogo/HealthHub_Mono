@@ -331,20 +331,18 @@ Pasta: `evidencias_tcc/rodada_final/ensaio_cronometrado/`. Os tempos abaixo fora
 
 | Arquivo | Função |
 |---|---|
-| `casos_fonte.csv` | Os 5 casos (`FICTÍCIO-01` a `-05`): categorias e chegadas do seu roteiro (amarela 08:00 e 08:05; laranja 08:10; verde 08:15; azul 08:20) e CPFs fictícios; **idade, sexo, motivo e sinais vitais artificiais estão em branco** |
+| `casos_fonte.csv` | Os 5 casos (`FICTÍCIO-01` a `-05`): categorias e chegadas do seu roteiro (amarela 08:00 e 08:05; laranja 08:10; verde 08:15; azul 08:20) e CPFs fictícios; idade, sexo, motivo e sinais vitais artificiais foram preenchidos depois, com os valores de fronteira do Apêndice A (sem interpretação clínica) |
 | `gerar_instrumentos.mjs` | Gera, a partir do CSV acima, os cartões, a ficha de papel, a planilha de coleta e o roteiro |
 | `cartoes_caso.html` | Um cartão imprimível por paciente (A4), com a categoria artificial e o aviso de que **não é classificação clínica nem gabarito** |
 | `formulario_papel.html` | Ficha de papel com os mesmos campos do sistema (cadastro, sinais vitais, motivo, cor de risco) |
-| `coleta_ensaio.csv` | Planilha com colunas caso, repetição, tentativa, método, ordem de execução, início, fim, tempo em segundos, campos obrigatórios completos, erros/omissões, falhas, ajuda e observações; 30 linhas válidas (5 casos × 3 repetições × 2 métodos) + 2 de familiarização (fora do cálculo), **todas com tempos em branco** |
+| `coleta_ensaio.csv` | Planilha com colunas caso, repetição, tentativa, método, ordem de execução, início, fim, tempo em segundos, campos obrigatórios completos, erros/omissões, falhas, ajuda e observações; 30 linhas válidas (5 casos × 3 repetições × 2 métodos) + 2 de familiarização (fora do cálculo); as 30 válidas têm tempo gravado |
 | `roteiro_execucao.md` | Ordem **alternada** das modalidades por caso e repetição, regras de cronometragem, familiarização, preservação de todas as tentativas e as declarações obrigatórias (ensaio solo, viés de familiaridade) |
 | `reiniciar_sistema_limpo.mjs` | Deixa o sistema limpo entre repetições (apaga fila e pacientes `FICTÍCIO-*` do banco de teste isolado; recusa rodar se o banco não parecer de teste) |
-| `analisar_ensaio.mjs` | **Para depois da coleta:** média, mediana, mínimo, máximo, desvio-padrão, taxa de completude, erros, diferença e razão papel ÷ sistema, tabela e gráfico de barras (SVG). Avisa quando n é pequeno e não afirma significância estatística |
+| `analisar_ensaio.mjs` | Rodado após a coleta: média, mediana, mínimo, máximo, desvio-padrão, taxa de completude, erros, diferença e razão papel ÷ sistema, tabela e gráfico de barras (SVG). Avisa quando n é pequeno e não afirma significância estatística |
 
-**O que ficou pendente de você:**
-1. **Os dados clínicos dos casos** (idade, sexo, motivo, sinais vitais artificiais): o Apêndice A do TCC **não está no repositório** e eu não inventei valores. Preencha `casos_fonte.csv` e rode `node gerar_instrumentos.mjs` de novo para regenerar os cartões.
-2. Executar o ensaio com cronômetro e preencher `coleta_ensaio.csv`; depois rodar `node analisar_ensaio.mjs`.
-3. Com 3 repetições (ímpar) a alternância não fica perfeitamente balanceada por caso (cada caso começa 2 vezes por um método e 1 pelo outro); o roteiro sugere 4 repetições.
-**Teste do código de análise:** rodei `analisar_ensaio.mjs` com um CSV **sintético, rotulado e descartado** (em pasta temporária, fora das evidências) só para ver se o cálculo funciona; esses números não existem em nenhum arquivo de resultado.
+**Limitação do delineamento:** com 3 repetições (ímpar) a alternância não fica perfeitamente balanceada por caso (cada caso começa 2 vezes por um método e 1 pelo outro).
+
+**Teste do código de análise (feito antes da coleta):** rodei `analisar_ensaio.mjs` com um CSV **sintético, rotulado e descartado** (em pasta temporária, fora das evidências) só para ver se o cálculo funciona; esses números não existem em nenhum arquivo de resultado.
 
 
 ---
