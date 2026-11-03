@@ -1,0 +1,6 @@
+{"em":"2026-11-03T14:29:03.157Z","acao":"limpar-sistema","db":"healthhub_test_ensaio"}
+{"em":"2026-11-03T14:53:21.011Z","acao":"salvar","indice":2,"caso":"FICTÍCIO-01","repeticao":"1","metodo":"papel","tempo_segundos":"121.0","adicional":false}
+{"em":"2026-11-03T14:55:45.627Z","acao":"salvar","indice":3,"caso":"FICTÍCIO-01","repeticao":"1","metodo":"sistema","tempo_segundos":"93.3","adicional":false}
+{"em":"2026-11-03T17:02:22.176Z","acao":"salvar","indice":0,"caso":"(familiarizacao)","repeticao":"0","metodo":"papel","tempo_segundos":"74.7","adicional":false}
+{"em":"2026-11-03T17:04:53.572Z","acao":"cancelar","indice":1,"motivo":"cancelada pelo executor"}
+{"em":"2026-11-03T17:05:28.788Z","acao":"salvar","indice":1,"caso":"(familiarizacao)","repeticao":"0","metodo":"sistema","tempo_segundos":"29.6","adicional":false}

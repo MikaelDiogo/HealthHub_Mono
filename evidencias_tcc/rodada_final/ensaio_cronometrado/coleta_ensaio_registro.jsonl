@@ -1,0 +1,33 @@
+{"em":"2026-11-03T17:36:33.723Z","acao":"limpar-sistema","db":"healthhub_test_ensaio"}
+{"em":"2026-11-03T17:39:32.339Z","acao":"salvar","indice":2,"caso":"FICTÍCIO-01","repeticao":"1","metodo":"papel","tempo_segundos":"100.5","adicional":false}
+{"em":"2026-11-03T17:42:04.437Z","acao":"salvar","indice":5,"caso":"FICTÍCIO-02","repeticao":"1","metodo":"papel","tempo_segundos":"84.9","adicional":false}
+{"em":"2026-11-03T17:43:55.075Z","acao":"salvar","indice":6,"caso":"FICTÍCIO-03","repeticao":"1","metodo":"papel","tempo_segundos":"89.3","adicional":false}
+{"em":"2026-11-03T17:45:38.402Z","acao":"salvar","indice":9,"caso":"FICTÍCIO-04","repeticao":"1","metodo":"papel","tempo_segundos":"86.6","adicional":false}
+{"em":"2026-11-03T17:47:44.180Z","acao":"salvar","indice":10,"caso":"FICTÍCIO-05","repeticao":"1","metodo":"papel","tempo_segundos":"100.0","adicional":false}
+{"em":"2026-11-03T17:48:26.904Z","acao":"cancelar","indice":13,"motivo":"cancelada pelo executor"}
+{"em":"2026-11-03T17:50:16.148Z","acao":"salvar","indice":13,"caso":"FICTÍCIO-01","repeticao":"2","metodo":"papel","tempo_segundos":"102.5","adicional":false}
+{"em":"2026-11-03T17:52:10.535Z","acao":"salvar","indice":14,"caso":"FICTÍCIO-02","repeticao":"2","metodo":"papel","tempo_segundos":"98.1","adicional":false}
+{"em":"2026-11-03T17:54:05.294Z","acao":"salvar","indice":17,"caso":"FICTÍCIO-03","repeticao":"2","metodo":"papel","tempo_segundos":"104.9","adicional":false}
+{"em":"2026-11-03T17:55:59.168Z","acao":"salvar","indice":18,"caso":"FICTÍCIO-04","repeticao":"2","metodo":"papel","tempo_segundos":"106.1","adicional":false}
+{"em":"2026-11-03T17:58:09.406Z","acao":"salvar","indice":21,"caso":"FICTÍCIO-05","repeticao":"2","metodo":"papel","tempo_segundos":"110.2","adicional":false}
+{"em":"2026-11-03T18:00:11.335Z","acao":"salvar","indice":22,"caso":"FICTÍCIO-01","repeticao":"3","metodo":"papel","tempo_segundos":"110.0","adicional":false}
+{"em":"2026-11-03T18:02:14.586Z","acao":"salvar","indice":25,"caso":"FICTÍCIO-02","repeticao":"3","metodo":"papel","tempo_segundos":"105.6","adicional":false}
+{"em":"2026-11-03T18:04:55.924Z","acao":"salvar","indice":26,"caso":"FICTÍCIO-03","repeticao":"3","metodo":"papel","tempo_segundos":"118.4","adicional":false}
+{"em":"2026-11-03T18:08:45.157Z","acao":"salvar","indice":29,"caso":"FICTÍCIO-04","repeticao":"3","metodo":"papel","tempo_segundos":"180.2","adicional":false}
+{"em":"2026-11-03T18:10:41.600Z","acao":"salvar","indice":30,"caso":"FICTÍCIO-05","repeticao":"3","metodo":"papel","tempo_segundos":"105.6","adicional":false}
+{"em":"2026-11-03T18:45:21.761Z","acao":"salvar","indice":3,"caso":"FICTÍCIO-01","repeticao":"1","metodo":"sistema","tempo_segundos":"72.0","adicional":false}
+{"em":"2026-11-03T18:46:31.827Z","acao":"salvar","indice":4,"caso":"FICTÍCIO-02","repeticao":"1","metodo":"sistema","tempo_segundos":"59.0","adicional":false}
+{"em":"2026-11-03T18:48:12.590Z","acao":"salvar","indice":7,"caso":"FICTÍCIO-03","repeticao":"1","metodo":"sistema","tempo_segundos":"64.0","adicional":false}
+{"em":"2026-11-03T18:49:13.363Z","acao":"cancelar","indice":8,"motivo":"cancelada pelo executor"}
+{"em":"2026-11-03T18:50:48.604Z","acao":"salvar","indice":8,"caso":"FICTÍCIO-04","repeticao":"1","metodo":"sistema","tempo_segundos":"66.5","adicional":false}
+{"em":"2026-11-03T18:53:00.451Z","acao":"salvar","indice":11,"caso":"FICTÍCIO-05","repeticao":"1","metodo":"sistema","tempo_segundos":"77.2","adicional":false}
+{"em":"2026-11-03T18:56:32.005Z","acao":"salvar","indice":12,"caso":"FICTÍCIO-01","repeticao":"2","metodo":"sistema","tempo_segundos":"96.9","adicional":false}
+{"em":"2026-11-03T18:59:17.675Z","acao":"salvar","indice":15,"caso":"FICTÍCIO-02","repeticao":"2","metodo":"sistema","tempo_segundos":"81.0","adicional":false}
+{"em":"2026-11-03T19:02:17.393Z","acao":"salvar","indice":16,"caso":"FICTÍCIO-03","repeticao":"2","metodo":"sistema","tempo_segundos":"66.7","adicional":false}
+{"em":"2026-11-03T19:04:53.871Z","acao":"salvar","indice":19,"caso":"FICTÍCIO-04","repeticao":"2","metodo":"sistema","tempo_segundos":"52.5","adicional":false}
+{"em":"2026-11-03T19:06:18.120Z","acao":"salvar","indice":20,"caso":"FICTÍCIO-05","repeticao":"2","metodo":"sistema","tempo_segundos":"56.2","adicional":false}
+{"em":"2026-11-03T19:31:02.844Z","acao":"salvar","indice":23,"caso":"FICTÍCIO-01","repeticao":"3","metodo":"sistema","tempo_segundos":"80.1","adicional":false}
+{"em":"2026-11-03T19:32:36.620Z","acao":"salvar","indice":24,"caso":"FICTÍCIO-02","repeticao":"3","metodo":"sistema","tempo_segundos":"69.4","adicional":false}
+{"em":"2026-11-03T19:34:03.449Z","acao":"salvar","indice":27,"caso":"FICTÍCIO-03","repeticao":"3","metodo":"sistema","tempo_segundos":"65.3","adicional":false}
+{"em":"2026-11-03T19:35:29.728Z","acao":"salvar","indice":28,"caso":"FICTÍCIO-04","repeticao":"3","metodo":"sistema","tempo_segundos":"54.6","adicional":false}
+{"em":"2026-11-03T19:36:47.952Z","acao":"salvar","indice":31,"caso":"FICTÍCIO-05","repeticao":"3","metodo":"sistema","tempo_segundos":"63.2","adicional":false}

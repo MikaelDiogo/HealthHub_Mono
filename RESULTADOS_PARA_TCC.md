@@ -303,9 +303,31 @@ Faixas de recusa no servidor (não são alertas): FC 0–300 bpm (inteiro), SpO�
 
 ---
 
-## Tarefa 10 — Instrumentos do ensaio cronometrado papel × HealthHub (preparados; **o ensaio é seu e não foi executado**)
+## Tarefa 10 — Ensaio cronometrado papel × HealthHub (executado pelo autor em 03/11/2026)
 
-Pasta: `evidencias_tcc/rodada_final/ensaio_cronometrado/`. **Nenhum resultado, tempo ou número do ensaio foi preenchido ou estimado.**
+Pasta: `evidencias_tcc/rodada_final/ensaio_cronometrado/`. Os tempos abaixo foram **medidos pelo próprio autor** com o cronômetro da pasta (gravação automática em `coleta_ensaio.csv`); nenhum tempo foi estimado, simulado ou corrigido por mim.
+
+### Resultado (30 medições válidas: 5 casos fictícios × 3 repetições × 2 métodos)
+
+| Método | n | Média (s) | Mediana (s) | Mín (s) | Máx (s) | Desvio-padrão (s) | Completude dos campos | Erros/omissões |
+|---|---|---|---|---|---|---|---|---|
+| Papel | 15 | 106,9 | 104,9 | 84,9 | 180,2 | 22,2 | 100% | 0 |
+| Sistema (HealthHub) | 15 | 68,3 | 66,5 | 52,5 | 96,9 | 11,8 | 100% | 0 |
+
+- Diferença das médias (papel − sistema): **38,6 s**; razão papel ÷ sistema: **1,56**.
+- Nos 15 pares (mesmo caso e mesma repetição), o sistema foi mais rápido **em 15 de 15**; diferença média por par 38,6 s.
+- Média por repetição (papel / sistema): 1ª 92,3 / 67,7 s; 2ª 104,4 / 70,7 s; 3ª 124,0 / 66,5 s. O tempo do papel **cresceu** a cada repetição; não foi investigada a causa (cansaço, ficha manuscrita, outro fator). O maior valor (180,2 s, caso FICTÍCIO-04, 3ª repetição, papel) foi **mantido** no cálculo; a mediana não depende dele.
+- Dados brutos: `coleta_ensaio.csv`; análise: `resultado_ensaio.md` e `grafico_ensaio.svg`; registro de tudo que foi gravado ou cancelado: `coleta_ensaio_registro.jsonl` (30 gravações; **2 rodadas canceladas e refeitas** pelo executor, preservadas no registro). As 4 medições do primeiro começo, descartadas por decisão do autor antes de reiniciar, estão em `arquivo_descartado_20261103_143626/`.
+
+### O que dizer (e não dizer) no TCC
+- É um **ensaio exploratório com um único executor, o próprio desenvolvedor**, que conhece o sistema e os dados (**viés de familiaridade**). Não mede satisfação de enfermeiros nem demonstra redução de tempo em uso real. Nenhum teste estatístico foi aplicado: não afirmar significância.
+- Dados 100% fictícios; sinais vitais e categorias artificiais (não são classificação clínica nem gabarito).
+- **Achado de fluxo:** no HealthHub o "motivo da visita" não está no cadastro; é digitado ao **admitir na esteira**. Nas rodadas do sistema o motivo foi digitado, como no papel (declaração do autor), então o tempo do sistema inclui esse passo.
+- O papel foi preenchido à mão em ficha impressa; o autor deve guardar as fotos das fichas como comprovação (não há outra prova de que foram manuscritas).
+- Nas 2 linhas de familiarização não há tempo gravado; elas ficam fora do cálculo de qualquer forma.
+- Houve 3 repetições (30 medições); o mínimo do Apêndice A é 10. Confirmar com o orientador se 30 atende o que ele pediu.
+
+### Instrumentos usados (preparados antes da coleta)
 
 | Arquivo | Função |
 |---|---|
@@ -399,7 +421,7 @@ Observação: com 500 entradas e 10 simultâneos o `GET /metricas` entregou só 
 2. **Fonte clínica dos limiares de sinais vitais** (e o limiar de pressão, se escolher a Opção A) e a **escolha entre as Opções A e B** da Tarefa 8.
 3. **Metas finais** de desempenho e disponibilidade (as da Tarefa 5 são só sugestões).
 4. **Preço de hospedagem:** não pesquisado; os recursos medidos estão na Tarefa 9.
-5. **Execução do ensaio cronometrado** (Tarefa 10). Os dados fictícios dos 5 casos já foram gerados a partir do Apêndice A; falta você cronometrar as 30 rodadas.
+5. ~~Execução do ensaio cronometrado~~ — **feito** (30 medições, Tarefa 10). Resta: guardar as fotos das fichas de papel como comprovação e confirmar com o orientador se 3 repetições atendem.
 6. **Nome real do autor no seed** (`HealthHub-BackEnd/src/database/seed.ts`, usuário enfermeiro): decidir se troca no código. Enquanto isso, nos bancos de teste eu renomeio o usuário para não vazar o nome nas capturas.
 7. **Decidir o que commitar ou ignorar** das pastas soltas (`coleta_tcc/`, `eval/`, `Print_healthhub/` etc.) e se faz **push** e merge: nada desta rodada foi enviado ao GitHub.
 8. Itens de produto apontados nos testes: o salto de estado na esteira é aceito (Tarefa 3); o histórico da IA não é limitado no backend (Tarefa 3); a recepção recebe a mensagem genérica do guard no S4; a rota de fechar visita não registra evento.
