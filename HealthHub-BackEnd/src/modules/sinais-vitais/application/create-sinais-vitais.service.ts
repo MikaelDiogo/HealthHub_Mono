@@ -15,7 +15,7 @@ export class CreateSinaisVitaisService {
   async execute(patientId: string, data: CreateSinaisVitaisDto, usuario?: UsuarioEvento): Promise<SinaisVitais> {
     // Um registro sem nenhum sinal não conta como "sinais registrados" (isso liberaria a classificação de risco).
     const preenchido = (v: unknown) => v !== undefined && v !== null && v !== '';
-    if (![data?.frequencia_cardiaca, data?.saturacao_oxigenio, data?.pressao_arterial, data?.temperatura].some(preenchido)) {
+    if (![data?.frequencia_cardiaca, data?.saturacao_oxigenio, data?.pressao_arterial, data?.pressao_sistolica, data?.pressao_diastolica, data?.temperatura].some(preenchido)) {
       throw new BadRequestException({ error: 'Informe ao menos um sinal vital (frequência cardíaca, SpO₂, pressão arterial ou temperatura).' });
     }
 
@@ -32,6 +32,8 @@ export class CreateSinaisVitaisService {
       frequencia_cardiaca: data.frequencia_cardiaca,
       saturacao_oxigenio: data.saturacao_oxigenio,
       pressao_arterial: data.pressao_arterial,
+      pressao_sistolica: data.pressao_sistolica,
+      pressao_diastolica: data.pressao_diastolica,
       temperatura: data.temperatura,
     });
 

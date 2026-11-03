@@ -21,6 +21,19 @@ export class CreateSinaisVitaisDto {
   @MaxLength(20, { message: 'Pressão arterial deve ter no máximo 20 caracteres' })
   pressao_arterial?: string;
 
+  // Faixa técnica mínima (inteiro >= 0); nenhum limite clínico foi escolhido: o autor informa se quiser um teto.
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'Pressão sistólica deve ser um número inteiro (mmHg)' })
+  @Min(0, { message: 'Pressão sistólica não pode ser negativa' })
+  pressao_sistolica?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt({ message: 'Pressão diastólica deve ser um número inteiro (mmHg)' })
+  @Min(0, { message: 'Pressão diastólica não pode ser negativa' })
+  pressao_diastolica?: number;
+
   @IsOptional()
   @Type(() => Number)
   @IsNumber({}, { message: 'Temperatura deve estar entre 25 e 45 °C' })

@@ -1,3 +1,4 @@
+import { LIMIARES_CRITICOS } from '../../../config/limiares-sinais-vitais';
 // Cálculo das métricas operacionais do pronto-atendimento a partir dos dados
 // brutos. Função pura (sem banco) para ser testável e auditável: cada número
 // do painel vem daqui, e os totais são sempre derivados das linhas.
@@ -64,9 +65,9 @@ export function motivoCritico(s: SinaisInput | undefined): string | null {
   const fc = Number(s.frequencia_cardiaca ?? 0);
   const temp = Number(s.temperatura ?? 0);
   const motivos: string[] = [];
-  if (spo2 > 0 && spo2 < 92) motivos.push(`SpO₂ ${spo2}%`);
-  if (fc > 0 && (fc > 100 || fc < 60)) motivos.push(`FC ${fc} bpm`);
-  if (temp > 38.5) motivos.push(`Temperatura ${temp} °C`);
+  if (spo2 > 0 && spo2 < LIMIARES_CRITICOS.spo2.criticoAbaixoDe) motivos.push(`SpO₂ ${spo2}%`);
+  if (fc > 0 && (fc > LIMIARES_CRITICOS.frequenciaCardiaca.criticoAcimaDe || fc < LIMIARES_CRITICOS.frequenciaCardiaca.criticoAbaixoDe)) motivos.push(`FC ${fc} bpm`);
+  if (temp > LIMIARES_CRITICOS.temperatura.criticoAcimaDe) motivos.push(`Temperatura ${temp} °C`);
   return motivos.length ? motivos.join(' · ') : null;
 }
 

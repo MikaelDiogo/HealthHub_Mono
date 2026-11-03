@@ -21,6 +21,13 @@ export class SinaisVitais {
   @Column('varchar', { nullable: true })
   pressao_arterial?: string;
 
+  // Pressão estruturada (Opção A). Nenhum limiar de alerta definido para ela.
+  @Column('smallint', { nullable: true })
+  pressao_sistolica?: number;
+
+  @Column('smallint', { nullable: true })
+  pressao_diastolica?: number;
+
   @Column('float', { nullable: true })
   temperatura?: number;
 

@@ -1,4 +1,5 @@
 import type { SinalVital } from '../types/patient';
+import { LIMIARES_SINAIS_VITAIS as L } from '../config/limiaresSinaisVitais';
 
 export type VitalStatus = 'critical' | 'warning' | 'normal' | 'unknown';
 
@@ -16,15 +17,15 @@ export function getVitalStatus(sinaisVitais?: SinalVital[]): VitalStatus {
   const hasTemp = temp > 0;
 
   if (
-    (hasSpo2 && spo2 < 92)  ||
-    (hasFc   && (fc > 100 || fc < 60)) ||
-    (hasTemp && temp > 38.5)
+    (hasSpo2 && spo2 < L.spo2.criticoAbaixoDe)  ||
+    (hasFc   && (fc > L.frequenciaCardiaca.criticoAcimaDe || fc < L.frequenciaCardiaca.criticoAbaixoDe)) ||
+    (hasTemp && temp > L.temperatura.criticoAcimaDe)
   ) return 'critical';
 
   if (
-    (hasSpo2 && spo2 < 95)  ||
-    (hasFc   && fc   > 90)  ||
-    (hasTemp && temp >= 37.8)
+    (hasSpo2 && spo2 < L.spo2.atencaoAbaixoDe)  ||
+    (hasFc   && fc   > L.frequenciaCardiaca.atencaoAcimaDe)  ||
+    (hasTemp && temp >= L.temperatura.atencaoAPartirDe)
   ) return 'warning';
 
   if (hasSpo2 || hasFc || hasTemp) return 'normal';
@@ -59,22 +60,22 @@ export function dispatchVitalsUpdated(patientId: string) {
 // ─── Status por métrica individual (para CardDashboard) ───────────────────────
 export function spo2Status(v: number): VitalStatus {
   if (v <= 0) return 'unknown';
-  if (v < 92) return 'critical';
-  if (v < 95) return 'warning';
+  if (v < L.spo2.criticoAbaixoDe) return 'critical';
+  if (v < L.spo2.atencaoAbaixoDe) return 'warning';
   return 'normal';
 }
 export function fcStatus(v: number): VitalStatus {
   if (v <= 0) return 'unknown';
   // Bradicardia (<60) é tão clinicamente relevante quanto taquicardia (>100) — faltava esse lado.
-  if (v > 100 || v < 60) return 'critical';
-  if (v > 90)  return 'warning';
+  if (v > L.frequenciaCardiaca.criticoAcimaDe || v < L.frequenciaCardiaca.criticoAbaixoDe) return 'critical';
+  if (v > L.frequenciaCardiaca.atencaoAcimaDe)  return 'warning';
   return 'normal';
 }
 export function tempStatus(v: number): VitalStatus {
   if (v <= 0)   return 'unknown';
-  if (v > 38.5) return 'critical';
+  if (v > L.temperatura.criticoAcimaDe) return 'critical';
   // >= 37.8, não > 37.8 — o limiar em si já conta como febre/alerta.
-  if (v >= 37.8) return 'warning';
+  if (v >= L.temperatura.atencaoAPartirDe) return 'warning';
   return 'normal';
 }
 

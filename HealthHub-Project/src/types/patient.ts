@@ -2,6 +2,8 @@ export interface SinalVital {
   id: string;
   temperatura: string;
   pressao_arterial: string;
+  pressao_sistolica?: number | null;
+  pressao_diastolica?: number | null;
   frequencia_cardiaca: string;
   saturacao_oxigenio: string;
   created_at: string;

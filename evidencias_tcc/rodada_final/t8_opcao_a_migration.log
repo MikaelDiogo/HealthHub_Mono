@@ -1,0 +1,15 @@
+## migration:run
+query: ALTER TABLE "sinais_vitais" ADD COLUMN "pressao_sistolica" smallint NULL
+query: ALTER TABLE "sinais_vitais" ADD COLUMN "pressao_diastolica" smallint NULL
+Migration AddPressaoEstruturada1783500000000 has been executed successfully.
+## migration:revert
+query: ALTER TABLE "sinais_vitais" DROP COLUMN "pressao_diastolica"
+query: ALTER TABLE "sinais_vitais" DROP COLUMN "pressao_sistolica"
+Migration AddPressaoEstruturada1783500000000 has been reverted successfully.
+## migration:run
+query: ALTER TABLE "sinais_vitais" ADD COLUMN "pressao_sistolica" smallint NULL
+query: ALTER TABLE "sinais_vitais" ADD COLUMN "pressao_diastolica" smallint NULL
+Migration AddPressaoEstruturada1783500000000 has been executed successfully.
+pressao_arterial character varying
+pressao_diastolica smallint
+pressao_sistolica smallint
