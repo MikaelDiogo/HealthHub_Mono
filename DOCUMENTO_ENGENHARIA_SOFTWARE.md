@@ -380,7 +380,7 @@ flowchart TB
     ENF -->|"HTTPS · triagem,<br/>sinais vitais"| HH
     REC -->|"HTTPS · cadastro,<br/>admissão"| HH
 
-    HH -->|"HTTPS · contexto clínico<br/>anonimizável"| GROQ
+    HH -->|"HTTPS · contexto clínico<br/>sem nome, CPF, RG, telefone e endereço"| GROQ
     HH -->|"TCP 5432 · TypeORM"| PG
 ```
 
@@ -1224,7 +1224,7 @@ sequenceDiagram
         CCS-->>MON: 503 "GROQ_API_KEY não configurada no .env."
     else chave presente
         CCS->>CCS: buildSystemPrompt(ctx)
-        Note over CCS: injeta nome, alergias, medicamentos,<br/>sinais vitais e anamnese —<br/>exige alerta em negrito para risco de alergia
+        Note over CCS: injeta alergias, medicamentos,<br/>sinais vitais e anamnese (sem nome) —<br/>exige alerta em negrito para risco de alergia
         CCS->>CCS: filtra histórico (só user/assistant)
         CCS->>GROQ: POST /chat/completions (gpt-oss-120b, 1024 tokens, timeout 30s)
         alt erro / timeout
@@ -1527,7 +1527,7 @@ flowchart TB
 | Não transferência a terceiros | Integração com Telegram **descartada por decisão de arquitetura**; comunicação 100% interna |
 | Prevenção | Rate limit, limite de payload, expiração de sessão |
 
-**Lacunas de conformidade abertas** (ver seção 13): ausência de `audit_logs`, de mecanismo de anonimização/eliminação a pedido do titular, e trânsito de contexto clínico identificável para a Groq API.
+**Lacunas de conformidade abertas** (ver seção 13): ausência de `audit_logs`, de mecanismo de anonimização/eliminação a pedido do titular, e envio de texto livre (anamnese e pergunta) à Groq API sem filtro de identificação (o nome e os demais identificadores estruturados deixaram de ser enviados em 03/11/2026).
 
 ### 11.4 Análise de ameaças (STRIDE resumido)
 
@@ -1844,7 +1844,7 @@ flowchart LR
 | R-01 | Histórico de visitas inconsistente invalida o estudo de ML | Alta | Alto | 🔴 | Corrigir DEB-01 antes de acumular volume; script de reconciliação das visitas abertas |
 | R-02 | Regressão de autorização sem testes automatizados | Alta | Alto | 🔴 | Suíte E2E da matriz RBAC (CT-03, CT-04) |
 | R-03 | Indisponibilidade da Groq API interrompe o apoio clínico | Média | Médio | 🟠 | Já degrada com `503`; exibir aviso claro na UI e manter fluxo manual |
-| R-04 | Vazamento de dados sensíveis para provedor de IA | Média | Alto | 🔴 | Anonimizar o contexto (remover nome) antes do envio; registrar consentimento |
+| R-04 | Vazamento de dados sensíveis para provedor de IA | Média | Alto | 🔴 | **Parcialmente mitigado (03/11/2026):** o nome e os demais identificadores já não são enviados (`contextoSemIdentificacao`); textos livres (anamnese, pergunta) seguem sem filtro; registrar consentimento |
 | R-05 | Token em `localStorage` capturado por XSS | Baixa | Alto | 🟠 | Migrar para cookie `HttpOnly` + CSRF; auditar renderização de conteúdo do chat |
 | R-06 | Concentração de conhecimento em um único desenvolvedor | Alta | Médio | 🟠 | Este documento; ADRs; Swagger (DEB-16) |
 | R-07 | Arquivos de 800+ linhas travam a evolução do frontend | Alta | Médio | 🟠 | Executar a Fase 2 (modularização por feature) |

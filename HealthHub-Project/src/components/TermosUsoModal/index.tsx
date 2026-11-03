@@ -271,7 +271,7 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
               <Box p="sm" style={{ background: 'var(--mantine-color-orange-0)', border: '1px solid var(--mantine-color-orange-3)', borderRadius: 8 }}>
                 <Text size="sm" fw={700} c="orange.8">Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo) para transcrição</Text>
                 <Text size="sm" c="slate.7" mt={4}>
-                  As perguntas ao assistente são enviadas à plataforma Groq (operador externo), com o contexto do paciente selecionado: nome, alergias, medicamentos em uso, anamnese e últimos sinais vitais, além de até 4 mensagens anteriores da conversa. Não há anonimização: o nome completo é enviado. CPF, RG, telefone e endereço não são enviados. O áudio da transcrição é enviado à Groq para virar texto e não é gravado pelo HealthHub.
+                  As perguntas ao assistente são enviadas à plataforma Groq (operador externo), com o contexto clínico do paciente selecionado: alergias, medicamentos em uso, anamnese e últimos sinais vitais, além de até 4 mensagens anteriores da conversa. O nome, o CPF, o RG, o telefone e o endereço não são enviados. Os textos livres (como a anamnese e a pergunta) são enviados como foram escritos: não digite dados de identificação neles. O áudio da transcrição é enviado à Groq para virar texto e não é gravado pelo HealthHub.
                 </Text>
               </Box>
             </Stack>

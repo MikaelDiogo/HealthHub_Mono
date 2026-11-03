@@ -10,8 +10,7 @@ const MAX_TOKENS = 1024;
 function buildSystemPrompt(ctx: PatientContext = {}): string {
   return `Você é o Assistente Clínico HealthHub — apoio técnico para médicos e enfermeiros, nunca substituto.
 
-## PACIENTE
-- **Nome:** ${ctx.nome}
+## PACIENTE (sem identificação)
 - **Alergias:** ${ctx.alergias || 'Nenhuma registrada'}
 - **Medicamentos em uso:** ${ctx.medicamentos || 'Nenhum'}
 - **Sinais Vitais:** Temp ${ctx.sinaisVitais?.temperatura || '--'}°C | SpO2 ${ctx.sinaisVitais?.saturacao_oxigenio || '--'}% | PA ${ctx.sinaisVitais?.pressao_arterial || '--'} | FC ${ctx.sinaisVitais?.frequencia_cardiaca || '--'} bpm

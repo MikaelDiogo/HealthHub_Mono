@@ -143,7 +143,7 @@ export function PoliticaDados() {
       <PolicySection icon={<IconEye size={16} />} color="indigo" title="5. IA e Privacidade dos Dados Clínicos">
         <Box p="sm" style={{ background: 'var(--mantine-color-orange-0)', border: '1px solid var(--mantine-color-orange-3)', borderRadius: 8 }}>
           <Text size="sm" fw={700} c="orange.8" mb={4}>Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo)</Text>
-          <Text size="xs" c="slate.7">Dados enviados à Groq (servidor externo): nome, alergias, medicamentos, anamnese e últimos sinais vitais do paciente em consulta, a pergunta e até 4 mensagens anteriores. Sem anonimização. CPF, RG, telefone e endereço não são enviados.</Text>
+          <Text size="xs" c="slate.7">Dados enviados à Groq (servidor externo): alergias, medicamentos, anamnese e últimos sinais vitais do paciente em consulta, a pergunta e até 4 mensagens anteriores. O nome, o CPF, o RG, o telefone e o endereço não são enviados. Textos livres são enviados como escritos: não digite dados de identificação neles.</Text>
         </Box>
         <Alert mt="sm" color="yellow" variant="light" icon={<IconAlertTriangle size={14} />} radius="md" p="sm">
           <Text size="xs" fw={600}>

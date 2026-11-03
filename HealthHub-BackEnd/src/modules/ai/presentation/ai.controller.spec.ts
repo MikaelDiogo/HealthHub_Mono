@@ -27,7 +27,7 @@ describe('AiController.chat — entrada inválida vira 400 (não 500)', () => {
 
   it('mensagem válida segue para o serviço com o contexto e o histórico recebidos', async () => {
     const { controller, chat } = montar();
-    const ctx = { nome: 'TESTE A' };
+    const ctx = { alergias: 'Nenhuma (fictício)' };
     await controller.chat(ID, { message: 'Olá', patientContext: ctx, history: [{ role: 'user', content: 'x' }] });
     expect(chat.execute).toHaveBeenCalledWith('Olá', ctx, [{ role: 'user', content: 'x' }]);
   });

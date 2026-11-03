@@ -99,7 +99,6 @@ export const Monitoring = () => {
       const response = await api.post(`/patients/${selectedPatientId}/chat`, {
         message: texto,
         patientContext: {
-          nome: currentPatient.nome_completo,
           alergias: currentPatient.alergias,
           medicamentos: currentPatient.medicamentos_em_uso,
           anamnese: currentPatient.anamnese,
