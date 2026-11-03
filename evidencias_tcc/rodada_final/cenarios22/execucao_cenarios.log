@@ -1,0 +1,46 @@
+### f01 (12:19:01)
+[F01] APROVADO — medico: entrou=true, rota final=/main | enfermeiro: entrou=true, rota final=/main | recepcionista: entrou=true, rota final=/main/alertas | senha errada: permane
+(exit=0)
+### f02_f06 (12:19:46)
+[F02] APROVADO — Cadastro VAZIO: requisição POST /patients → status 204,400; modal ainda aberto=true; aviso vermelho visível na tela=true ("Nome completo é obrigatório (3 a 150 
+(exit=0)
+### f03_f06 (12:20:13)
+[F03] APROVADO — Aba Hospitalares aberta (ok); chamadas: /patients 201; /sinais/89b8d7a4-3d3d-4909-ac78-b124c19b4e26 201; /patients?ativo=true 200; paciente criado=true; leitura
+[F04] APROVADO — Aviso vermelho ao recusar 46 °C: "Temperatura deve estar entre 25 e 45 °C" | Temp 46 °C: chamadas /patients/89b8d7a4-3d3d-4909-ac78-b124c19b4e26 200; /sinais/89
+[F05] APROVADO — Senha mostrada no modal: A=PR-001, B=PR-002; senha gravada: A=PR-001, B=PR-002; status A=Aguardando Triagem, B=Aguardando Triagem; chegada A="03/11/2026, 09:20"
+[F06] APROVADO — API direta (POST /fila com TESTE A já na fila): HTTP 409 {"error":"Paciente já está na fila de atendimento."}; entradas de TESTE A na fila=1 | Interface: TESTE 
+(exit=0)
+### f07_f09 (12:21:18)
+[F07] APROVADO — Clique em Iniciar Triagem no cartão do TESTE A (ok); status no banco="Em Triagem (Enfermeiro)"; PUT /fila → 200,200,200,200
+[F08] APROVADO — TESTE F cadastrado e admitido pela interface (senha PR-003); sem sinais vitais=true | Clique numa cor (Amarelo) no TESTE F sem sinais (ok): chamadas fila 400; g
+[F09] APROVADO — Sinais lançados pela interface (SpO2 98, FC 72, Temp 36,5, PA 120/80); cor escolhida=Azul (ok); banco: gravidade="Azul", status="Aguardando Atendimento"; chamad
+(exit=0)
+### f10 (12:22:21)
+[F10] APROVADO — Admissão: A(1º) B(2º) F(3º) C(4º) D(5º) E(6º). Cores: A=Azul, B=Vermelho, C=Verde, D=Laranja, E=Amarelo, F=sem classificação (bloqueada no F08). | Ordem do back
+(exit=0)
+### f11_f12 (12:23:12)
+[F11] APROVADO — A: após Chamar → "Em Consulta (Médico)" | A: após Observação → "Em Observação" | A: após Liberar Alta → na fila=false; paciente ativo=false; visitas=1, desfecho
+[F12] APROVADO — Modal mostrou histórico ("Visitas anteriores")=true; após confirmar: na fila=true, status="Aguardando Triagem", senha=PR-007; paciente ativo=true; visitas=2; vi
+(exit=0)
+### f13 (12:24:09)
+[F13] APROVADO — RECEPÇÃO: botão "Editar" visível nos cartões=false | ENFERMEIRO: botão "Liberar Alta" visível na Observação=false | ENFERMEIRO: botão × "Remover da esteira" vis
+(exit=0)
+### f14 (12:24:47)
+[F14] APROVADO — Antes de lançar: lista de atenção = [vazia] | Após TESTE C (SpO2 91, FC 110, Temp 38,6): atenção = [TESTE C:critico(SpO₂ 91% · FC 110 bpm · Temperatura 38.6 °C)
+(exit=0)
+### f15 (12:25:43)
+[F15] APROVADO — Médico viu a mensagem normal do enfermeiro ao abrir a conversa=true | Enfermeiro viu a resposta do médico em tempo real (sem recarregar)=true | Médico recebeu a
+(exit=0)
+### f16_f17 (12:26:19)
+[F16] APROVADO — Arquivo gerado no navegador: prontuario_TESTE_C_—_Lima.pdf; texto do PDF contém "TESTE C — Lima"=true, CPF fictício=true, sinais "38.6"=true
+[F17] APROVADO — Esteira antes (senhas existentes): [PR-003, PR-004, PR-005, PR-006, PR-007] | 1º cadastro/admissão no mobile: TESTE G → senha PR-008, status Aguardando Triagem 
+(exit=0)
+### c01_c05 (12:27:10)
+Esteira limpa: true
+[C01] APROVADO — Painel: lista "Atenção agora" → fora da lista; cartão "Estado geral" → Estável | t0=09:27:37 (ok); clique na cor Azul (ok); t1=09:27:37; tempo de automação=00:0
+[C02] APROVADO — Painel: lista "Atenção agora" → fora da lista; cartão "Estado geral" → Atenção | t0=09:28:08 (ok); clique na cor Amarelo (ok); t1=09:28:08; tempo de automação=0
+[C03] APROVADO — Painel: lista "Atenção agora" → critico; cartão "Estado geral" → Crítico | t0=09:28:40 (ok); clique na cor Vermelho (ok); t1=09:28:40; tempo de automação=00:01 
+[C04] APROVADO — Painel: lista "Atenção agora" → critico; cartão "Estado geral" → Crítico | t0=09:29:11 (ok); clique na cor Laranja (ok); t1=09:29:12; tempo de automação=00:01 (
+[C05] APROVADO — Painel: lista "Atenção agora" → fora da lista; cartão "Estado geral" → Atenção | t0=09:29:43 (ok); clique na cor Amarelo (ok); t1=09:29:43; tempo de automação=0
+(exit=0)
+FIM

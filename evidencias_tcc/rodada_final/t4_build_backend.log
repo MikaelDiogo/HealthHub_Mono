@@ -1,0 +1,5 @@
+
+> healthhub-backend@2.0.0 build
+> nest build
+
+build-backend exit=0

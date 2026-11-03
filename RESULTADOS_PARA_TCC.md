@@ -72,3 +72,52 @@ Numeração dos RF = a do TCC (Seção 4.1.1). Contagem de testes: **backend 117
 4. **RF15 — a rota `PATCH /patients/:id/visitas/fechar` não registra evento na esteira.** O evento `alta` existe no fluxo `PATCH /fila/:id/alta` (testado em `fila-eventos.spec.ts`). Não alterei o comportamento.
 
 **Limites.** Os testes HTTP usam app Nest mínimo, o RolesGuard real e autenticação simulada (cabeçalho `x-role`); não passam pelo JWT real nem pelo banco. RF22: testei a lógica de gravação; a janela do modal não foi renderizada (o projeto não tem jsdom/Testing Library e não adicionei dependências). Para viabilizar o teste do RF22, movi as funções de aceite para `src/utils/termosAceitos.ts` (reexportadas pelo modal, sem mudar comportamento).
+
+---
+
+## Tarefa 4 — Rodada final dos 22 cenários sobre a versão publicada
+
+**Commit testado:** `1948b8493ec3091f6bb9ce58ca932a67ca7713e0` (branch `evolucao-estrutura`, árvore sem alterações). Clone novo em `C:\Users\642mi\Documents\HealthHub_rodada_final_clone`, `npm ci` nos dois pacotes, **banco novo** (`healthhub_test_final`, mesmo contêiner Postgres 16.15, porta 5435) com as **10 migrations aplicadas do zero** e seed.
+**Ambiente:** Windows 11 Pro, Node 24.20.0, npm 11.19.0, navegador Microsoft Edge 156.0.4314.58 (headless, DevTools Protocol), IA com provedor simulado. Detalhes: `evidencias_tcc/rodada_final/t4_ambiente_e_testes.log`.
+
+**Testes e builds (clone, códigos de saída 0):** backend build OK, **149 testes** (17 arquivos); frontend build OK, **25 testes** (6 arquivos). Logs `t4_build_*.log`, `t4_vitest_*.log`.
+
+**22 cenários (F01–F17 e C01–C05), execução 2** (`cenarios22/resultados.json`, gerado pelos scripts, sem edição manual):
+
+| Caso | Perfil | Resultado |
+|---|---|---|
+| F01 | Todos | APROVADO |
+| F02 | Recepcionista | APROVADO |
+| F03 | Enfermeiro | APROVADO |
+| F04 | Enfermeiro | APROVADO |
+| F05 | Recepcionista | APROVADO |
+| F06 | Recepcionista | APROVADO |
+| F07 | Enfermeiro | APROVADO |
+| F08 | Enfermeiro | APROVADO |
+| F09 | Enfermeiro | APROVADO |
+| F10 | Enfermeiro + Médico | APROVADO |
+| F11 | Médico | APROVADO |
+| F12 | Recepcionista | APROVADO |
+| F13 | Cada perfil | APROVADO |
+| F14 | Médico ou Enfermeiro | APROVADO |
+| F15 | Dois perfis | APROVADO |
+| F16 | Médico | APROVADO |
+| F17 | Enfermeiro (mobile) | APROVADO |
+| C01 | Recepção → Enfermagem → Médico (automação) | APROVADO |
+| C02 | Recepção → Enfermagem → Médico (automação) | APROVADO |
+| C03 | Recepção → Enfermagem → Médico (automação) | APROVADO |
+| C04 | Recepção → Enfermagem → Médico (automação) | APROVADO |
+| C05 | Recepção → Enfermagem → Médico (automação) | APROVADO |
+
+**Resultado: 22 aprovados, 0 reprovados** — mas só na **execução 2**. A **execução 1** (mesmo commit, banco novo) teve **F15 e C01–C05 reprovados**, e está preservada em `cenarios22_execucao1/` com a explicação:
+- **C01–C05:** scripts antigos liam `gravidade_manchester`, campo renomeado para `classificacao_risco` na migração Manchester → classificação de risco. Na execução 2 usei **cópias** dos scripts (`runner_atualizado/`) em que a **única** alteração é esse nome de campo (originais intactos em `evidencias_testes_2026-10-29/runner/`).
+- **F15:** o script procura o contato "Enfermeiro Teste"; no banco novo o enfermeiro do seed tem o nome real do autor (vem de `HealthHub-BackEnd/src/database/seed.ts`). Na execução 2 renomeei o usuário **no banco de teste** (não no código) para "Enfermeiro Teste".
+- As capturas da execução 1 foram **apagadas**, porque mostravam o nome real do autor. As da execução 2 não o contêm (busca nos arquivos de texto; nas imagens, garantido pelo nome do usuário no banco).
+- F06 agora devolve **HTTP 409** (antes 400), contrato novo da Tarefa 1.
+
+Os scripts dos cenários **não estão versionados no repositório** (ficam em `evidencias_testes_2026-10-29/runner`); os 11 scripts usados e a ordem foram inferidos pelos IDs e horários (f01, f02_f06, f03_f06, f07_f09, f10, f11_f12, f13, f14, f15, f16_f17, c01_c05); f04.mjs e f08_f09.mjs (versões antigas) não foram usados.
+
+**Script de API do registro de eventos:** **14/14** OK (`t4_api_eventos_e_s1_s8.log`).
+**Cenários S1–S8 de 30/10:** S1, S2, S3 OK; S4 com HTTP 403 e nenhuma cor gravada, mas com a **mesma divergência já registrada** (a recepção recebe a mensagem genérica do guard); S7 sem falhas; S8 repete o salto aceito (HTTP 200). Saídas em `s1_s8_rodada_final/`.
+
+**Limites.** Automação solo, ambiente local; os tempos de C01–C05 seguem sendo tempo de automação, não tempo humano. O contêiner Postgres é o mesmo da rodada anterior (outro banco dentro dele). O seed do repositório ainda traz o nome real do autor (`seed.ts:22`): decisão pendente sua.

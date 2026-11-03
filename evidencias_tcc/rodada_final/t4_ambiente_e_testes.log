@@ -1,0 +1,20 @@
+# Tarefa 4 — rodada final sobre a versão publicada (clone limpo)
+data: 2026-11-03T12:04:39Z
+commit: 1948b8493ec3091f6bb9ce58ca932a67ca7713e0
+git status do clone: 0 alterações
+SO: MINGW64_NT-10.0-26200 3.6.10-710e5275.x86_64 / Windows Microsoft Windows 11 Pro
+Node: v24.20.0 | npm: 11.19.0
+PostgreSQL: 16.15 (contêiner healthhub-test-db, banco novo healthhub_test_final, porta 5435)
+Navegador: 156.0.4314.58
+10 migrations were found in the source code.
+Migration CreateBaseSchema1000000000000 has been executed successfully.
+Migration UpdateSinaisVitaisAddPressaoEPaciente1774448538633 has been executed successfully.
+Migration CreateFilaPacientes1780358400000 has been executed successfully.
+Migration CreateUsers1780500000000 has been executed successfully.
+Migration CreateChat1782600000000 has been executed successfully.
+Migration CreateVisitas1783000000000 has been executed successfully.
+Migration AddAtivoToPacientes1783100000000 has been executed successfully.
+Migration CreateFilaEventos1783200000000 has been executed successfully.
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been executed successfully.
+Migration UniqueFilaPorPaciente1783400000000 has been executed successfully.
+migrations aplicadas: 10

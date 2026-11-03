@@ -1,0 +1,82 @@
+## e2e_eventos (14 checagens)
+OK   admissão (recepção) cria fila {"status":"Aguardando Triagem"}
+OK   sinais vitais (enfermeiro) {"status":201}
+OK   iniciar triagem {"status":200}
+OK   classificar cor com justificativa {"status":200}
+OK   consulta iniciada (médico) {"status":200}
+OK   enfermeiro PUT Alta → 403 e nenhum evento novo {"status":403,"antes":5,"depois":5}
+OK   alta (médico) via PATCH {"status":204}
+OK   eventos do paciente A na ordem esperada {"tipos":["admitido","sinais_registrados","triagem_iniciada","classificado","consulta_iniciada","alta"]}
+OK   classificação traz cor, justificativa, autor (nome+perfil) e data ISO {"gravidade":"Amarelo","role":"enfermeiro","tem_nome":true,"criado_em":"2026-11-03T12:30:25.678Z"}
+OK   removido da esteira registra evento e preserva a cor {"delete_status":204,"tipos":["removido_da_fila","classificado","sinais_registrados","admitido"]}
+OK   recepção lendo eventos → 403 {"status":403}
+OK   sem login → 401 {"status":401}
+OK   enfermeiro lendo eventos → 200 {"status":200}
+OK   justificativa > 500 caracteres → 400 {"status":400}
+
+RESUMO 14/14
+## cenarios_accr s123
+# Fase s123 — 2026-11-03T12:30:27.569Z (UTC) — API http://localhost:3001
+
+## S1 — ordenação da fila
+fila: P2 Fictício S1 [Vermelho] | P4 Fictício S1 [Laranja] | P5 Fictício S1 [Amarelo] | P1 Fictício S1 [Verde] | P3 Fictício S1 [Azul]
+OK    S1 ordem P2,P4,P5,P1,P3
+   esperado: ["P2","P4","P5","P1","P3"]
+   obtido:   ["P2","P4","P5","P1","P3"]
+
+## S2 — desempate por chegada (sem limpar)
+fila: P2 Fictício S1 [Vermelho] | P4 Fictício S1 [Laranja] | P5 Fictício S1 [Amarelo] | P6 Fictício S1 [Amarelo] | P7 Fictício S1 [Amarelo] | P1 Fictício S1 [Verde] | P3 Fictício S1 [Azul]
+OK    S2 Amarelos em ordem de chegada P5,P6,P7
+   esperado: ["P5","P6","P7"]
+   obtido:   ["P5","P6","P7"]
+
+## S3 — reavaliação (P5 Amarelo → Vermelho)
+PUT reclassificar → HTTP 200
+fila: P2 Fictício S1 [Vermelho] | P5 Fictício S1 [Vermelho] | P4 Fictício S1 [Laranja] | P6 Fictício S1 [Amarelo] | P7 Fictício S1 [Amarelo] | P1 Fictício S1 [Verde] | P3 Fictício S1 [Azul]
+OK    S3 fila P2,P5,P4,P6,P7,P1,P3
+   esperado: ["P2","P5","P4","P6","P7","P1","P3"]
+   obtido:   ["P2","P5","P4","P6","P7","P1","P3"]
+eventos de P5 (do mais recente ao mais antigo; campos devolvidos pela API):
+  {"tipo":"classificado","gravidade":"Vermelho","status_anterior":"Aguardando Atendimento","status_novo":"Aguardando Atendimento","justificativa":"Reavaliação fictícia de teste","usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026
+  {"tipo":"classificado","gravidade":"Amarelo","status_anterior":"Em Triagem (Enfermeiro)","status_novo":"Aguardando Atendimento","justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-11-03T12:30:33.762Z"}
+  {"tipo":"triagem_iniciada","gravidade":null,"status_anterior":"Aguardando Triagem","status_novo":"Em Triagem (Enfermeiro)","justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-11-03T12:30:33.620Z"}
+  {"tipo":"sinais_registrados","gravidade":null,"status_anterior":null,"status_novo":null,"justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-11-03T12:30:33.601Z"}
+  {"tipo":"admitido","gravidade":null,"status_anterior":null,"status_novo":"Aguardando Triagem","justificativa":null,"usuario_nome":"Ana Souza","usuario_role":"recepcionista","criado_em":"2026-11-03T12:30:32.465Z"}
+eventos "classificado" de P5: 2 (cores: Amarelo → Vermelho)
+Observação: o evento guarda a cor NOVA, o autor, o horário e a justificativa; a cor anterior aparece como o evento "classificado" anterior da mesma linha do tempo (não há campo próprio "cor_anterior").
+## cenarios_accr s4
+# Fase s4 — 2026-11-03T12:30:37.970Z (UTC) — API http://localhost:3001
+recepcionista PUT /fila/:id com gravidade=Vermelho → HTTP 403
+corpo: {"message":"Acesso negado para este perfil"}
+entrada após a tentativa: status=Aguardando Triagem gravidade=null
+(extra) médico PUT com gravidade=Vermelho → HTTP 403
+corpo: {"error":"Apenas o enfermeiro pode atribuir a categoria de risco."}
+Achado: a recepção é barrada antes, pelo RolesGuard (PUT /fila/:id não lista recepcionista), com a mensagem genérica do guard; a mensagem do serviço aparece para quem passa pelo guard sem ser enfermeiro (médico).
+OK    S4 (extra) médico: mensagem do serviço
+   esperado: "Apenas o enfermeiro pode atribuir a categoria de risco."
+   obtido:   "Apenas o enfermeiro pode atribuir a categoria de risco."
+OK    S4 HTTP 403
+   esperado: 403
+   obtido:   403
+FALHA S4 mensagem real
+   esperado: "Apenas o enfermeiro pode atribuir a categoria de risco."
+   obtido:   undefined
+OK    S4 nenhuma cor gravada
+   esperado: null
+   obtido:   null
+## cenarios_accr s8
+# Fase s8 — 2026-11-03T12:30:39.812Z (UTC) — API http://localhost:3001
+P8 admitido com status "Aguardando Triagem"
+enfermeiro PUT status "Aguardando Triagem" → "Em Observação" (salto) → HTTP 200
+corpo: {"id":"10964da2-be17-40d8-a1ef-188efc48bf33","paciente_id":"880aefa9-0786-4c46-ac0c-b6fa1f9d09e0","nome":"P8 Fictício","idade":40,"senha":"PR-001","chegada":"03/11/2026, 09:30","status":"Em Observação","gravidade":null,"created_at":"2026-11-03T12:30:
+status depois da tentativa: Em Observação
+(extra) médico volta para "Aguardando Triagem" → HTTP 200
+## cenarios_accr s7
+# Fase s7 — 2026-11-03T12:30:41.923Z (UTC) — API http://localhost:3001
+admissão (recepção) → entrada criada, status "Aguardando Triagem"
+sinais vitais (enfermeiro) → HTTP 201
+última leitura → HTTP 200 [{"id":"834b4d42-6da3-4faf-8af2-e661fc4da813","patient_id":"9597c83f-2ba2-49f8-a308-30b96fdd943e","hora":1230,"frequencia_cardiaca":130,"saturacao_oxigenio":88,
+chat de IA (provedor simulado) → HTTP 201; resposta: {"reply":"[RESPOSTA SIMULADA — NÃO É DO MODELO REAL] Texto fixo do mock para teste de integração.","source":"groq"}
+gravidade após usar a IA: null (esperado null: a IA não atribui cor)
+alta por enfermeiro → HTTP 403
+alta por médico → HTTP 204

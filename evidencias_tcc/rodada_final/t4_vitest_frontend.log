@@ -1,0 +1,14 @@
+
+> healthhub@0.0.0 test
+> vitest run
+
+
+ RUN  v5.0.4 C:/Users/642mi/Documents/HealthHub_rodada_final_clone/HealthHub-Project
+
+
+ Test Files  6 passed (6)
+      Tests  25 passed (25)
+   Start at  09:06:09
+   Duration  405ms (transform 68%, import 20%, worker 7%, tests 4%)
+
+vitest-frontend exit=0

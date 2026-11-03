@@ -1,0 +1,22 @@
+
+> healthhub@0.0.0 build
+> tsc -b && vite build
+
+vite v7.3.1 building client environment for production...
+transforming...
+✓ 8020 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                              0.81 kB │ gzip:   0.44 kB
+dist/assets/index-CNtQGkmj.css             212.57 kB │ gzip:  31.92 kB
+dist/assets/purify.es-DSHCW8nm.js           26.22 kB │ gzip:   9.82 kB
+dist/assets/index.es-Brf1nCqk.js           158.79 kB │ gzip:  53.02 kB
+dist/assets/html2canvas.esm-DXEQVQnt.js    201.04 kB │ gzip:  47.43 kB
+dist/assets/index-CRkqtvA5.js            1,717.96 kB │ gzip: 532.96 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 30.48s
+build-frontend exit=0

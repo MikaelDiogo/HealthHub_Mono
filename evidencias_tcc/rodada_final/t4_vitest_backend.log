@@ -1,0 +1,14 @@
+
+> healthhub-backend@2.0.0 test
+> vitest run
+
+
+ RUN  v5.0.4 C:/Users/642mi/Documents/HealthHub_rodada_final_clone/HealthHub-BackEnd
+
+
+ Test Files  17 passed (17)
+      Tests  149 passed (149)
+   Start at  09:05:19
+   Duration  6.59s (import 91%, transform 6%, tests 3%, worker 1%)
+
+vitest-backend exit=0
