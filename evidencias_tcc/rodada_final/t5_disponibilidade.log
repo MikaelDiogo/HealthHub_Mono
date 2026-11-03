@@ -1,0 +1,33 @@
+# 2026-11-03T12:38:49Z | commit base 429e75e + /health
+banco #1: 1.5 s
+banco #2: 2.2 s
+banco #3: 1.1 s
+banco #4: 1.1 s
+banco #5: 1.2 s
+api #1: 6.5 s
+api #2: 5.6 s
+api #3: 5.0 s
+api #4: 5.1 s
+api #5: 5.6 s
+ambos #1: 6.4 s
+ambos #2: 5.6 s
+ambos #3: 6.2 s
+ambos #4: 5.8 s
+ambos #5: 5.6 s
+
+alvo_reiniciado,repeticao,segundos_ate_health_200
+banco,1,1.5
+banco,2,2.2
+banco,3,1.1
+banco,4,1.1
+banco,5,1.2
+api,1,6.5
+api,2,5.6
+api,3,5.0
+api,4,5.1
+api,5,5.6
+ambos,1,6.4
+ambos,2,5.6
+ambos,3,6.2
+ambos,4,5.8
+ambos,5,5.6

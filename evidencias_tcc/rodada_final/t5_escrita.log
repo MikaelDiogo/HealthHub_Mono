@@ -1,0 +1,5 @@
+# 2026-11-03T12:38:25Z | commit base 429e75e + /health | Node v24.20.0
+escrita POST /fila sequencial: n=100 min=16.6 p50=29.8 p95=37.1 p99=44.7 max=45.1 ms respostas!=201=0
+escrita PUT /fila/:id (classificar cor) sequencial: n=100 min=10.4 p50=17.6 p95=30.9 p99=33.2 max=34.9 ms respostas!=200=0
+
+CSV: C:/Users/642mi/Documents/HealthHub_Mono/evidencias_tcc/rodada_final/desempenho_escrita.csv

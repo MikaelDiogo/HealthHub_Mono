@@ -204,3 +204,7 @@ src/
 ```
 
 Cada módulo segue **Clean Architecture**: `domain → application → infrastructure → presentation`. A camada `application` nunca importa TypeORM diretamente.
+
+## Verificação de saúde (`GET /health`)
+
+Rota pública, sem autenticação e sem dados: devolve `200 {"status":"ok","database":"up"}` quando a API e o banco respondem e `503 {"status":"error","database":"down"}` quando o banco não responde. Serve para monitoramento e para medir a disponibilidade (tempo até a API voltar após reiniciar).

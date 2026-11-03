@@ -1,0 +1,8 @@
+# Tarefa 9 — crescimento do banco por 1.000 atendimentos (dados fictícios gerados por SQL em healthhub_test_perf)
+# Premissas (NÃO medidas no uso real): por atendimento = 1 paciente, 1 visita, 6 eventos da esteira, 3 leituras de sinais vitais, 5 mensagens de chat de ~80 caracteres.
+fila_eventos   antes=122880 B depois=1540096 B crescimento=1384 KiB
+messages       antes=24576 B depois=1400832 B crescimento=1344 KiB
+pacientes      antes=147456 B depois=532480 B crescimento=376 KiB
+sinais_vitais  antes=40960 B depois=516096 B crescimento=464 KiB
+visitas        antes=172032 B depois=368640 B crescimento=192 KiB
+banco total: 12 MB
