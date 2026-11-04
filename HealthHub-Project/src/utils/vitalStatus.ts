@@ -1,4 +1,5 @@
 import type { SinalVital } from '../types/patient';
+import { LIMIARES_SINAIS_VITAIS as L, alertasSemFonteAtivos, limiarAtivo } from '../config/limiaresSinaisVitais';
 
 export type VitalStatus = 'critical' | 'warning' | 'normal' | 'unknown';
 
@@ -19,10 +20,12 @@ export type VitalStatus = 'critical' | 'warning' | 'normal' | 'unknown';
  * Pressão arterial: sem limiar e sem alerta (campo de texto livre).
  * Os valores NÃO foram alterados por causa dessa consulta. Qualquer mudança é decisão clínica do autor/orientador;
  * os limiares de "crítico" também existem em HealthHub-BackEnd/src/modules/metricas/application/calcular-metricas.ts.
+ * Os números e a fonte de cada um ficam em config/limiaresSinaisVitais.ts (`fonte: null` = sem fonte clínica registrada).
+ * Chave VITE_ALERTAS_SEM_FONTE=false desliga só os alertas com `fonte: null` (padrão: ligados, comportamento de sempre).
  */
 
 /** Calcula o status clínico a partir do último registro de sinais vitais */
-export function getVitalStatus(sinaisVitais?: SinalVital[]): VitalStatus {
+export function getVitalStatus(sinaisVitais?: SinalVital[], semFonte: boolean = alertasSemFonteAtivos()): VitalStatus {
   const latest = sinaisVitais?.[0];
   if (!latest) return 'unknown';
 
@@ -35,15 +38,15 @@ export function getVitalStatus(sinaisVitais?: SinalVital[]): VitalStatus {
   const hasTemp = temp > 0;
 
   if (
-    (hasSpo2 && spo2 < 92)  ||
-    (hasFc   && (fc > 100 || fc < 60)) ||
-    (hasTemp && temp > 38.5)
+    (hasSpo2 && limiarAtivo(L.spo2.critico, semFonte) && spo2 < L.spo2.critico.abaixoDe) ||
+    (hasFc   && limiarAtivo(L.frequenciaCardiaca.critico, semFonte) && (fc > L.frequenciaCardiaca.critico.acimaDe || fc < L.frequenciaCardiaca.critico.abaixoDe)) ||
+    (hasTemp && limiarAtivo(L.temperatura.critico, semFonte) && temp > L.temperatura.critico.acimaDe)
   ) return 'critical';
 
   if (
-    (hasSpo2 && spo2 < 95)  ||
-    (hasFc   && fc   > 90)  ||
-    (hasTemp && temp >= 37.8)
+    (hasSpo2 && limiarAtivo(L.spo2.atencao, semFonte) && spo2 < L.spo2.atencao.abaixoDe) ||
+    (hasFc   && limiarAtivo(L.frequenciaCardiaca.atencao, semFonte) && fc > L.frequenciaCardiaca.atencao.acimaDe) ||
+    (hasTemp && limiarAtivo(L.temperatura.atencao, semFonte) && temp >= L.temperatura.atencao.aPartirDe)
   ) return 'warning';
 
   if (hasSpo2 || hasFc || hasTemp) return 'normal';
@@ -76,24 +79,25 @@ export function dispatchVitalsUpdated(patientId: string) {
 }
 
 // ─── Status por métrica individual (para CardDashboard) ───────────────────────
-export function spo2Status(v: number): VitalStatus {
+export function spo2Status(v: number, semFonte: boolean = alertasSemFonteAtivos()): VitalStatus {
   if (v <= 0) return 'unknown';
-  if (v < 92) return 'critical';
-  if (v < 95) return 'warning';
+  if (limiarAtivo(L.spo2.critico, semFonte) && v < L.spo2.critico.abaixoDe) return 'critical';
+  if (limiarAtivo(L.spo2.atencao, semFonte) && v < L.spo2.atencao.abaixoDe) return 'warning';
   return 'normal';
 }
-export function fcStatus(v: number): VitalStatus {
+export function fcStatus(v: number, semFonte: boolean = alertasSemFonteAtivos()): VitalStatus {
   if (v <= 0) return 'unknown';
   // Bradicardia (<60) é tão clinicamente relevante quanto taquicardia (>100) — faltava esse lado.
-  if (v > 100 || v < 60) return 'critical';
-  if (v > 90)  return 'warning';
+  const c = L.frequenciaCardiaca.critico;
+  if (limiarAtivo(c, semFonte) && (v > c.acimaDe || v < c.abaixoDe)) return 'critical';
+  if (limiarAtivo(L.frequenciaCardiaca.atencao, semFonte) && v > L.frequenciaCardiaca.atencao.acimaDe) return 'warning';
   return 'normal';
 }
-export function tempStatus(v: number): VitalStatus {
+export function tempStatus(v: number, semFonte: boolean = alertasSemFonteAtivos()): VitalStatus {
   if (v <= 0)   return 'unknown';
-  if (v > 38.5) return 'critical';
+  if (limiarAtivo(L.temperatura.critico, semFonte) && v > L.temperatura.critico.acimaDe) return 'critical';
   // >= 37.8, não > 37.8 — o limiar em si já conta como febre/alerta.
-  if (v >= 37.8) return 'warning';
+  if (limiarAtivo(L.temperatura.atencao, semFonte) && v >= L.temperatura.atencao.aPartirDe) return 'warning';
   return 'normal';
 }
 

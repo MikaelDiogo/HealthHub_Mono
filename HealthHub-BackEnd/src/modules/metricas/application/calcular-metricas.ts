@@ -1,3 +1,5 @@
+import { LIMIARES_CRITICOS, alertasSemFonteAtivos, limiarAtivo } from '../../../config/limiares-sinais-vitais';
+
 // Cálculo das métricas operacionais do pronto-atendimento a partir dos dados
 // brutos. Função pura (sem banco) para ser testável e auditável: cada número
 // do painel vem daqui, e os totais são sempre derivados das linhas.
@@ -61,17 +63,19 @@ function media(nums: number[]): number | null {
  * Mesmos limiares de "crítico" do frontend (utils/vitalStatus.ts), que traz o detalhe da fonte consultada
  * (POP.HC-UFTM-DENF.003 v6, Ebserh, 2025). Resumo: FC 60/100 e SpO₂ coincidem com o POP/NEWS 2; a temperatura
  * > 38,5 °C NÃO aparece no POP (ele usa 38,1 e 39,1) e é valor adotado pelo desenvolvedor, sem fonte registrada.
- * Valores não alterados; mudar um lado exige mudar o outro.
+ * Valores não alterados; mudar um lado exige mudar o outro. Os números e a fonte de cada um ficam em
+ * config/limiares-sinais-vitais.ts; a chave ALERTAS_SEM_FONTE=false desliga só os alertas com `fonte: null`.
  */
-export function motivoCritico(s: SinaisInput | undefined): string | null {
+export function motivoCritico(s: SinaisInput | undefined, semFonte: boolean = alertasSemFonteAtivos()): string | null {
   if (!s) return null;
   const spo2 = Number(s.saturacao_oxigenio ?? 0);
   const fc = Number(s.frequencia_cardiaca ?? 0);
   const temp = Number(s.temperatura ?? 0);
   const motivos: string[] = [];
-  if (spo2 > 0 && spo2 < 92) motivos.push(`SpO₂ ${spo2}%`);
-  if (fc > 0 && (fc > 100 || fc < 60)) motivos.push(`FC ${fc} bpm`);
-  if (temp > 38.5) motivos.push(`Temperatura ${temp} °C`);
+  const L = LIMIARES_CRITICOS;
+  if (spo2 > 0 && limiarAtivo(L.spo2, semFonte) && spo2 < L.spo2.abaixoDe) motivos.push(`SpO₂ ${spo2}%`);
+  if (fc > 0 && limiarAtivo(L.frequenciaCardiaca, semFonte) && (fc > L.frequenciaCardiaca.acimaDe || fc < L.frequenciaCardiaca.abaixoDe)) motivos.push(`FC ${fc} bpm`);
+  if (temp > 0 && limiarAtivo(L.temperatura, semFonte) && temp > L.temperatura.acimaDe) motivos.push(`Temperatura ${temp} °C`);
   return motivos.length ? motivos.join(' · ') : null;
 }
 

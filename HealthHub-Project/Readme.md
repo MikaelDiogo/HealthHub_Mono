@@ -72,6 +72,10 @@ Para apontar para outro ambiente, altere a constante `BASE_URL` nos dois arquivo
 ```env
 # .env.local
 VITE_API_URL=http://localhost:3001
+
+# Opcional (padrão true): false desliga só os alertas de sinais vitais cujo limiar não tem fonte clínica registrada
+# (FC > 90, temperatura > 38,5 e SpO2 < 92). Veja src/config/limiaresSinaisVitais.ts
+VITE_ALERTAS_SEM_FONTE=true
 ```
 
 ---
