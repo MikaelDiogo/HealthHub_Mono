@@ -132,6 +132,36 @@ Abra **http://localhost:5173** e faça login com um dos usuários criados pelo s
 
 Senha: conforme definido nas variáveis `SEED_*_SENHA` do seu `.env`.
 
+### Regra do cadastro de paciente
+
+**Só o nome é obrigatório.** CPF, RG, idade, sexo, telefone, endereço, alergias, medicamentos e anamnese são opcionais (campo vazio vira `NULL`; o formato só é validado quando há valor; o CPF é único quando informado). O sexo é escolhido em uma lista (Masculino/Feminino) e gravado como `M`/`F`. Se o nome não for conhecido (por exemplo, paciente inconsciente), marque **Nome desconhecido**: o sistema grava "Paciente não identificado (#xxxx)" e marca o paciente como **nome provisório**, com um selo visível nas telas, até alguém corrigir o nome pela edição do paciente (médico e enfermeiro). Detalhes, justificativa e riscos em `DOCUMENTO_ENGENHARIA_SOFTWARE.md`, seção 7.4.
+
+### Verificação de saúde
+
+`GET /health` (sem autenticação) devolve o estado da API e do banco; é o endpoint usado para medir disponibilidade.
+
+### Alertas de sinais vitais e chave `ALERTAS_SEM_FONTE`
+
+Os limiares de alerta (FC, SpO₂ e temperatura; a pressão arterial não gera alerta) ficam centralizados, cada um com a sua fonte, em `HealthHub-BackEnd/src/config/limiares-sinais-vitais.ts` e `HealthHub-Project/src/config/limiaresSinaisVitais.ts`. Os que têm correspondência no POP.HC-UFTM-DENF.003 v6 (Ebserh, 2025) registram a fonte; FC > 90, temperatura > 38,5 e SpO₂ < 92 estão com `fonte: null` (sem fonte clínica registrada). A chave `ALERTAS_SEM_FONTE` (backend) e `VITE_ALERTAS_SEM_FONTE` (frontend) tem padrão `true` (todos os alertas, como sempre); `false` desliga só os alertas sem fonte. Os limiares **não** são validação clínica.
+
+---
+
+## Testes e verificação
+
+```bash
+# Testes e build (devem passar nos dois pacotes)
+cd HealthHub-BackEnd && npm test && npm run build
+cd HealthHub-Project && npm test && npm run build
+```
+
+A verificação ponta a ponta (22 cenários, S1 a S8, TF01 a TF08, concorrência e desempenho) roda em **banco de teste isolado**, com dados fictícios e a IA simulada: os scripts e o passo a passo estão em `evidencias_tcc/scripts_verificacao/README.md`.
+
+## Onde estão os materiais do TCC
+
+- `benchmark/`: harness, vinhetas e CSVs por chamada do benchmark dos modelos (com o README que conferiu a Tabela 2 e a verificação de pensamento estendido).
+- `evidencias_tcc/`: evidências das rodadas de testes (`rodada_final/`, `rodada_final_2/`), os scripts de verificação (`scripts_verificacao/`) e `LEIA-ME_EVIDENCIAS_ANTIGAS.md`, que lista o que é anterior à mudança do cadastro.
+- `RESULTADOS_PARA_TCC.md` e `RESULTADOS_PARA_TCC_2.md`: resultados por rodada, com números, caminhos das evidências e limitações.
+
 ---
 
 ## Arquitetura resumida
