@@ -8,7 +8,7 @@ await caso(async () => {
 
   // Enfermeiro abre uma conversa direta com o médico e envia mensagem normal
   await passo(e, 'Nova mensagem', { espera: 1000 });
-  await passo(e, 'Dr. João Silva', { parcial: true, espera: 1500 });
+  await passo(e, 'Médico Teste', { parcial: true, espera: 1500 });
   await digitar(e, 'Mensagem para', 'Bom dia, doutor. Teste de chat (mensagem normal).');
   await enter(e); await sleep(1200);
   prints.push(await foto(e, 'F15_enfermeiro_normal.png'));
@@ -47,6 +47,6 @@ await caso(async () => {
   await e.close(); await m.close();
   const ok = recebeuNormal && enfViuResposta && medViu && medUrgente && msgs.length === 3 && msgs[2].priority === 'urgente' && msgs[0].priority === 'normal';
   registrar({ id: 'F15', perfil: 'Dois perfis', inicio: ini, fim: horaBR(), evidencias: prints.join(', '), observado: obs.join(' | '), resultado: ok ? 'APROVADO' : 'REPROVADO',
-    notas: 'Duas sessões de navegador simultâneas (médico e enfermeiro). Nomes nos prints: usuários do seed do banco de teste (Dr. João Silva — seed fictício; Enfermeiro Teste — renomeado no banco de teste).' });
+    notas: 'Duas sessões de navegador simultâneas (médico e enfermeiro). Nomes nos prints: usuários do seed (Médico Teste, Recepcionista Teste e Enfermeiro Teste, todos fictícios).' });
 });
 await fechar();

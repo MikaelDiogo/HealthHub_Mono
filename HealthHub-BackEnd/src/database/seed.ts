@@ -7,19 +7,19 @@ import * as bcrypt from 'bcryptjs';
 // Senhas lidas de variáveis de ambiente — nunca hardcoded
 const SEED_USERS = [
   {
-    nome: 'Dr. João Silva',
+    nome: 'Médico Teste',
     email: process.env.SEED_MEDICO_EMAIL ?? 'medico@healthhub.com',
     senha: process.env.SEED_MEDICO_SENHA,
     role: 'medico' as const,
   },
   {
-    nome: 'Ana Souza',
+    nome: 'Recepcionista Teste',
     email: process.env.SEED_RECEPCIONISTA_EMAIL ?? 'recepcionista@healthhub.com',
     senha: process.env.SEED_RECEPCIONISTA_SENHA,
     role: 'recepcionista' as const,
   },
   {
-    nome: 'Mikael Diogo',
+    nome: 'Enfermeiro Teste',
     email: process.env.SEED_ENFERMEIRO_EMAIL ?? 'enfermeiro@healthhub.com',
     senha: process.env.SEED_ENFERMEIRO_SENHA,
     role: 'enfermeiro' as const,

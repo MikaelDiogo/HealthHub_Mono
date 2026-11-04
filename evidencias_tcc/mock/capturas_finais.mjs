@@ -87,7 +87,7 @@ await tente('recepção', async () => {
   await foto(p, 'recepcionista', '04_esteira_recepcao.png', 'Esteira (recepção) com paciente recém-admitido');
   await ir(p, '/main/pacientes'); await marcarRadio(p, 'alta');
   await foto(p, 'recepcionista', '05_pacientes_com_alta_readmitir.png', 'Lista com alta e botão de readmissão');
-  await abrirConversa(p, 'Dr. João Silva');
+  await abrirConversa(p, 'Médico Teste');
   await foto(p, 'recepcionista', '06_chat_com_medico.png', 'Chat interno (recepção)');
   await p.close();
 });
@@ -120,7 +120,7 @@ await tente('enfermeiro', async () => {
   await p.send('Input.insertText', { text: 'Resuma o caso (pergunta fictícia)' });
   await p.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' }); await p.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 }); await sleep(3500);
   await foto(p, 'enfermeiro', '08_chat_ia_resposta_simulada.png', 'Chat de IA: resposta do MOCK, rotulada "RESPOSTA SIMULADA — NÃO É DO MODELO REAL"');
-  await abrirConversa(p, 'Dr. João Silva');
+  await abrirConversa(p, 'Médico Teste');
   await passo(p, 'Marcar como urgente', { parcial: true, espera: 600 });
   await p.eval(() => { const i = document.querySelector('textarea, input[placeholder^="Mensagem"]'); i?.focus(); });
   await p.send('Input.insertText', { text: 'Paciente Carla Dias com saturação em queda (mensagem fictícia)' });
