@@ -26,6 +26,7 @@ import { formatCPF, formatPhone, onlyDigits, stripMask } from '../../utils/forma
 import { dispatchVitalsUpdated } from '../../utils/vitalStatus';
 import { mensagemErro } from '../../utils/erro';
 import { AvisoErro } from '../ui';
+import { CampoNome, CampoSexo } from '../CadastroCampos';
 
 interface SidebarLinkProps {
   to: string;
@@ -119,6 +120,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
   const form = useForm({
     initialValues: {
       nome_completo: '',
+      nome_desconhecido: false,
       rg: '',
       cpf: '',
       idade: '',
@@ -133,6 +135,10 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
       pressao_arterial: '',
       frequencia_cardiaca: '',
     },
+    // Só o nome é obrigatório (dispensado quando "Nome desconhecido" está marcado)
+    validate: {
+      nome_completo: (value, values) => (values.nome_desconhecido || value.trim() ? null : 'Informe o nome (ou marque "Nome desconhecido")'),
+    },
   });
 
   const handleSubmit = async (values: typeof form.values) => {
@@ -140,7 +146,8 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
     setErro(null);
     try {
       const response = await api.post('/patients', {
-        nome_completo: values.nome_completo || undefined,
+        nome_desconhecido: values.nome_desconhecido || undefined,
+        nome_completo: values.nome_desconhecido ? undefined : values.nome_completo.trim(),
         rg: values.rg || undefined,
         cpf: values.cpf ? stripMask(values.cpf) : undefined,
         idade: values.idade ? Number(values.idade) : undefined,
@@ -189,7 +196,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
           </Title>
           <Text size="sm" c="var(--hh-muted)" mt={2}>
             {isRecepcionista
-              ? 'Cadastro mínimo: nome, CPF, idade e sexo são obrigatórios.'
+              ? 'Cadastro mínimo: só o nome é obrigatório.'
               : 'Dados cadastrais, triagem e anamnese do paciente.'}
           </Text>
         </Box>
@@ -205,12 +212,12 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
                   variant="light"
                   radius="md"
                   mb="md"
-                  title="Dados obrigatórios"
+                  title="Só o nome é obrigatório"
                 >
-                  Informe nome completo, CPF (11 dígitos), idade e sexo (M, F ou Outro). O restante pode ser completado depois.
+                  Só o nome é obrigatório. Se não souber o nome, marque 'Nome desconhecido': ele poderá ser corrigido depois.
                 </Alert>
                 <Stack gap="md">
-                  <TextInput label="Nome Completo" placeholder="Ex: Maria Silva Santos" radius="md" maxLength={100} {...form.getInputProps('nome_completo')} />
+                  <CampoNome form={form} permiteDesconhecido radius="md" />
                   <Group grow>
                     <TextInput label="RG" radius="md" maxLength={12} {...form.getInputProps('rg')} />
                     <TextInput
@@ -230,7 +237,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
                       {...form.getInputProps('idade')}
                       onChange={(e) => form.setFieldValue('idade', onlyDigits(e.currentTarget.value, 3))}
                     />
-                    <TextInput label="Sexo" radius="md" maxLength={20} {...form.getInputProps('sexo')} />
+                    <CampoSexo form={form} radius="md" />
                   </Group>
                   <TextInput
                     label="Telefone"
@@ -259,7 +266,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
 
                 <Tabs.Panel value="pessoais">
                   <Stack gap="md">
-                    <TextInput label="Nome Completo" placeholder="Ex: Maria Silva Santos" radius="md" maxLength={100} {...form.getInputProps('nome_completo')} />
+                    <CampoNome form={form} permiteDesconhecido radius="md" />
                     <Group grow>
                       <TextInput label="RG" radius="md" maxLength={12} {...form.getInputProps('rg')} />
                       <TextInput
@@ -279,7 +286,7 @@ export const ButtonAddPatient = ({ onPatientCreated }: ButtonAddPatientProps) =>
                         {...form.getInputProps('idade')}
                         onChange={(e) => form.setFieldValue('idade', onlyDigits(e.currentTarget.value, 3))}
                       />
-                      <TextInput label="Sexo" radius="md" maxLength={20} {...form.getInputProps('sexo')} />
+                      <CampoSexo form={form} radius="md" />
                     </Group>
                     <TextInput
                       label="Telefone"

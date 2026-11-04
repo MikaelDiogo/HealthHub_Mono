@@ -18,7 +18,10 @@ export interface FilaPaciente {
   id: string;
   paciente_id: string;
   nome: string;
-  idade: number;
+  /** Cópia do cadastro: pode faltar (cadastro mínimo) */
+  idade?: number | null;
+  /** Nome gerado pelo sistema: o paciente ainda não foi identificado */
+  nome_provisorio?: boolean;
   senha: string;
   chegada: string;
   status: PatientStatus;
@@ -86,7 +89,7 @@ export function CareProvider({ children }: { children: React.ReactNode }) {
     const body = {
       paciente_id: patient.id,
       nome: patient.nome_completo?.trim() || 'Paciente não identificado',
-      idade: patient.idade ?? 0,
+      idade: patient.idade ?? null,
       senha,
       chegada: horarioBrasilia(),
       status: 'Aguardando Triagem',

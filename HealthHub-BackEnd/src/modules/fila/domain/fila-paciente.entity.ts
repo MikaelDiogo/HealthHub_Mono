@@ -11,8 +11,9 @@ export class FilaPaciente {
   @Column('varchar')
   nome!: string;
 
-  @Column('int')
-  idade!: number;
+  // Cópia do cadastro: pode faltar (cadastro mínimo). Atualizada quando o cadastro é editado.
+  @Column('int', { nullable: true })
+  idade?: number | null;
 
   @Column('varchar')
   senha!: string;
@@ -28,4 +29,7 @@ export class FilaPaciente {
 
   @CreateDateColumn()
   created_at!: Date;
+
+  // Não é coluna: vem do cadastro (junção na listagem) para a tela mostrar o selo "Nome provisório"
+  nome_provisorio?: boolean;
 }

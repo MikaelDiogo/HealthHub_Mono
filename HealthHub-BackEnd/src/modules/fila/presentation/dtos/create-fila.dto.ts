@@ -1,4 +1,5 @@
-import { Type } from 'class-transformer';
+import { Transform } from 'class-transformer';
+import { idadeOuNulo } from '../../../patients/presentation/dtos/create-patient.dto';
 import { IsIn, IsInt, IsOptional, IsString, IsUUID, MaxLength } from 'class-validator';
 import { STATUS_ESTEIRA } from '../../domain/fila-valores';
 
@@ -10,9 +11,11 @@ export class CreateFilaDto {
   @MaxLength(150)
   nome!: string;
 
-  @Type(() => Number)
+  // Opcional: o cadastro mínimo só exige o nome.
+  @IsOptional()
+  @Transform(idadeOuNulo)
   @IsInt()
-  idade!: number;
+  idade?: number | null;
 
   // Ignorada: a senha (PR-NNN) é gerada pelo servidor, de forma atômica. Mantida por compatibilidade com clientes antigos.
   @IsOptional()

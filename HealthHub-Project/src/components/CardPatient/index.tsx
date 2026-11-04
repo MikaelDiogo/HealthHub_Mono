@@ -1,9 +1,13 @@
 import { Paper, Text, Avatar, Button, Group, Box } from '@mantine/core';
+import { SeloNomeProvisorio } from '../CadastroCampos';
+import { rotuloIdade } from '../../utils/nomeProvisorio';
 
 interface CardPatientProps {
   patientName: string;
-  patientAge: number;
-  patientGender: string;
+  patientAge?: number | null;
+  patientGender?: string | null;
+  /** Nome gerado pelo sistema (paciente ainda não identificado): mostra o selo */
+  nomeProvisorio?: boolean;
   temp?: string;
   bpm?: string;
   spo2?: string;
@@ -28,7 +32,7 @@ const AUSENTE = '--';
 // Cartão de paciente: a faixa superior é a categoria de risco (dado). Os sinais
 // vitais levam rótulo em texto (antes só havia ícone) e valor ausente vira traço cinza.
 const CardPatient = ({
-  patientName, patientAge, patientGender,
+  patientName, patientAge, patientGender, nomeProvisorio,
   onView, onClickView, onEdit, onReadmit, rodape,
   temp = AUSENTE, bpm = AUSENTE, spo2 = AUSENTE,
   topColor = 'var(--hh-control)',
@@ -52,9 +56,12 @@ const CardPatient = ({
               {getInitials(patientName)}
             </Avatar>
             <Box style={{ minWidth: 0 }}>
-              <Text fw={600} size="sm" c="var(--hh-ink)" truncate>{patientName}</Text>
+              <Group gap={6} wrap="nowrap">
+                <Text fw={600} size="sm" c="var(--hh-ink)" truncate>{patientName}</Text>
+                {nomeProvisorio && <SeloNomeProvisorio />}
+              </Group>
               <Text size="xs" c="var(--hh-muted)">
-                {patientAge} anos · {patientGender}
+                {rotuloIdade(patientAge)} · {patientGender || '—'}
               </Text>
             </Box>
           </Group>

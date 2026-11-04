@@ -37,4 +37,13 @@ describe('o nome do paciente NÃO chega ao provedor (axios simulado, corpo inspe
     expect(corpo).toContain('Dor lombar (fictício)');
     expect(corpo).toContain('SpO2 98%');
   });
+  it('cadastro mínimo: alergias, medicamentos, anamnese e sinais ausentes (null) não quebram o prompt', async () => {
+    post.mockResolvedValue({ data: { choices: [{ message: { content: 'resposta simulada' } }] } });
+    const svc = new ClinicalChatService(new GroqChatProvider());
+    await svc.execute('Pergunta fictícia', { alergias: null, medicamentos: null, anamnese: null, sinaisVitais: undefined } as any, []);
+    const corpo = JSON.stringify(post.mock.calls[post.mock.calls.length - 1][1]);
+    expect(corpo).toContain('Nenhuma registrada');
+    expect(corpo).toContain('Não registrada');
+    expect(corpo).not.toContain('null');
+  });
 });

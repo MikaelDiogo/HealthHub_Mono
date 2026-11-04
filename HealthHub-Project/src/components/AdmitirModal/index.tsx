@@ -1,3 +1,5 @@
+import { SeloNomeProvisorio } from '../../components/CadastroCampos';
+import { ehNomeProvisorio, nomeExibicao } from '../../utils/nomeProvisorio';
 import { useEffect, useMemo, useState } from 'react';
 import {
   ActionIcon, Box, Button, Group, Modal, ScrollArea, Skeleton, Stack, Text, TextInput, Textarea, UnstyledButton,
@@ -73,7 +75,7 @@ function Detalhe({ paciente, resumo, agora, onAdmitir, admitindo, senha }: {
   const proxima = (resumo?.total ?? 0) + 1;
   const volta30 = readmissao30d(resumo, agora);
   const identificacao = [
-    paciente.idade ? `${paciente.idade} anos` : null,
+    paciente.idade != null ? `${paciente.idade} anos` : null,
     paciente.sexo || null,
     paciente.cpf ? `CPF ${paciente.cpf}` : null,
   ].filter(Boolean).join(' · ');
@@ -82,7 +84,10 @@ function Detalhe({ paciente, resumo, agora, onAdmitir, admitindo, senha }: {
     <Box key={paciente.id} className="hh-fade" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
       <ScrollArea style={{ flex: 1 }} type="auto" offsetScrollbars>
         <Box p="lg" pb="md">
-          <Text fz={20} fw={600} c="var(--hh-ink)" lh={1.25}>{paciente.nome_completo || 'Sem nome'}</Text>
+          <Group gap={8} align="center">
+            <Text fz={20} fw={600} c="var(--hh-ink)" lh={1.25}>{nomeExibicao(paciente)}</Text>
+            {ehNomeProvisorio(paciente) && <SeloNomeProvisorio />}
+          </Group>
           <Text size="sm" c="var(--hh-muted)" mt={2}>{identificacao || 'Sem dados de identificação'}</Text>
 
           {volta30 && (
@@ -330,7 +335,10 @@ export function AdmitirModal({ opened, onClose, pacienteInicialId }: {
                       >
                         <Group gap="sm" wrap="nowrap">
                           <Box style={{ flex: 1, minWidth: 0 }}>
-                            <Text size="sm" fw={ativo ? 600 : 500} c="var(--hh-ink)" truncate>{p.nome_completo || 'Sem nome'}</Text>
+                            <Group gap={6} wrap="nowrap">
+                              <Text size="sm" fw={ativo ? 600 : 500} c="var(--hh-ink)" truncate>{nomeExibicao(p)}</Text>
+                              {ehNomeProvisorio(p) && <SeloNomeProvisorio />}
+                            </Group>
                             <Text size="xs" c={readmissao30d(h, agora) ? 'var(--hh-warning)' : 'var(--hh-muted)'} truncate>
                               {linhaHistorico(h)}
                             </Text>

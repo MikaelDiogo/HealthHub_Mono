@@ -41,6 +41,7 @@ function buildService(sinaisExistem: boolean) {
     createAndSave: vi.fn(),
     save: vi.fn(),
     setAtivo: vi.fn(),
+    saveSincronizandoFila: vi.fn(),
   };
   const sinaisVitaisRepository: ISinaisVitaisRepository = {
     createAndSave: vi.fn(),

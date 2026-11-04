@@ -1,3 +1,5 @@
+import { SeloNomeProvisorio } from '../../components/CadastroCampos';
+import { ehNomeProvisorio } from '../../utils/nomeProvisorio';
 import { useState } from 'react';
 import {
   Grid, Paper, Text, Group, Badge, Button, Stack,
@@ -123,9 +125,12 @@ function PatientCard({ patient, borderColor, footer, agora, visita, motivo }: {
       <Box p="sm">
         <Group justify="space-between" mb={6} wrap="nowrap" align="flex-start">
           <Box style={{ minWidth: 0 }}>
-            <Text fw={600} size="sm" c="var(--hh-ink)" truncate>
-              {patient.nome || <Text span c="var(--hh-faint)" fs="italic">Sem nome</Text>}
-            </Text>
+            <Group gap={6} wrap="nowrap">
+              <Text fw={600} size="sm" c="var(--hh-ink)" truncate>
+                {patient.nome || <Text span c="var(--hh-faint)" fs="italic">Sem nome</Text>}
+              </Text>
+              {ehNomeProvisorio(patient) && <SeloNomeProvisorio />}
+            </Group>
             <Text size="xs" c="var(--hh-muted)">
               {patient.idade ? `${patient.idade} anos` : '—'} · Senha{' '}
               <Text span ff="monospace" fw={600} c="var(--hh-ink)" style={{ whiteSpace: 'nowrap' }}>{patient.senha}</Text>

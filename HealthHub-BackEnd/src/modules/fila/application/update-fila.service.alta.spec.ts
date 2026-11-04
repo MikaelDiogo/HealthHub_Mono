@@ -21,7 +21,7 @@ function montar() {
   };
   const patientsRepository: IPatientsRepository = {
     findByCpf: vi.fn(), findById: vi.fn(), findByIdWithVitals: vi.fn(), findAllWithVitals: vi.fn(),
-    createAndSave: vi.fn(), save: vi.fn(), setAtivo: vi.fn(),
+    createAndSave: vi.fn(), save: vi.fn(), setAtivo: vi.fn(), saveSincronizandoFila: vi.fn(),
   };
   const sinaisVitaisRepository: ISinaisVitaisRepository = {
     createAndSave: vi.fn(), findAllByPatient: vi.fn(), findLatestByPatient: vi.fn().mockResolvedValue([{ id: 'sv-1' }]),

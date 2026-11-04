@@ -36,13 +36,21 @@ import api from '../../services/api';
 import type { Patient, SinalVital } from '../../types/patient';
 import jsPDF from 'jspdf';
 import { useAuth } from '../../context/AuthContext';
+import { SeloNomeProvisorio } from '../../components/CadastroCampos';
+import { ehNomeProvisorio } from '../../utils/nomeProvisorio';
 
 interface PatientWithVitals extends Patient {
   sinaisVitais?: SinalVital[];
 }
 
+/** Nome no PDF/ficha: acrescenta "(nome provisório)" quando o nome foi gerado pelo sistema. */
+function nomePdf(p: { nome_completo?: string | null; nome_provisorio?: boolean }) {
+  const nome = p.nome_completo || 'Paciente sem identificação';
+  return ehNomeProvisorio(p) ? `${nome} (nome provisório)` : nome;
+}
+
 // ─── Helpers de UI ────────────────────────────────────────────────────────────
-function InfoRow({ label, value }: { label: string; value?: string | number }) {
+function InfoRow({ label, value }: { label: string; value?: string | number | null }) {
   return (
     <Group gap="xs" py={4} style={{ borderBottom: '1px solid var(--mantine-color-slate-1)' }}>
       <Text size="xs" fw={700} c="slate.5" w={160} style={{ flexShrink: 0 }}>{label}</Text>
@@ -138,7 +146,7 @@ function gerarPDF(patient: PatientWithVitals) {
   doc.setTextColor(...dark);
   doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
-  doc.text(patient.nome_completo || 'Paciente sem identificação', margin + 10, y + 9);
+  doc.text(nomePdf(patient), margin + 10, y + 9);
   const metaParts = [patient.idade ? `${patient.idade} anos` : null, patient.sexo, patient.cpf ? `CPF: ${patient.cpf}` : null].filter(Boolean).join('   ·   ');
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
@@ -151,7 +159,7 @@ function gerarPDF(patient: PatientWithVitals) {
   doc.text(`ID: ${patient.id.slice(0, 8).toUpperCase()}   ·   Gerado em: ${new Date().toLocaleString('pt-BR')}`, margin, y);
   y += 8;
 
-  const drawSection = (title: string, rows: [string, string | number | undefined][]) => {
+  const drawSection = (title: string, rows: [string, string | number | null | undefined][]) => {
     const rowH = 7.5;
     if (y + 10 + rows.length * rowH + 4 > pageH - 20) { doc.addPage(); y = 20; }
     doc.setFillColor(...tealBg);
@@ -183,7 +191,7 @@ function gerarPDF(patient: PatientWithVitals) {
   };
 
   drawSection('Dados Pessoais', [
-    ['Nome Completo', patient.nome_completo],
+    ['Nome Completo', nomePdf(patient)],
     ['CPF', patient.cpf],
     ['RG', patient.rg],
     ['Idade', patient.idade ? `${patient.idade} anos` : undefined],
@@ -305,7 +313,7 @@ function gerarPDFAtestado(patient: PatientWithVitals, dias: number, crm: string,
   y += 18;
 
   // Corpo do atestado
-  const nomePaciente = patient.nome_completo || 'PACIENTE SEM IDENTIFICAÇÃO';
+  const nomePaciente = patient.nome_completo || 'PACIENTE SEM IDENTIFICAÇÃO';  // atestado: o nome aparece como está no cadastro
   const cpfPart = patient.cpf ? `, portador(a) do CPF ${patient.cpf},` : ',';
   const dateStr = new Date().toLocaleDateString('pt-BR');
   const diasLabel = `${dias} (${dias === 1 ? 'um' : dias === 2 ? 'dois' : dias === 3 ? 'três' : String(dias)}) dia${dias > 1 ? 's' : ''}`;
@@ -376,7 +384,7 @@ function gerarPDFPrescricao(
   doc.setTextColor(...dark);
   doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
-  doc.text(patient.nome_completo || 'Paciente sem identificação', margin + 10, y + 9);
+  doc.text(nomePdf(patient), margin + 10, y + 9);
   const meta = [patient.idade ? `${patient.idade} anos` : null, patient.sexo, patient.cpf ? `CPF: ${patient.cpf}` : null].filter(Boolean).join('   ·   ');
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
@@ -678,7 +686,7 @@ export const ExportPDF = () => {
                           }}
                         >
                           <Text fw={600} size="sm" c="slate.8">
-                            {p.nome_completo || <Text span c="dimmed" fs="italic">Sem nome</Text>}
+                            {p.nome_completo || <Text span c="dimmed" fs="italic">Sem nome</Text>}{ehNomeProvisorio(p) && <>{' '}<SeloNomeProvisorio /></>}
                           </Text>
                           <Text size="xs" c="dimmed">
                             {[p.idade ? `${p.idade} anos` : null, p.sexo, p.cpf ? `CPF: ${p.cpf}` : null].filter(Boolean).join(' · ')}
@@ -726,6 +734,7 @@ export const ExportPDF = () => {
                     <Box>
                       <Text fw={800} size="lg" c="slate.9">
                         {selected.nome_completo || <Text span c="dimmed" fs="italic">Sem identificação</Text>}
+                        {ehNomeProvisorio(selected) && <>{' '}<SeloNomeProvisorio /></>}
                       </Text>
                       <Text size="xs" c="dimmed">Prontuário · ID: {selected.id.slice(0, 8).toUpperCase()}</Text>
                     </Box>
@@ -776,7 +785,7 @@ export const ExportPDF = () => {
                 <Box mb="lg">
                   <SectionTitle icon={<IconUser size={12} />} title="Dados Pessoais" />
                   <Stack gap={0}>
-                    <InfoRow label="Nome Completo" value={selected.nome_completo} />
+                    <InfoRow label="Nome Completo" value={nomePdf(selected)} />
                     <InfoRow label="CPF" value={selected.cpf} />
                     <InfoRow label="RG" value={selected.rg} />
                     <InfoRow label="Idade" value={selected.idade ? `${selected.idade} anos` : undefined} />

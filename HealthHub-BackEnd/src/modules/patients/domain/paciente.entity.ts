@@ -9,37 +9,44 @@ export class Paciente {
   @Column('varchar')
   nome_completo!: string;
 
-  @Column('varchar', { unique: true })
-  cpf!: string;
+  // Só o nome é obrigatório: CPF, idade e sexo podem faltar (paciente sem documentos ou sem identificação).
+  // O CPF continua único quando preenchido (no PostgreSQL vários NULL não colidem).
+  @Column('varchar', { unique: true, nullable: true })
+  cpf?: string | null;
 
   @Column('varchar', { nullable: true })
-  rg?: string;
+  rg?: string | null;
 
-  @Column('int')
-  idade!: number;
-
-  @Column('varchar')
-  sexo!: string;
+  @Column('int', { nullable: true })
+  idade?: number | null;
 
   @Column('varchar', { nullable: true })
-  telefone?: string;
+  sexo?: string | null;
+
+  @Column('varchar', { nullable: true })
+  telefone?: string | null;
 
   @Column('text', { nullable: true })
-  endereco?: string;
+  endereco?: string | null;
 
   @Column('text', { nullable: true })
-  alergias?: string;
+  alergias?: string | null;
 
   @Column('text', { nullable: true })
-  medicamentos_em_uso?: string;
+  medicamentos_em_uso?: string | null;
 
   @Column('text', { nullable: true })
-  anamnese?: string;
+  anamnese?: string | null;
 
   // Falso quando o paciente recebeu alta e ainda não foi readmitido na esteira —
   // some da listagem padrão, mas o cadastro e o histórico de visitas são preservados.
   @Column('boolean', { default: true })
   ativo!: boolean;
+
+  // Verdadeiro quando o nome foi gerado pelo sistema ("Paciente não identificado (#xxxx)") por o paciente ainda
+  // não ter sido identificado. Volta a falso quando alguém grava um nome diferente do provisório.
+  @Column('boolean', { default: false })
+  nome_provisorio!: boolean;
 
   @OneToMany(() => SinaisVitais, (sinais) => sinais.paciente)
   sinaisVitais!: SinaisVitais[];

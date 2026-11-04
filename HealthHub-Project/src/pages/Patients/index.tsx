@@ -14,6 +14,8 @@ import {
 } from '@tabler/icons-react';
 import { ButtonAddPatient } from '../../components/Buttons';
 import CardPatient from '../../components/CardPatient';
+import { SeloNomeProvisorio } from '../../components/CadastroCampos';
+import { ehNomeProvisorio, rotuloIdade } from '../../utils/nomeProvisorio';
 import api from '../../services/api';
 import { riscoCSSColor } from '../../utils/vitalStatus';
 import { ModalEditPatient } from '../../components/Buttons/ModalEditPatient';
@@ -171,11 +173,14 @@ export const Patients = () => {
                     {getInitials(selectedPatient.nome_completo)}
                   </Avatar>
                   <Box>
-                    <Title order={3} size={18} fw={600} c="var(--hh-ink)" lh={1.2}>
-                      {selectedPatient.nome_completo}
-                    </Title>
+                    <Group gap={8} wrap="nowrap">
+                      <Title order={3} size={18} fw={600} c="var(--hh-ink)" lh={1.2}>
+                        {selectedPatient.nome_completo}
+                      </Title>
+                      {ehNomeProvisorio(selectedPatient) && <SeloNomeProvisorio />}
+                    </Group>
                     <Text size="sm" c="var(--hh-muted)">
-                      {[selectedPatient.idade ? `${selectedPatient.idade} anos` : null, selectedPatient.sexo].filter(Boolean).join(' · ')}
+                      {`${rotuloIdade(selectedPatient.idade)} · ${selectedPatient.sexo || '—'}`}
                     </Text>
                   </Box>
                 </Group>
@@ -420,6 +425,7 @@ export const Patients = () => {
                         patientName={patient.nome_completo}
                         patientAge={patient.idade}
                         patientGender={patient.sexo}
+                        nomeProvisorio={ehNomeProvisorio(patient)}
                         temp={v?.temperatura ? `${v.temperatura}°C` : '--'}
                         bpm={v?.frequencia_cardiaca ? `${v.frequencia_cardiaca} bpm` : '--'}
                         spo2={v?.saturacao_oxigenio ? `${v.saturacao_oxigenio}%` : '--'}

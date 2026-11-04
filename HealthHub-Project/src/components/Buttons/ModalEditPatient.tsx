@@ -31,6 +31,7 @@ import { formatCPF, formatPhone, onlyDigits, stripMask } from '../../utils/forma
 import { dispatchVitalsUpdated } from '../../utils/vitalStatus';
 import { mensagemErro } from '../../utils/erro';
 import { AvisoErro } from '../ui';
+import { CampoNome, CampoSexo, SeloNomeProvisorio } from '../CadastroCampos';
 
 interface ModalEditProps {
   opened: boolean;
@@ -61,7 +62,7 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
       saturacao_oxigenio: '',
     },
     validate: {
-      nome_completo: (value) => (value.trim().length < 3 ? 'Nome muito curto' : null),
+      nome_completo: (value) => (value.trim().length < 1 ? 'Informe o nome' : null),
     },
   });
 
@@ -72,7 +73,7 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
         nome_completo: patient.nome_completo || '',
         rg: patient.rg || '',
         cpf: patient.cpf || '',
-        idade: patient.idade ? String(patient.idade) : '',
+        idade: patient.idade != null ? String(patient.idade) : '',
         sexo: patient.sexo || '',
         telefone: patient.telefone || '',
         endereco: patient.endereco || '',
@@ -99,8 +100,8 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
       await api.put(`/patients/${patient.id}`, {
         nome_completo: values.nome_completo,
         rg: values.rg,
-        cpf: values.cpf ? stripMask(values.cpf) : undefined,
-        idade: Number(values.idade),
+        cpf: values.cpf ? stripMask(values.cpf) : '',
+        idade: values.idade !== '' ? Number(values.idade) : '',
         sexo: values.sexo,
         telefone: values.telefone ? stripMask(values.telefone) : undefined,
         endereco: values.endereco,
@@ -148,7 +149,10 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
           <Group justify="space-between" wrap="nowrap" p="lg" style={{ borderBottom: '1px solid var(--hh-border)' }}>
             <Box style={{ minWidth: 0 }}>
               <Title order={4} c="var(--hh-ink)">Editar prontuário</Title>
-              <Text size="sm" c="var(--hh-muted)" truncate>{patient?.nome_completo}</Text>
+              <Group gap={6} wrap="nowrap">
+                <Text size="sm" c="var(--hh-muted)" truncate>{patient?.nome_completo}</Text>
+                {patient?.nome_provisorio && <SeloNomeProvisorio />}
+              </Group>
             </Box>
             <ActionIcon variant="subtle" color="slate" onClick={onClose} aria-label="Fechar edição">
               <IconX size={18} />
@@ -171,7 +175,7 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
 
               <Tabs.Panel value="pessoais">
                 <Stack gap="md">
-                  <TextInput label="Nome Completo" required maxLength={100} {...form.getInputProps('nome_completo')} />
+                  <CampoNome form={form} />
                   <Group grow>
                     <TextInput label="RG" maxLength={12} {...form.getInputProps('rg')} />
                     <TextInput
@@ -189,7 +193,7 @@ export const ModalEditPatient = ({ opened, onClose, patient, onUpdated }: ModalE
                       {...form.getInputProps('idade')}
                       onChange={(e) => form.setFieldValue('idade', onlyDigits(e.currentTarget.value, 3))}
                     />
-                    <TextInput label="Sexo" maxLength={20} {...form.getInputProps('sexo')} />
+                    <CampoSexo form={form} />
                   </Group>
                   <TextInput
                     label="Telefone"

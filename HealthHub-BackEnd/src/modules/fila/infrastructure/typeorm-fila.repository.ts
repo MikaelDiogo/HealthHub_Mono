@@ -14,8 +14,15 @@ export class TypeormFilaRepository implements IFilaRepository {
     private readonly dataSource: DataSource,
   ) {}
 
-  findAll(): Promise<FilaPaciente[]> {
-    return this.repo.find({ order: { created_at: 'ASC' } });
+  // Junta, só na leitura, a marca "nome provisório" do cadastro (a esteira guarda cópia de nome e idade, não dessa marca)
+  async findAll(): Promise<FilaPaciente[]> {
+    const { entities, raw } = await this.repo
+      .createQueryBuilder('f')
+      .leftJoin(Paciente, 'p', 'p.id = f.paciente_id')
+      .addSelect('p.nome_provisorio', 'p_nome_provisorio')
+      .orderBy('f.created_at', 'ASC')
+      .getRawAndEntities();
+    return entities.map((e, i) => Object.assign(e, { nome_provisorio: raw[i]?.p_nome_provisorio === true }));
   }
 
   findById(id: string): Promise<FilaPaciente | null> {

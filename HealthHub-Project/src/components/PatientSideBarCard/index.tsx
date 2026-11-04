@@ -1,3 +1,5 @@
+import { SeloNomeProvisorio } from '../../components/CadastroCampos';
+import { ehNomeProvisorio } from '../../utils/nomeProvisorio';
 import { Group, Stack, Text, UnstyledButton } from '@mantine/core';
 import type { Patient } from '../../types/patient';
 
@@ -40,9 +42,12 @@ export function PatientSidebarCard({ patient, isActive, onClick, dotColor }: Pat
           }}
         />
         <Stack gap={0} style={{ flex: 1, minWidth: 0 }}>
-          <Text size="sm" fw={isActive ? 600 : 500} truncate lh={1.3} c="var(--hh-ink)">
-            {patient.nome_completo}
-          </Text>
+          <Group gap={6} wrap="nowrap">
+            <Text size="sm" fw={isActive ? 600 : 500} truncate lh={1.3} c="var(--hh-ink)">
+              {patient.nome_completo}
+            </Text>
+            {ehNomeProvisorio(patient) && <SeloNomeProvisorio />}
+          </Group>
           <Text size="xs" c="var(--hh-muted)">
             {patient.idade ? `${patient.idade} anos` : '—'} · {patient.sexo || '—'}
           </Text>

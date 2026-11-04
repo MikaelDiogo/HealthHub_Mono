@@ -8,9 +8,10 @@ import { ListPatientsService } from './application/list-patients.service';
 import { ShowPatientService } from './application/show-patient.service';
 import { UpdatePatientService } from './application/update-patient.service';
 import { PatientsController } from './presentation/patients.controller';
+import { RealtimeModule } from '../../shared/realtime/realtime.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Paciente])],
+  imports: [TypeOrmModule.forFeature([Paciente]), RealtimeModule],
   controllers: [PatientsController],
   providers: [
     CreatePatientService,

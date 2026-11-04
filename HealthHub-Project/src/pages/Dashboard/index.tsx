@@ -1,3 +1,5 @@
+import { SeloNomeProvisorio } from '../../components/CadastroCampos';
+import { ehNomeProvisorio } from '../../utils/nomeProvisorio';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import {
   Text, Box, Paper, Stack, ScrollArea, Flex, Group, TextInput, Title,
@@ -196,7 +198,7 @@ export default function DashboardHome() {
 
             <Box className="hh-grid-main">
               <Tendencia30d serie={m.serie30d} />
-              <AtencaoAgora itens={m.atencao} onSelecionar={focar} />
+              <AtencaoAgora itens={m.atencao} onSelecionar={focar} provisorios={new Set(carePatients.filter((c) => c.nome_provisorio).map((c) => c.paciente_id))} />
             </Box>
 
             <Composicao periodo={m.periodo30d} />
@@ -211,6 +213,7 @@ export default function DashboardHome() {
             </Title>
             <Text size="sm" c="var(--hh-muted)">
               {selectedPatient?.nome_completo ?? 'nenhum selecionado'}
+              {ehNomeProvisorio(selectedPatient) && <> <SeloNomeProvisorio /></>}
             </Text>
           </Group>
 

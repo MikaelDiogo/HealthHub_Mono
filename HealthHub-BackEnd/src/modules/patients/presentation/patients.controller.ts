@@ -29,7 +29,7 @@ export class PatientsController {
     return this.listPatients.execute(ativo === undefined ? undefined : ativo === 'true');
   }
 
-  @ApiOperation({ summary: "Cadastra paciente (nome, CPF, idade e sexo obrigatórios)", description: "Perfis permitidos: medico, enfermeiro, recepcionista." })
+  @ApiOperation({ summary: "Cadastra paciente (só o nome é obrigatório)", description: "Perfis permitidos: medico, enfermeiro, recepcionista. CPF, idade, sexo e demais campos são opcionais (vazio vira null). Com nome_desconhecido=true o servidor grava 'Paciente não identificado (#xxxx)' e marca nome_provisorio." })
   @Post()
   @Roles('medico', 'enfermeiro', 'recepcionista')
   create(@Body() body: CreatePatientDto) {

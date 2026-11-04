@@ -1,3 +1,5 @@
+import { SeloNomeProvisorio } from '../../components/CadastroCampos';
+import { ehNomeProvisorio } from '../../utils/nomeProvisorio';
 import type { ReactNode } from 'react';
 import { Box, Group, Paper, Text, Title, Tooltip, UnstyledButton } from '@mantine/core';
 import { BarChart } from '@mantine/charts';
@@ -204,6 +206,7 @@ export function EsteiraFluxo({ fila, agora, esperaMediaMin, onSelecionar, seleci
                               style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: riscoCSSColor(p.gravidade) }}
                             />
                             <Text size="xs" fw={500} c="var(--hh-ink)" truncate style={{ flex: 1 }}>{nomeCurto(p.nome)}</Text>
+                            {ehNomeProvisorio(p) && <SeloNomeProvisorio />}
                             {espera !== null && (
                               <Text
                                 size="xs"
@@ -253,7 +256,9 @@ export function EsteiraFluxo({ fila, agora, esperaMediaMin, onSelecionar, seleci
 }
 
 // ─── Atenção agora ────────────────────────────────────────────────────────────
-export function AtencaoAgora({ itens, onSelecionar }: {
+export function AtencaoAgora({ itens, onSelecionar, provisorios }: {
+  /** paciente_id dos que estão com nome provisório (vem da esteira) */
+  provisorios?: Set<string>;
   itens: Metricas['atencao'];
   onSelecionar: (pacienteId: string) => void;
 }) {
@@ -285,7 +290,10 @@ export function AtencaoAgora({ itens, onSelecionar }: {
                   }}
                 />
                 <Box style={{ flex: 1, minWidth: 0 }}>
-                  <Text size="sm" fw={600} c="var(--hh-ink)" truncate>{a.nome}</Text>
+                  <Group gap={6} wrap="nowrap">
+                    <Text size="sm" fw={600} c="var(--hh-ink)" truncate>{a.nome}</Text>
+                    {provisorios?.has(a.paciente_id) && <SeloNomeProvisorio />}
+                  </Group>
                   <Text size="xs" c="var(--hh-muted)" truncate>
                     {a.nivel === 'critico'
                       ? a.motivo

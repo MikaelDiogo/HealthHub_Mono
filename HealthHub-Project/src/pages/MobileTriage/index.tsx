@@ -1,3 +1,5 @@
+import { CampoNome, CampoSexo, SeloNomeProvisorio } from '../../components/CadastroCampos';
+import { ehNomeProvisorio } from '../../utils/nomeProvisorio';
 import { useState, useEffect } from 'react';
 import {
   Box, Stack, Text, Group, Badge, Button, ActionIcon,
@@ -200,7 +202,7 @@ function FilaCard({
               )}
             </Group>
             <Text fw={600} size="sm" c="slate.8" truncate>
-              {patient.nome || <Text span c="dimmed" fs="italic">Sem nome</Text>}
+              {patient.nome || <Text span c="dimmed" fs="italic">Sem nome</Text>}{ehNomeProvisorio(patient) && <>{' '}<SeloNomeProvisorio /></>}
             </Text>
             <Text size="xs" c="dimmed">
               {patient.idade ? `${patient.idade} anos` : '—'} · Chegada: {patient.chegada}
@@ -402,6 +404,7 @@ function CadastrarView() {
   const form = useMantineForm({
     initialValues: {
       nome_completo: '',
+      nome_desconhecido: false,
       rg: '',
       cpf: '',
       idade: '',
@@ -416,6 +419,10 @@ function CadastrarView() {
       pressao_arterial: '',
       frequencia_cardiaca: '',
     },
+    // Só o nome é obrigatório (dispensado quando "Nome desconhecido" está marcado)
+    validate: {
+      nome_completo: (value, values) => (values.nome_desconhecido || value.trim() ? null : 'Informe o nome (ou marque "Nome desconhecido")'),
+    },
   });
 
   const handleSubmit = async (values: typeof form.values, admitir: boolean) => {
@@ -423,7 +430,8 @@ function CadastrarView() {
     setErro(null);
     try {
       const res = await api.post('/patients', {
-        nome_completo: values.nome_completo || undefined,
+        nome_desconhecido: values.nome_desconhecido || undefined,
+        nome_completo: values.nome_desconhecido ? undefined : values.nome_completo.trim(),
         rg: values.rg || undefined,
         cpf: values.cpf ? stripMask(values.cpf) : undefined,
         idade: values.idade ? Number(values.idade) : undefined,
@@ -491,7 +499,7 @@ function CadastrarView() {
 
         {isRecepcionista && (
           <Alert icon={<IconAlertCircle size={14} />} color="blue" variant="light" radius="md" mb="xs">
-            Obrigatórios: nome completo, CPF (11 dígitos), idade e sexo (M, F ou Outro).
+            Só o nome é obrigatório. Se não souber o nome, marque 'Nome desconhecido': ele poderá ser corrigido depois.
           </Alert>
         )}
 
@@ -532,14 +540,7 @@ function CadastrarView() {
           {/* Aba Pessoais (sempre visível para recepcionista) */}
           {(activeTab === 'pessoais' || isRecepcionista) && (
             <>
-              <TextInput
-                label="Nome Completo"
-                placeholder="Ex: Maria Silva Santos"
-                radius="md"
-                size="md"
-                maxLength={100}
-                {...form.getInputProps('nome_completo')}
-              />
+              <CampoNome form={form} permiteDesconhecido radius="md" size="md" />
               <Group grow>
                 <TextInput
                   label="RG"
@@ -567,13 +568,7 @@ function CadastrarView() {
                   {...form.getInputProps('idade')}
                   onChange={(e) => form.setFieldValue('idade', onlyDigits(e.currentTarget.value, 3))}
                 />
-                <TextInput
-                  label="Sexo"
-                  radius="md"
-                  size="md"
-                  maxLength={20}
-                  {...form.getInputProps('sexo')}
-                />
+                <CampoSexo form={form} radius="md" size="md" />
               </Group>
               <TextInput
                 label="Telefone"
