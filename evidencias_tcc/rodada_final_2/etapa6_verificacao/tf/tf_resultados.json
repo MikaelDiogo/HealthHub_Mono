@@ -1,0 +1,157 @@
+{
+  "versao": "98b375d",
+  "data": "2026-11-04T12:36:28.387Z",
+  "executor": "Claude Code (automação) a pedido do autor",
+  "ambiente": "API local, banco de teste isolado, IA simulada",
+  "resultados": [
+    {
+      "id": "TF01",
+      "regra": "Cadastro / RF02",
+      "entrada": "Cadastrar FICTÍCIO-01 só com o nome (dados mínimos)",
+      "esperado": "Salvar e recuperar o registro com o nome e sem trocar a identidade; CPF, idade e sexo ausentes (null)",
+      "obtido": "status=201; id criado=a7be1b55-d89d-4ad2-978d-63d89b21a938; id lido=a7be1b55-d89d-4ad2-978d-63d89b21a938; nome igual=true; cpf/idade/sexo=null/null/null",
+      "resultado": "APROVADO"
+    },
+    {
+      "id": "TF02",
+      "regra": "Classificação de risco / RF09",
+      "entrada": "Inserir os cinco registros de fila (amarelo×2, laranja, verde, azul) e classificá-los",
+      "esperado": "Entre classificados: Laranja, Amarelo, Amarelo, Verde, Azul (não há Vermelho no roteiro). Não triados: registrar separadamente",
+      "obtido": "fila: FICTÍCIO-03[Laranja] | FICTÍCIO-01[Amarelo] | FICTÍCIO-02[Amarelo] | FICTÍCIO-04[Verde] | FICTÍCIO-05[Azul] | FICTÍCIO-06[sem cor]",
+      "resultado": "APROVADO",
+      "observacao": "Não triado (FICTÍCIO-06): posição 6 de 6 (observado; é ordem a revisar, não regra clínica aprovada). Obs.: a ordem de chegada usa o instante de gravação no servidor, não o texto do horário informado no campo \"chegada\"."
+    },
+    {
+      "id": "TF03",
+      "regra": "Desempate / RF09",
+      "entrada": "Comparar os dois registros amarelos (chegadas 08:00 e 08:05)",
+      "esperado": "FICTÍCIO-01 antes de FICTÍCIO-02",
+      "obtido": "posições: FICTÍCIO-01=2, FICTÍCIO-02=3",
+      "resultado": "APROVADO"
+    },
+    {
+      "id": "TF04",
+      "regra": "Pré-condição / RF11",
+      "entrada": "Tentar registrar a categoria antes de salvar sinais vitais",
+      "esperado": "Bloquear a classificação (regra 4.1.1)",
+      "obtido": "HTTP 400 {\"error\":\"Registre os sinais vitais do paciente antes de classificar o risco.\"}; gravidade gravada=null",
+      "resultado": "APROVADO"
+    },
+    {
+      "id": "TF06",
+      "regra": "Estados / RF10/RF12",
+      "entrada": "Percorrer o fluxo de estados e tentar transições não previstas",
+      "esperado": "Documentar o backend atual (sem validação de transições); sem inventar bloqueio existente",
+      "obtido": "Fluxo: enfermeiro→\"Em Triagem (Enfermeiro)\": HTTP 200; enfermeiro→\"Aguardando Atendimento\": HTTP 200; medico→\"Em Consulta (Médico)\": HTTP 200; medico→\"Em Observação\": HTTP 200; médico alta: HTTP 204. Saltos: \"Aguardando Triagem\"→\"Em Consulta (Médico)\" HTTP 200; →\"Em Observação\" HTTP 200; retroceder→\"Aguardando Triagem\" HTTP 200",
+      "resultado": "DOCUMENTADO (saltos e retrocesso ACEITOS; sem validação de transição)",
+      "observacao": "Sem critério de aprovado/reprovado: registra o comportamento atual (ver fila-valores.ts). A matriz de transições aprovada não existe; teste de correção futuro fica pendente."
+    },
+    {
+      "id": "TF07",
+      "regra": "Acesso / RNF04",
+      "entrada": "Contas fictícias de perfis distintos executando as operações do sistema",
+      "esperado": "Permitir só as operações autorizadas na matriz de perfis (ainda a documentar)",
+      "obtido": "matriz observada em tf07_matriz_perfis.md (14 operações; 10 com ao menos um 403); sem login → 401",
+      "resultado": "OBSERVADO (sem matriz aprovada para comparar; ver arquivo)",
+      "matriz": {
+        "GET /fila": [
+          200,
+          200,
+          200
+        ],
+        "POST /patients (cadastrar)": [
+          201,
+          201,
+          201
+        ],
+        "GET /patients": [
+          200,
+          200,
+          200
+        ],
+        "POST /sinais/:id": [
+          403,
+          201,
+          201
+        ],
+        "GET /patients/:id/vitals": [
+          403,
+          200,
+          200
+        ],
+        "PUT /fila/:id (iniciar triagem)": [
+          403,
+          200,
+          200
+        ],
+        "PUT /fila/:id (classificar cor)": [
+          403,
+          200,
+          403
+        ],
+        "PUT /fila/:id (status Alta)": [
+          403,
+          403,
+          200
+        ],
+        "GET /patients/:id/eventos": [
+          403,
+          200,
+          200
+        ],
+        "POST /patients/:id/chat (IA)": [
+          403,
+          201,
+          201
+        ],
+        "GET /metricas": [
+          200,
+          200,
+          200
+        ],
+        "PATCH /patients/:id/visitas/fechar": [
+          403,
+          403,
+          200
+        ],
+        "PATCH /fila/:id/alta": [
+          403,
+          403,
+          204
+        ],
+        "DELETE /fila/:id": [
+          403,
+          403,
+          404
+        ]
+      }
+    },
+    {
+      "id": "TF08",
+      "regra": "Falha de integração / RF16/RF17",
+      "entrada": "Provedor de IA simulado indisponível (429, 500, timeout, resposta vazia)",
+      "esperado": "Exibir a falha sem inventar resposta clínica nem perder o registro local",
+      "obtido": "{\"__ERRO_429__\":{\"http\":500,\"corpo\":\"{\\\"error\\\":\\\"Assistente clínico indisponível.\\\"}\"},\"__ERRO_500__\":{\"http\":500,\"corpo\":\"{\\\"error\\\":\\\"Assistente clínico indisponível.\\\"}\"},\"__TIMEOUT__\":{\"http\":500,\"corpo\":\"{\\\"error\\\":\\\"Assistente clínico indisponível.\\\"}\"},\"__VAZIO__\":{\"http\":201,\"corpo\":\"{\\\"reply\\\":\\\"\\\",\\\"source\\\":\\\"groq\\\"}\"}}; sinais vitais registrados antes=2, depois=2",
+      "resultado": "APROVADO (nível API; a mensagem na tela está em tf08_ui.md)",
+      "observacao": "Em 429 e 500 o backend devolve HTTP 500 com mensagem genérica (o 429 vira 500). Nenhuma resposta clínica foi inventada.",
+      "testes": {
+        "__ERRO_429__": {
+          "http": 500,
+          "corpo": "{\"error\":\"Assistente clínico indisponível.\"}"
+        },
+        "__ERRO_500__": {
+          "http": 500,
+          "corpo": "{\"error\":\"Assistente clínico indisponível.\"}"
+        },
+        "__TIMEOUT__": {
+          "http": 500,
+          "corpo": "{\"error\":\"Assistente clínico indisponível.\"}"
+        },
+        "__VAZIO__": {
+          "http": 201,
+          "corpo": "{\"reply\":\"\",\"source\":\"groq\"}"
+        }
+      }
+    }
+  ]
+}

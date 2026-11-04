@@ -1,0 +1,5 @@
+2026-11-04T13:21:40.078Z
+paciente fictício criado: FICTÍCIO-06 484460
+(b) paciente selecionado na tela: true
+(b) resposta apareceu em ~6 s; contém "CID": true; contém "SIMULADA": false
+captura novo04_chat_ia_cid.png

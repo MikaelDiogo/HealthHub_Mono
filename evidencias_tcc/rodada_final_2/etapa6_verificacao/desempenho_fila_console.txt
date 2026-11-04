@@ -1,0 +1,20 @@
+
+## fila com 20 entradas
+fila=20 GET /fila sequencial: n=200 min=3.0 p50=15.1 p95=16.6 p99=17.4 max=37.6 ms 
+fila=20 GET /fila concorrente(10): n=200 min=8.3 p50=12.7 p95=17.1 p99=19.3 max=83.0 ms vazao=748 req/s; respostas!=200=0
+fila=20 GET /metricas sequencial: n=200 min=5.7 p50=15.0 p95=20.9 p99=25.4 max=28.2 ms 
+fila=20 GET /metricas concorrente(10): n=200 min=14.9 p50=40.9 p95=61.8 p99=71.9 max=75.8 ms vazao=229 req/s; respostas!=200=0
+
+## fila com 100 entradas
+fila=100 GET /fila sequencial: n=200 min=4.3 p50=14.9 p95=18.2 p99=23.4 max=23.8 ms 
+fila=100 GET /fila concorrente(10): n=200 min=12.4 p50=26.3 p95=36.6 p99=39.1 max=39.8 ms vazao=367 req/s; respostas!=200=0
+fila=100 GET /metricas sequencial: n=200 min=10.1 p50=15.8 p95=28.3 p99=34.2 max=46.9 ms 
+fila=100 GET /metricas concorrente(10): n=200 min=16.0 p50=82.0 p95=108.6 p99=116.6 max=119.2 ms vazao=117 req/s; respostas!=200=0
+
+## fila com 500 entradas
+fila=500 GET /fila sequencial: n=200 min=7.8 p50=15.3 p95=23.9 p99=36.5 max=38.9 ms 
+fila=500 GET /fila concorrente(10): n=200 min=19.3 p50=63.5 p95=83.2 p99=87.8 max=101.4 ms vazao=154 req/s; respostas!=200=0
+fila=500 GET /metricas sequencial: n=200 min=30.2 p50=45.9 p95=60.5 p99=67.1 max=83.3 ms 
+fila=500 GET /metricas concorrente(10): n=200 min=115.2 p50=360.2 p95=416.6 p99=459.6 max=838.1 ms vazao=28 req/s; respostas!=200=0
+
+CSV: <repositório>/evidencias_tcc/rodada_final_2/etapa6_verificacao/desempenho/desempenho_fila.csv

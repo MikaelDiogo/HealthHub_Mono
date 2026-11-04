@@ -16,6 +16,8 @@ Scripts usados para verificar o HealthHub em **banco de teste isolado**, com **d
 | `concorrencia.mjs` | Admissão concorrente (senha sem repetição, 409 no mesmo paciente) |
 | `desempenho.mjs`, `amostrador_recursos.mjs` | Latência (p50/p95/p99), disponibilidade após reinício e uso de recursos |
 | `casos_ficticios.csv` | Os 5 casos fictícios (FICTÍCIO-01 a 05) |
+| `capturas_rodada2.mjs` | As capturas de tela da rodada 2 (1280 × 800, PNG) e o manifesto parcial, com a IA **simulada**; inclui a captura do PDF (visualizador do navegador) e o erro 429 **simulado** |
+| `capturas_ia_real.mjs` | As 4 capturas com o provedor de IA **REAL** (chat com CID e transcrição de áudio). Faz chamadas pagas à Groq (1 de chat e 1 de transcrição por execução; `SO_CHAT=1` pula o áudio). Exige `WAV_FICTICIO` (áudio de voz sintética, arquivo local fora do Git) e a chave só no ambiente do processo da **API** (nunca neste script) |
 
 O mock da IA fica em `evidencias_tcc/mock/mock-groq.cjs` (a API sobe com `node -r ../evidencias_tcc/mock/mock-groq.cjs dist/main`): **nenhuma chamada real à Groq** é feita por estes scripts.
 

@@ -1,0 +1,94 @@
+{
+  "api": "http://localhost:3001",
+  "executado_em": "2026-11-04T12:36:10.909Z",
+  "resultados": [
+    {
+      "nome": "admissão (recepção) cria fila",
+      "ok": true,
+      "status": "Aguardando Triagem"
+    },
+    {
+      "nome": "sinais vitais (enfermeiro)",
+      "ok": true,
+      "status": 201
+    },
+    {
+      "nome": "iniciar triagem",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "nome": "classificar cor com justificativa",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "nome": "consulta iniciada (médico)",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "nome": "enfermeiro PUT Alta → 403 e nenhum evento novo",
+      "ok": true,
+      "status": 403,
+      "antes": 5,
+      "depois": 5
+    },
+    {
+      "nome": "alta (médico) via PATCH",
+      "ok": true,
+      "status": 204
+    },
+    {
+      "nome": "eventos do paciente A na ordem esperada",
+      "ok": true,
+      "tipos": [
+        "admitido",
+        "sinais_registrados",
+        "triagem_iniciada",
+        "classificado",
+        "consulta_iniciada",
+        "alta"
+      ]
+    },
+    {
+      "nome": "classificação traz cor, justificativa, autor (nome+perfil) e data ISO",
+      "ok": true,
+      "gravidade": "Amarelo",
+      "role": "enfermeiro",
+      "tem_nome": true,
+      "criado_em": "2026-11-04T12:36:10.599Z"
+    },
+    {
+      "nome": "removido da esteira registra evento e preserva a cor",
+      "ok": true,
+      "delete_status": 204,
+      "tipos": [
+        "removido_da_fila",
+        "classificado",
+        "sinais_registrados",
+        "admitido"
+      ]
+    },
+    {
+      "nome": "recepção lendo eventos → 403",
+      "ok": true,
+      "status": 403
+    },
+    {
+      "nome": "sem login → 401",
+      "ok": true,
+      "status": 401
+    },
+    {
+      "nome": "enfermeiro lendo eventos → 200",
+      "ok": true,
+      "status": 200
+    },
+    {
+      "nome": "justificativa > 500 caracteres → 400",
+      "ok": true,
+      "status": 400
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+escrita POST /fila sequencial: n=100 min=23.4 p50=35.3 p95=128.3 p99=145.4 max=188.3 ms respostas!=201=0
+escrita PUT /fila/:id (classificar cor) sequencial: n=100 min=14.4 p50=30.0 p95=110.3 p99=128.6 max=133.9 ms respostas!=200=0
+
+CSV: <repositório>/evidencias_tcc/rodada_final_2/etapa6_verificacao/desempenho/desempenho_escrita.csv

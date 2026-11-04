@@ -1,0 +1,18 @@
+## migration:run do zero
+11 migrations are new migrations must be executed.
+Migration CreateBaseSchema1000000000000 has been executed successfully.
+Migration UpdateSinaisVitaisAddPressaoEPaciente1774448538633 has been executed successfully.
+Migration CreateFilaPacientes1780358400000 has been executed successfully.
+Migration CreateUsers1780500000000 has been executed successfully.
+Migration CreateChat1782600000000 has been executed successfully.
+Migration CreateVisitas1783000000000 has been executed successfully.
+Migration AddAtivoToPacientes1783100000000 has been executed successfully.
+Migration CreateFilaEventos1783200000000 has been executed successfully.
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been executed successfully.
+Migration UniqueFilaPorPaciente1783400000000 has been executed successfully.
+Migration CadastroMinimoNomeProvisorio1783500000000 has been executed successfully.
+## seed
+Criado: medico.teste@healthhub.local (medico)
+Criado: recepcao.teste@healthhub.local (recepcionista)
+Criado: enfermeiro.teste@healthhub.local (enfermeiro)
+Seed concluído.

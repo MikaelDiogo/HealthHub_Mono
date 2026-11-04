@@ -1,0 +1,31 @@
+✓ novo01_sexo_select_aberto.png
+✓ fig07_cadastro.png
+✓ novo02a_nome_desconhecido_marcado.png
+✓ novo02b_lista_selo_nome_provisorio.png
+✓ fig09_admissao.png
+✓ fig10_esteira_recem_admitido.png
+✓ fig08_sinais_vitais.png
+✓ fig11_seletor_cor.png
+✓ fig12_risco_aguardando_medico.png
+✓ fig20_recusa_temperatura.png
+✓ novo09a_editar_nome_provisorio.png
+✓ novo09b_lista_sem_selo.png
+✓ fig21_prioridade_esteira.png
+✓ fig21b_prioridade_esteira_fim.png
+✓ fig15_lista_com_alta.png
+✓ fig25_historico_sem_eventos.png
+✓ fig16_painel.png
+✓ fig16b_painel_atencao_agora.png
+✓ fig22_painel_atencao_f14.png
+✓ fig13_consulta.png
+✓ fig14_janela_alta.png
+✓ fig17_historico_sinais.png
+✓ fig18_chat_urgente.png
+✓ fig24_registro_eventos.png
+✓ fig06_acesso.png
+✓ novo03_termos_secao_ia.png
+✓ novo10_politica_pdf.png
+✓ fig19_prontuario_pdf.png
+✓ novo08_erro_429.png
+
+29 itens OK, 0 falhas

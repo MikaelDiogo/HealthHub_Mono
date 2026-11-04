@@ -1,0 +1,1 @@
+GET /health sequencial: n=200 min=2.0 p50=15.3 p95=16.3 p99=17.0 max=19.3 ms

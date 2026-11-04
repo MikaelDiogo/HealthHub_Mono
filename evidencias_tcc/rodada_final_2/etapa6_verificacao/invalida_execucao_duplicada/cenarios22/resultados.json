@@ -1,0 +1,134 @@
+[
+  {
+    "id": "F01",
+    "perfil": "Todos",
+    "inicio": "09:37:18",
+    "fim": "09:37:44",
+    "evidencias": "F01_tela1.png, F01_login_medico.png, F01_login_enfermeiro.png, F01_login_recepcionista.png, F01_senha_errada.png",
+    "observado": "medico: entrou=true, rota final=/main | enfermeiro: entrou=true, rota final=/main | recepcionista: entrou=true, rota final=/main/alertas | senha errada: permaneceu em /; mensagem \"Credenciais inválidas\" visível=true",
+    "resultado": "APROVADO",
+    "notas": "Login feito pela interface (digitação de e-mail/senha). E-mail desfocado nos prints. Credenciais do seed do banco de teste isolado.",
+    "registrado_em": "04/11/2026, 09:37:44"
+  },
+  {
+    "id": "F01",
+    "perfil": "Todos",
+    "inicio": "09:37:34",
+    "fim": "09:38:00",
+    "evidencias": "F01_tela1.png, F01_login_medico.png, F01_login_enfermeiro.png, F01_login_recepcionista.png, F01_senha_errada.png",
+    "observado": "medico: entrou=true, rota final=/main | enfermeiro: entrou=true, rota final=/main | recepcionista: entrou=true, rota final=/main/alertas | senha errada: permaneceu em /; mensagem \"Credenciais inválidas\" visível=true",
+    "resultado": "APROVADO",
+    "notas": "Login feito pela interface (digitação de e-mail/senha). E-mail desfocado nos prints. Credenciais do seed do banco de teste isolado.",
+    "registrado_em": "04/11/2026, 09:38:00"
+  },
+  {
+    "id": "F02",
+    "perfil": "Recepcionista",
+    "inicio": "09:38:04",
+    "fim": "09:38:17",
+    "evidencias": "F02_tela1.png, F02_vazio.png, F02_preenchido.png, F02_resultado.png",
+    "observado": "Cadastro VAZIO: requisição POST /patients → status (nenhuma requisição enviada); modal ainda aberto=true; aviso visível na tela (aviso vermelho ou erro no campo Nome)=true (\"Informe o nome (ou marque \"Nome desconhecido\")\") | Cadastro VÁLIDO: POST /patients → 204,201,204,200; paciente no banco=true (idade 34, sexo M, ativo=true)",
+    "resultado": "APROVADO",
+    "notas": "Tela mostrou aviso no cadastro vazio (a partir da regra do cadastro mínimo, o aviso é o erro do campo Nome: só o nome é obrigatório).",
+    "registrado_em": "04/11/2026, 09:38:17"
+  },
+  {
+    "id": "F02",
+    "perfil": "Recepcionista",
+    "inicio": "09:38:20",
+    "fim": "09:38:33",
+    "evidencias": "F02_tela1.png, F02_vazio.png, F02_preenchido.png, F02_resultado.png",
+    "observado": "Cadastro VAZIO: requisição POST /patients → status (nenhuma requisição enviada); modal ainda aberto=true; aviso visível na tela (aviso vermelho ou erro no campo Nome)=true (\"Informe o nome (ou marque \"Nome desconhecido\")\") | Cadastro VÁLIDO: POST /patients → 204,400; paciente no banco=true (idade 34, sexo M, ativo=true)",
+    "resultado": "APROVADO",
+    "notas": "Tela mostrou aviso no cadastro vazio (a partir da regra do cadastro mínimo, o aviso é o erro do campo Nome: só o nome é obrigatório).",
+    "registrado_em": "04/11/2026, 09:38:33"
+  },
+  {
+    "id": "F03",
+    "perfil": "Enfermeiro",
+    "inicio": "09:38:31",
+    "fim": "09:38:45",
+    "evidencias": "F03_tela1.png, F03_sinais.png, F03_resultado.png",
+    "observado": "Aba Hospitalares aberta (ok); chamadas: /patients 201; /sinais/a2ed108c-9723-4eec-b4b8-16cf64d0ec94 201; /patients?ativo=true 200; paciente criado=true; leituras de sinais=1 → SpO2 94, FC 95, Temp 37.9, PA 140/90; alergias=\"Nenhuma conhecida (fictício)\"",
+    "resultado": "APROVADO",
+    "notas": "",
+    "registrado_em": "04/11/2026, 09:38:45"
+  },
+  {
+    "id": "F04",
+    "perfil": "Enfermeiro",
+    "inicio": "09:38:45",
+    "fim": "09:38:57",
+    "evidencias": "F04_tela1.png, F04_recusa.png, F04_valido.png",
+    "observado": "Aviso vermelho ao recusar 46 °C: \"Temperatura deve estar entre 25 e 45 °C\" | Temp 46 °C: chamadas /patients/a2ed108c-9723-4eec-b4b8-16cf64d0ec94 200; /sinais/a2ed108c-9723-4eec-b4b8-16cf64d0ec94 400; leituras antes=1, depois=1; valor 46 gravado=false; modal ainda aberto=true | Temp 37,9 °C (válido): chamadas /patients/a2ed108c-9723-4eec-b4b8-16cf64d0ec94 200; /sinais/a2ed108c-9723-4eec-b4b8-16cf64d0ec94 201; /patients?ativo=true 200; leituras=2; última temp=37.9",
+    "resultado": "APROVADO",
+    "notas": "A tela mostrou o motivo da recusa.",
+    "registrado_em": "04/11/2026, 09:38:57"
+  },
+  {
+    "id": "F03",
+    "perfil": "Enfermeiro",
+    "inicio": "09:38:48",
+    "fim": "09:39:01",
+    "evidencias": "F03_tela1.png, F03_sinais.png, F03_resultado.png",
+    "observado": "Aba Hospitalares aberta (ok); chamadas: /patients 400; paciente criado=true; leituras de sinais=2 → SpO2 94, FC 95, Temp 37.9, PA 140/90; alergias=\"Nenhuma conhecida (fictício)\"",
+    "resultado": "APROVADO",
+    "notas": "",
+    "registrado_em": "04/11/2026, 09:39:01"
+  },
+  {
+    "id": "F05",
+    "perfil": "Recepcionista",
+    "inicio": "09:38:57",
+    "fim": "09:39:11",
+    "evidencias": "F05_tela1.png, F05_admitirA.png, F05_admitirB.png, F05_esteira.png",
+    "observado": "Senha mostrada no modal: A=PR-001, B=PR-002; senha gravada: A=PR-001, B=PR-002; status A=Aguardando Triagem, B=Aguardando Triagem; chegada A=\"04/11/2026, 09:39\", B=\"04/11/2026, 09:39\" (hora atual BRT 09:39); entradas na fila=2",
+    "resultado": "APROVADO",
+    "notas": "Fila inicialmente vazia: esperado PR-001 e PR-002. A árvore testada inclui a correção de senha sequencial feita em 28/10 (proximaSenha), ainda não commitada.",
+    "registrado_em": "04/11/2026, 09:39:11"
+  },
+  {
+    "id": "F04",
+    "perfil": "Enfermeiro",
+    "inicio": "09:39:01",
+    "fim": "09:39:13",
+    "evidencias": "F04_tela1.png, F04_recusa.png, F04_valido.png",
+    "observado": "Aviso vermelho ao recusar 46 °C: \"Temperatura deve estar entre 25 e 45 °C\" | Temp 46 °C: chamadas /patients/a2ed108c-9723-4eec-b4b8-16cf64d0ec94 200; /sinais/a2ed108c-9723-4eec-b4b8-16cf64d0ec94 400; /metricas/historico-pacientes 200; /patients?ativo=true 200; /fila 200; /patients?ativo=true 200; leituras antes=2, depois=2; valor 46 gravado=false; modal ainda aberto=true | Temp 37,9 °C (válido): chamadas /patients/a2ed108c-9723-4eec-b4b8-16cf64d0ec94 200; /patients?ativo=true 200; /metricas/historico-pacientes 200; /fila 200; /patients?ativo=true 200; /sinais/a2ed108c-9723-4eec-b4b8-16cf64d0ec94 201; /patients?ativo=true 200; leituras=3; última temp=37.9",
+    "resultado": "APROVADO",
+    "notas": "A tela mostrou o motivo da recusa.",
+    "registrado_em": "04/11/2026, 09:39:13"
+  },
+  {
+    "id": "F06",
+    "perfil": "Recepcionista",
+    "inicio": "09:39:11",
+    "fim": "09:39:16",
+    "evidencias": "F06_modal_busca.png",
+    "observado": "API direta (POST /fila com TESTE A já na fila): HTTP 409 {\"error\":\"Paciente já está na fila de atendimento.\"}; entradas de TESTE A na fila=1 | Interface: TESTE A aparece como opção no modal de admissão=false",
+    "resultado": "APROVADO",
+    "notas": "A interface impede a duplicidade ao não listar o paciente; a recusa com mensagem foi comprovada chamando a API diretamente (a tela não oferece o caminho, então não há print da mensagem).",
+    "registrado_em": "04/11/2026, 09:39:16"
+  },
+  {
+    "id": "F05",
+    "perfil": "Recepcionista",
+    "inicio": "09:39:13",
+    "fim": "09:39:27",
+    "evidencias": "F05_tela1.png, F05_admitirA.png, F05_admitirB.png, F05_esteira.png",
+    "observado": "Senha mostrada no modal: A=undefined, B=undefined; senha gravada: A=PR-001, B=PR-002; status A=Aguardando Triagem, B=Aguardando Triagem; chegada A=\"04/11/2026, 09:39\", B=\"04/11/2026, 09:39\" (hora atual BRT 09:39); entradas na fila=2",
+    "resultado": "APROVADO",
+    "notas": "Fila inicialmente vazia: esperado PR-001 e PR-002. A árvore testada inclui a correção de senha sequencial feita em 28/10 (proximaSenha), ainda não commitada.",
+    "registrado_em": "04/11/2026, 09:39:27"
+  },
+  {
+    "id": "F06",
+    "perfil": "Recepcionista",
+    "inicio": "09:39:27",
+    "fim": "09:39:32",
+    "evidencias": "F06_modal_busca.png",
+    "observado": "API direta (POST /fila com TESTE A já na fila): HTTP 409 {\"error\":\"Paciente já está na fila de atendimento.\"}; entradas de TESTE A na fila=1 | Interface: TESTE A aparece como opção no modal de admissão=false",
+    "resultado": "APROVADO",
+    "notas": "A interface impede a duplicidade ao não listar o paciente; a recusa com mensagem foi comprovada chamando a API diretamente (a tela não oferece o caminho, então não há print da mensagem).",
+    "registrado_em": "04/11/2026, 09:39:32"
+  }
+]

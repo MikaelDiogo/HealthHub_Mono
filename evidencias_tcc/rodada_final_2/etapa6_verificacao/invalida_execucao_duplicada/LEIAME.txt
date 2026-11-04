@@ -1,0 +1,1 @@
+Execuções INVÁLIDAS dos 22 cenários (04/11/2026, 09:37 a 09:45): o executor foi iniciado mais de uma vez ao mesmo tempo (um lançamento anterior não tinha encerrado), então navegadores diferentes usaram o mesmo banco e a mesma API, e as saídas se misturaram. Foram descartadas e guardadas aqui só por transparência. Não use estes resultados. A execução válida está em ../cenarios22/.

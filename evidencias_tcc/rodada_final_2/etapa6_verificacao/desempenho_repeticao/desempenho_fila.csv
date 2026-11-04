@@ -1,0 +1,13 @@
+cenario,endpoint,modo,n,min_ms,p50_ms,p95_ms,p99_ms,max_ms,observacao
+fila=20,GET /fila,sequencial,200,3.0,15.1,16.9,17.8,18.8,
+fila=20,GET /fila,concorrente(10),200,8.1,14.1,22.7,49.0,63.2,vazao=630 req/s; respostas!=200=0
+fila=20,GET /metricas,sequencial,200,4.7,14.8,18.6,23.5,56.6,
+fila=20,GET /metricas,concorrente(10),200,13.1,29.6,44.3,46.9,51.9,vazao=306 req/s; respostas!=200=0
+fila=100,GET /fila,sequencial,200,4.2,15.2,16.9,17.9,18.4,
+fila=100,GET /fila,concorrente(10),200,7.5,20.8,28.1,31.9,36.0,vazao=464 req/s; respostas!=200=0
+fila=100,GET /metricas,sequencial,200,11.3,17.4,32.1,33.7,37.9,
+fila=100,GET /metricas,concorrente(10),200,27.1,101.0,153.0,169.7,181.7,vazao=95 req/s; respostas!=200=0
+fila=500,GET /fila,sequencial,200,8.3,15.4,27.2,36.6,43.1,
+fila=500,GET /fila,concorrente(10),200,21.0,59.3,72.7,75.1,80.4,vazao=166 req/s; respostas!=200=0
+fila=500,GET /metricas,sequencial,200,30.5,45.8,60.5,63.3,65.3,
+fila=500,GET /metricas,concorrente(10),200,104.4,339.3,435.9,456.6,678.1,vazao=29 req/s; respostas!=200=0
