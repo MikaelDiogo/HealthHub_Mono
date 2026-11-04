@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { pagina, ir, passo, digitar, foto, sleep, texto, temTexto, registrar, horaBR, fechar, abrir, apiLogin, caso, observarRede, EV } from './lib.mjs';
+import { pagina, ir, passo, digitar, escolherSexo, foto, sleep, texto, temTexto, registrar, horaBR, fechar, abrir, apiLogin, caso, observarRede, EV } from './lib.mjs';
 const med = await apiLogin('medico'); const rec = await apiLogin('recepcionista');
 const fila = async () => (await med('GET', '/fila')).data;
 fs.mkdirSync(`${EV}/downloads`, { recursive: true });
@@ -41,7 +41,7 @@ await caso(async () => {
 
   async function cadastrar(nome, cpf, idade) {
     await passo(sessao, 'Cadastrar', { espera: 1200 });
-    await digitar(sessao, 'Nome Completo', nome); await digitar(sessao, 'CPF', cpf); await digitar(sessao, 'Idade', idade); await digitar(sessao, 'Sexo', 'M');
+    await digitar(sessao, 'Nome Completo', nome); await digitar(sessao, 'CPF', cpf); await digitar(sessao, 'Idade', idade); await escolherSexo(sessao, 'Masculino');
     await passo(sessao, 'Salvar e Admitir na Fila', { espera: 2500 });
   }
   await cadastrar('TESTE G — Costa', '99999999907', '36');

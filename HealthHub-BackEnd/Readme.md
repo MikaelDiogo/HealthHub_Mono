@@ -188,7 +188,7 @@ Senhas definidas pelas variáveis `SEED_*_SENHA` no `.env`.
 src/
   config/          # typeorm.config.ts · env.validation.ts
   database/
-    migrations/    # 6 migrations versionadas
+    migrations/    # 11 migrations versionadas
     seed.ts
   modules/
     auth/          # login · JWT

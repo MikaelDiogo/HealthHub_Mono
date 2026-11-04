@@ -5,8 +5,8 @@ const resp = (status: number, data: unknown) => ({ response: { status, data } })
 
 describe('mensagemErro', () => {
   it('validação do NestJS: junta as mensagens e ignora o nome do status ("Bad Request")', () => {
-    const e = resp(400, { statusCode: 400, message: ['Idade é obrigatória (0 a 150)', 'Idade é obrigatória (0 a 150)', 'Sexo deve ser M, F ou Outro'], error: 'Bad Request' });
-    expect(mensagemErro(e)).toBe('Idade é obrigatória (0 a 150) · Sexo deve ser M, F ou Outro');
+    const e = resp(400, { statusCode: 400, message: ['Idade deve ser um número inteiro de 0 a 150', 'Idade deve ser um número inteiro de 0 a 150', 'Sexo deve ser M, F ou Outro'], error: 'Bad Request' });
+    expect(mensagemErro(e)).toBe('Idade deve ser um número inteiro de 0 a 150 · Sexo deve ser M, F ou Outro');
   });
 
   it('exceção própria do backend ({ error: "texto" }) mostra o texto', () => {

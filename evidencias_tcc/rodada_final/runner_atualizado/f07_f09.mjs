@@ -1,5 +1,5 @@
 import fs from 'node:fs';
-import { pagina, ir, digitar, passo, passoRe, foto, sleep, texto, temTexto, registrar, horaBR, fechar, apiLogin, observarRede, admitirUI, caso, esc } from './lib.mjs';
+import { pagina, ir, digitar, escolherSexo, passo, passoRe, foto, sleep, texto, temTexto, registrar, horaBR, fechar, apiLogin, observarRede, admitirUI, caso, esc } from './lib.mjs';
 const med = await apiLogin('medico'); const rec = await apiLogin('recepcionista');
 const fila = async () => (await med('GET', '/fila')).data;
 const entrada = async (nome) => (await fila()).find(x => x.nome.startsWith(nome));
@@ -25,7 +25,7 @@ await caso(async () => {
   const ini = horaBR(); const prints = []; const obs = [];
   const pr = await pagina('recepcionista');
   await ir(pr, '/main/pacientes'); await passo(pr, 'Adicionar Paciente');
-  await digitar(pr, 'Nome Completo', 'TESTE F — Pires'); await digitar(pr, 'CPF', '99999999906'); await digitar(pr, 'Idade', '29'); await digitar(pr, 'Sexo', 'F');
+  await digitar(pr, 'Nome Completo', 'TESTE F — Pires'); await digitar(pr, 'CPF', '99999999906'); await digitar(pr, 'Idade', '29'); await escolherSexo(pr, 'Feminino');
   await passo(pr, 'Salvar e Registrar', { espera: 2000 });
   await ir(pr, '/main/alertas');
   const adm = await admitirUI(pr, 'TESTE F — Pires', 'Dor de cabeça');

@@ -113,6 +113,13 @@ export async function digitar(page, rotulo, texto) {
   return true;
 }
 
+// O campo Sexo agora é uma lista (Masculino/Feminino): abre a lista e clica na opção (grava M ou F).
+export async function escolherSexo(page, rotulo) {
+  await clicar(page, 'Sexo').then((r) => r); await sleep(400);
+  const r = await passo(page, rotulo, { espera: 500 });
+  return r;
+}
+
 export const enter = async (page) => { await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13, text: '\r' }); await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 }); await sleep(700); };
 export const esc = async (page) => { await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); await sleep(500); };
 export const texto = (page) => page.eval(() => document.body.innerText);

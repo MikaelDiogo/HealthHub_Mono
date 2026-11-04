@@ -167,10 +167,10 @@ flowchart LR
 | RF-01 | Autenticar profissional por e-mail e senha, retornando token JWT com `id`, `nome`, `role` | Alta | Todos | `auth.service.ts` |
 | RF-02 | Limitar tentativas de login a 10 por 15 min por IP em produção | Alta | — | `auth.controller.ts` (`@Throttle`) |
 | RF-03 | Encerrar sessão automaticamente ao expirar o token | Alta | Todos | `services/api.ts` (interceptors) |
-| RF-04 | Cadastrar paciente com CPF único de 11 dígitos | Alta | Todos | `create-patient.service.ts` |
-| RF-05 | Impedir cadastro duplicado por CPF | Alta | Todos | `create-patient.service.ts` |
+| RF-04 | Cadastrar paciente exigindo **somente o nome**; CPF (11 dígitos, único quando informado), idade, sexo e demais campos são opcionais; com *Nome desconhecido* o sistema grava o nome provisório "Paciente não identificado (#xxxx)" e marca `nome_provisorio` | Alta | Todos | `create-patient.service.ts`, `create-patient.dto.ts` |
+| RF-05 | Impedir cadastro duplicado por CPF quando o CPF é informado (vários pacientes sem CPF são permitidos) | Alta | Todos | `create-patient.service.ts` |
 | RF-06 | Exibir prontuário com dados pessoais, alergias, medicamentos e anamnese | Alta | Médico, Enfermeiro | `show-patient.service.ts` |
-| RF-07 | Atualizar parcialmente o prontuário | Média | Médico, Enfermeiro | `update-patient.service.ts` |
+| RF-07 | Atualizar parcialmente o prontuário (corrigir o nome retira a marca de nome provisório e atualiza, na mesma transação, a cópia de nome e idade na esteira) | Média | Médico, Enfermeiro | `update-patient.service.ts` |
 | RF-08 | Registrar medição de sinais vitais (FC, SpO₂, PA, temperatura) com marca temporal | Alta | Médico, Enfermeiro | `create-sinais-vitais.service.ts` |
 | RF-09 | Retornar as 12 medições mais recentes para o painel | Alta | Médico, Enfermeiro | `get-current-vitals.service.ts` |
 | RF-10 | Retornar histórico completo de sinais vitais | Média | Médico, Enfermeiro | `get-vitals-history.service.ts` |
@@ -567,10 +567,11 @@ classDiagram
     class Paciente {
         +uuid id
         +string nome_completo
-        +string cpf «unique»
+        +string cpf «unique, opcional»
         +string rg
-        +int idade
-        +string sexo
+        +int idade «opcional»
+        +string sexo «opcional (M/F)»
+        +boolean nome_provisorio
         +string telefone
         +string endereco
         +string alergias
@@ -594,7 +595,7 @@ classDiagram
         +uuid id
         +uuid paciente_id
         +string nome
-        +int idade
+        +int idade «opcional»
         +string senha
         +string chegada
         +string status
@@ -717,7 +718,7 @@ classDiagram
 
 | ID | Invariante | Onde é garantida |
 |---|---|---|
-| RN-01 | CPF é único no cadastro de pacientes | `UNIQUE` no banco + verificação em `CreatePatientService` |
+| RN-01 | CPF é único no cadastro de pacientes **quando informado** (vários cadastros sem CPF são permitidos) | `UNIQUE` no banco (NULL não colide) + verificação em `CreatePatientService` |
 | RN-02 | Um paciente ocupa no máximo uma posição na fila | `findByPacienteId` em `CreateFilaService` |
 | RN-03 | Um paciente possui no máximo uma visita ativa | `findActiveByPacienteId` em `CreateVisitaService` |
 | RN-04 | Visita ativa ⇔ `alta IS NULL AND desfecho = 'Em Atendimento'` | Cláusula do repositório de visitas |
@@ -728,6 +729,16 @@ classDiagram
 | RN-09 | `last_read_at` usa o relógio do banco, não do Node | `set({ last_read_at: () => 'now()' })` — evita erro de contagem por fuso |
 | RN-10 | Remetente já leu sua própria mensagem | `markAsRead` no fim de `SendMessageService` |
 | RN-11 | Exclusão de paciente propaga em cascata para vitais, fila e visitas | `ON DELETE CASCADE` nas FKs |
+| RN-12 | Só o **nome** é obrigatório no cadastro; sem nome, o sistema grava "Paciente não identificado (#xxxx)" com `nome_provisorio = true`, até alguém corrigir o nome | `create-patient.dto.ts`, `CreatePatientService`, `UpdatePatientService` |
+| RN-13 | Corrigir nome ou idade de quem está na esteira atualiza a cópia da esteira **na mesma transação** e avisa os clientes (`fila:changed`) | `saveSincronizandoFila` em `TypeormPatientsRepository` |
+
+### 7.4 Regra de negócio: cadastro mínimo (só o nome)
+
+**Regra.** O único campo obrigatório do cadastro de paciente é o nome. CPF, RG, idade, sexo, telefone, endereço, alergias, medicamentos e anamnese são opcionais; um campo opcional vazio é gravado como `NULL` e o formato (CPF com 11 dígitos, idade de 0 a 150, sexo `M`/`F`, telefone com 10 ou 11 dígitos) só é validado quando há valor. Se o nome não é conhecido (por exemplo, paciente inconsciente), o cadastro oferece *Nome desconhecido*: o servidor gera o id do paciente e grava o nome "Paciente não identificado (#xxxx)", em que `xxxx` são os quatro primeiros caracteres do id, e marca `nome_provisorio = true`. Os quatro caracteres não precisam ser únicos: o nome não tem restrição de unicidade e a identificação real é o id.
+
+**Justificativa.** Em urgência o paciente não precisa ter todos os dados disponíveis para ser atendido; o cadastro começa só com o nome (ou com um nome provisório) e os demais dados são completados depois, durante o atendimento.
+
+**Riscos e mitigação.** A regra aumenta o risco de registros duplicados (o CPF, que impedia duplicidade, pode faltar), de registros incompletos e de identificação incorreta. O nome provisório mitiga o último: a marca fica visível (selo "Nome provisório") na lista de pacientes, na esteira, no painel, na admissão, no chat e nos PDFs até a correção, e o nome pode ser corrigido a qualquer momento pela edição do paciente (médico e enfermeiro; a recepção continua sem permissão de editar). A duplicidade só é detectada pelo CPF quando ele é informado.
 
 ---
 
@@ -994,7 +1005,7 @@ erDiagram
 | Constraint | Tabela | Definição | Efeito |
 |---|---|---|---|
 | `PK` (7×) | todas | `uuid` com `uuid_generate_v4()` | Extensão `uuid-ossp` habilitada por migration |
-| `UK cpf` | `pacientes` | `UNIQUE` | Garante RN-01 no banco, não só na aplicação |
+| `UK cpf` | `pacientes` | `UNIQUE` (coluna anulável: vários `NULL` não colidem) | Garante RN-01 no banco, não só na aplicação |
 | `UK email` | `users` | `UNIQUE` | Identificador de login |
 | `UNIQUE (conversation_id, user_id)` | `conversation_participants` | composta | Impede participação duplicada |
 | `FK_sinais_vitais_paciente` | `sinais_vitais` | `CASCADE` | Excluir paciente remove o histórico de aferições |
@@ -1064,6 +1075,11 @@ timeline
     1780500000000 : CreateUsers : users (base de autenticação)
     1782600000000 : CreateChat : conversations · conversation_participants · messages · Grupo Geral · 2 índices
     1783000000000 : CreateVisitas : visitas + FK + 2 índices
+    1783100000000 : AddAtivoToPacientes : pacientes.ativo
+    1783200000000 : CreateFilaEventos : registro de eventos da esteira (rastreabilidade)
+    1783300000000 : RenameGravidadeToClassificacaoRisco : gravidade_manchester vira classificacao_risco
+    1783400000000 : UniqueFilaPorPaciente : índice único em fila_pacientes(paciente_id)
+    1783500000000 : CadastroMinimoNomeProvisorio : cpf, idade e sexo anuláveis · pacientes.nome_provisorio · fila_pacientes.idade anulável
 ```
 
 `synchronize` está desligado: **toda** mudança de esquema passa por migration versionada, o que garante reprodutibilidade entre ambientes.
@@ -1633,7 +1649,7 @@ Itens levantados por leitura do código, com severidade e correção proposta.
 | **DEB-17** | 🟡 Baixa | **`.env.example` retém chaves de Supabase/Vite não usadas.** | `.env.example` | Confunde quem configura o ambiente. | Remover as entradas obsoletas. |
 | **DEB-18** | 🟡 Baixa | **PDF gerado no cliente.** Layout e dados dependem do navegador. | `pages/ExportPDF`, `Alerts` | Inconsistência entre máquinas; impede anexar PDF ao chat. | Módulo `pdf` server-side (`GET /patients/:id/pdf`). |
 | **DEB-19** | 🟠 Média | **Domínios de valor sem `CHECK` nem tabela de referência.** `status`, `desfecho`, `classificacao_risco` e `role` são `varchar` livres; a regra existe só em TypeScript. | migrations vs. `@IsIn`, `PatientStatus`, `UserRole` | Escrita fora da API (script, correção manual, migration futura) grava valor inválido sem o banco reclamar; consultas analíticas ficam sujeitas a variação de grafia. | Adicionar `CHECK` nas colunas, ou tabelas de domínio com FK. O `CHECK` é suficiente e mais barato. |
-| **DEB-20** | 🟡 Baixa | **Denormalização acidental em `fila_pacientes`.** `nome` e `idade` são cópias de `pacientes`, sem a justificativa histórica que `messages` tem. | migration `CreateFilaPacientes`, `CareContext.admitirPaciente` | Corrigir o nome do paciente durante o atendimento não atualiza o cartão do Kanban — dois valores divergentes na mesma tela. | Remover as colunas e obter os dados por join/`relations`. |
+| **DEB-20** | 🟡 Baixa | **Denormalização acidental em `fila_pacientes`.** `nome` e `idade` são cópias de `pacientes`, sem a justificativa histórica que `messages` tem. | migration `CreateFilaPacientes`, `CareContext.admitirPaciente` | **[Mitigado em 04/11/2026: a edição do cadastro atualiza nome e idade das entradas da esteira na mesma transação e emite `fila:changed`; as colunas continuam duplicadas.]** Antes, corrigir o nome do paciente durante o atendimento não atualizava o cartão do Kanban — dois valores divergentes na mesma tela. | Remover as colunas e obter os dados por join/`relations`. |
 | **DEB-21** | 🟠 Média | **Unicidade de fila e de visita ativa garantida só na aplicação.** Não há `UNIQUE` em `fila_pacientes.paciente_id` nem índice parcial de visita aberta. | RN-02, RN-03 verificadas com `SELECT` prévio | Duas admissões simultâneas do mesmo paciente passam pela verificação antes de qualquer `INSERT` e duplicam o registro. | `UNIQUE (paciente_id)` na fila e `CREATE UNIQUE INDEX ON visitas (paciente_id) WHERE alta IS NULL`. |
 
 ### 13.1 Priorização

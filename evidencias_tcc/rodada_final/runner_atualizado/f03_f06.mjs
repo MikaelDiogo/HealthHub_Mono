@@ -1,4 +1,4 @@
-import { pagina, ir, digitar, passo, passoRe, foto, sleep, texto, temTexto, registrar, horaBR, fechar, apiLogin, observarRede, admitirUI, caso, esc } from './lib.mjs';
+import { pagina, ir, digitar, escolherSexo, passo, passoRe, foto, sleep, texto, temTexto, registrar, horaBR, fechar, apiLogin, observarRede, admitirUI, caso, esc } from './lib.mjs';
 const med = await apiLogin('medico'); const rec = await apiLogin('recepcionista');
 const achar = async (nome) => (await med('GET', '/patients')).data.find(x => x.nome_completo === nome);
 const brt = () => new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', hour: '2-digit', minute: '2-digit' });
@@ -11,7 +11,7 @@ await caso(async () => {
   await passo(p, 'Adicionar Paciente');
   prints.push(await foto(p, 'F03_tela1.png'));
   await digitar(p, 'Nome Completo', 'TESTE B — Souza'); await digitar(p, 'CPF', '99999999902');
-  await digitar(p, 'Idade', '67'); await digitar(p, 'Sexo', 'F');
+  await digitar(p, 'Idade', '67'); await escolherSexo(p, 'Feminino');
   const rt = await passo(p, 'Hospitalares', { parcial: true });
   await digitar(p, 'Temperatura', '37.9'); await digitar(p, 'SpO', '94'); await digitar(p, 'Pressão', '140/90'); await digitar(p, 'FC', '95');
   await digitar(p, 'Alergias', 'Nenhuma conhecida (fictício)'); await digitar(p, 'Medicamentos', 'Nenhum (fictício)');

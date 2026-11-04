@@ -23,13 +23,14 @@ const cadastrar = async (c) => (await req(T.recepcionista, 'POST', '/patients', 
 const admitir = async (p, c) => (await req(T.recepcionista, 'POST', '/fila', { paciente_id: p.id, nome: p.nome_completo, idade: p.idade, chegada: `${c.chegada} (${brt()})`, status: 'Aguardando Triagem', motivo_visita: c.motivo_visita })).data;
 const ordem = async () => ((await req(T.medico, 'GET', '/fila')).data ?? []).map((e) => `${e.nome}${e.gravidade ? `[${e.gravidade}]` : '[sem cor]'}`);
 
-// TF01 — Cadastro / RF02
+// TF01 — Cadastro / RF02 (cadastro mínimo: só o nome é obrigatório)
 const P = {}, F = {};
 {
-  const c = nCaso(1); const p = await cadastrar(c); P[1] = p;
-  const lido = (await req(T.medico, 'GET', `/patients/${p.id}`)).data;
-  const igual = lido?.id === p.id && lido?.nome_completo === c.nome && lido?.cpf === c.cpf_ficticio && lido?.idade === Number(c.idade) && lido?.sexo === c.sexo;
-  registrar('TF01', 'Cadastro / RF02', `Cadastrar ${c.nome} (CPF fictício, ${c.idade} anos, ${c.sexo})`, 'Salvar e recuperar os dados sem trocar a identidade do registro', `id criado=${p.id}; id lido=${lido?.id}; dados iguais=${igual}`, igual ? 'APROVADO' : 'REPROVADO');
+  const c = nCaso(1);
+  const r = await req(T.recepcionista, 'POST', '/patients', { nome_completo: c.nome }); const p = r.data; P[1] = p;
+  const lido = (await req(T.medico, 'GET', '/patients/' + p?.id)).data;
+  const igual = r.status === 201 && lido?.id === p.id && lido?.nome_completo === c.nome && lido?.nome_provisorio === false && lido?.cpf == null && lido?.idade == null && lido?.sexo == null;
+  registrar('TF01', 'Cadastro / RF02', 'Cadastrar ' + c.nome + ' só com o nome (dados mínimos)', 'Salvar e recuperar o registro com o nome e sem trocar a identidade; CPF, idade e sexo ausentes (null)', 'status=' + r.status + '; id criado=' + p?.id + '; id lido=' + lido?.id + '; nome igual=' + (lido?.nome_completo === c.nome) + '; cpf/idade/sexo=' + [lido?.cpf, lido?.idade, lido?.sexo].map((x) => x ?? 'null').join('/'), igual ? 'APROVADO' : 'REPROVADO');
 }
 
 // TF02 / TF03 — Classificação e desempate / RF09

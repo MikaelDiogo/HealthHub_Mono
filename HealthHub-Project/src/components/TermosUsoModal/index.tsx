@@ -162,7 +162,7 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
               O HealthHub trata as seguintes categorias de dados:
             </Text>
             <Stack gap={6} mt="sm">
-              <DataItem label="Dados de identificação do paciente" value="Nome completo, CPF, RG, idade, sexo, endereço e telefone." />
+              <DataItem label="Dados de identificação do paciente" value="Nome completo (único campo obrigatório) e, quando informados, CPF, RG, idade, sexo, endereço e telefone. Se o nome não for conhecido, o sistema registra um nome provisório até a correção." />
               <DataItem label="Dados de saúde (sensíveis)" value="Sinais vitais (frequência cardíaca, pressão arterial, temperatura, saturação de oxigênio), alergias, medicamentos em uso e anamnese clínica." />
               <DataItem label="Dados de acesso dos profissionais" value="Nome, e-mail, papel (role) e registros de autenticação (tokens JWT com validade de 24 horas)." />
               <DataItem label="Dados gerados pela IA" value="Histórico de conversas clínicas com o assistente de IA e transcrições de áudio enviadas para análise." />

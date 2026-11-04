@@ -76,7 +76,7 @@ export function PoliticaDados() {
       <PolicySection icon={<IconDatabase size={16} />} color="blue" title="2. Dados Pessoais Coletados">
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
           {[
-            { label: 'Identificação do paciente', items: ['Nome completo, CPF, RG', 'Idade, sexo', 'Endereço e telefone'] },
+            { label: 'Identificação do paciente', items: ['Nome completo (único obrigatório)', 'CPF, RG, idade e sexo, quando informados', 'Endereço e telefone, quando informados'] },
             { label: 'Dados de saúde (sensíveis)', items: ['Sinais vitais (FC, PA, Temp, SpO2)', 'Alergias e medicamentos', 'Anamnese clínica'] },
             { label: 'Acesso dos profissionais', items: ['Nome e e-mail', 'Papel (role)', 'Registros JWT (24h)'] },
             { label: 'Dados da IA', items: ['Histórico de conversas clínicas', 'Transcrições de áudio', 'Contexto clínico enviado'] },

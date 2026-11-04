@@ -139,7 +139,7 @@ export function gerarPDFPolitica() {
   // 2
   sectionTitle('2. Dados Pessoais Coletados e Tratados');
   paragraph('O HealthHub trata as seguintes categorias de dados:');
-  subBox('Dados de identificacao do paciente', 'Nome completo, CPF, RG, idade, sexo, endereco e telefone.', 240, 249, 255);
+  subBox('Dados de identificacao do paciente', 'Nome completo (unico campo obrigatorio) e, quando informados, CPF, RG, idade, sexo, endereco e telefone. Se o nome nao for conhecido, o sistema registra um nome provisorio ate a correcao.', 240, 249, 255);
   subBox('Dados de saude (sensiveis)', 'Sinais vitais (frequencia cardiaca, pressao arterial, temperatura, SpO2), alergias, medicamentos em uso e anamnese clinica.', 254, 242, 242);
   subBox('Dados de acesso dos profissionais', 'Nome, e-mail, papel (role) e registros de autenticacao (tokens JWT com validade de 24 horas).', 240, 253, 244);
   subBox('Dados gerados pela IA', 'Historico de conversas clinicas com o assistente de IA e transcricoes de audio enviadas para analise.', 250, 245, 255);
