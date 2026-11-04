@@ -1,0 +1,288 @@
+{
+  "data": "2026-11-04T12:21:38.102Z",
+  "versao_cli": "2.1.300 (Claude Code)",
+  "chamadas": 9,
+  "custo_total_usd": 0.06940400000000001,
+  "resultados": [
+    {
+      "modelo": "claude-sonnet-5",
+      "modelo_reportado": "claude-sonnet-5",
+      "vinheta": "1",
+      "ms": 5472,
+      "status_processo": 0,
+      "tipos_de_bloco": {
+        "text": 1
+      },
+      "tem_bloco_thinking": false,
+      "tokens_out": 88,
+      "tokens_in": 2,
+      "chaves_usage": [
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "cache_creation",
+        "inference_geo",
+        "iterations",
+        "speed",
+        "fallback_credit"
+      ],
+      "custo_usd": 0.006,
+      "erro": "",
+      "thinking_tokens_usage": 0,
+      "thinking_tokens_modelUsage": 0
+    },
+    {
+      "modelo": "claude-sonnet-5",
+      "modelo_reportado": "claude-sonnet-5",
+      "vinheta": "2",
+      "ms": 4025,
+      "status_processo": 0,
+      "tipos_de_bloco": {
+        "text": 1
+      },
+      "tem_bloco_thinking": false,
+      "tokens_out": 63,
+      "tokens_in": 2,
+      "chaves_usage": [
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "cache_creation",
+        "inference_geo",
+        "iterations",
+        "speed",
+        "fallback_credit"
+      ],
+      "custo_usd": 0.005706,
+      "erro": "",
+      "thinking_tokens_usage": 0,
+      "thinking_tokens_modelUsage": 0
+    },
+    {
+      "modelo": "claude-sonnet-5",
+      "modelo_reportado": "claude-sonnet-5",
+      "vinheta": "3",
+      "ms": 3906,
+      "status_processo": 0,
+      "tipos_de_bloco": {
+        "text": 1
+      },
+      "tem_bloco_thinking": false,
+      "tokens_out": 54,
+      "tokens_in": 2,
+      "chaves_usage": [
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "cache_creation",
+        "inference_geo",
+        "iterations",
+        "speed",
+        "fallback_credit"
+      ],
+      "custo_usd": 0.005592000000000001,
+      "erro": "",
+      "thinking_tokens_usage": 0,
+      "thinking_tokens_modelUsage": 0
+    },
+    {
+      "modelo": "claude-sonnet-5-5",
+      "modelo_reportado": "claude-sonnet-5-5",
+      "vinheta": "1",
+      "ms": 4481,
+      "status_processo": 0,
+      "tipos_de_bloco": {
+        "text": 1
+      },
+      "tem_bloco_thinking": false,
+      "tokens_out": 167,
+      "tokens_in": 2,
+      "chaves_usage": [
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "cache_creation",
+        "inference_geo",
+        "iterations",
+        "speed",
+        "fallback_credit"
+      ],
+      "custo_usd": 0.006462,
+      "erro": "",
+      "thinking_tokens_usage": 0,
+      "thinking_tokens_modelUsage": 0
+    },
+    {
+      "modelo": "claude-sonnet-5-5",
+      "modelo_reportado": "claude-sonnet-5-5",
+      "vinheta": "2",
+      "ms": 3902,
+      "status_processo": 0,
+      "tipos_de_bloco": {
+        "text": 1
+      },
+      "tem_bloco_thinking": false,
+      "tokens_out": 78,
+      "tokens_in": 2,
+      "chaves_usage": [
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "cache_creation",
+        "inference_geo",
+        "iterations",
+        "speed",
+        "fallback_credit"
+      ],
+      "custo_usd": 0.005528,
+      "erro": "",
+      "thinking_tokens_usage": 0,
+      "thinking_tokens_modelUsage": 0
+    },
+    {
+      "modelo": "claude-sonnet-5-5",
+      "modelo_reportado": "claude-sonnet-5-5",
+      "vinheta": "3",
+      "ms": 3202,
+      "status_processo": 0,
+      "tipos_de_bloco": {
+        "text": 1
+      },
+      "tem_bloco_thinking": false,
+      "tokens_out": 70,
+      "tokens_in": 2,
+      "chaves_usage": [
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "cache_creation",
+        "inference_geo",
+        "iterations",
+        "speed",
+        "fallback_credit"
+      ],
+      "custo_usd": 0.005424,
+      "erro": "",
+      "thinking_tokens_usage": 0,
+      "thinking_tokens_modelUsage": 0
+    },
+    {
+      "modelo": "claude-opus-5-5",
+      "modelo_reportado": "claude-opus-5-5",
+      "vinheta": "1",
+      "ms": 4832,
+      "status_processo": 0,
+      "tipos_de_bloco": {
+        "text": 1
+      },
+      "tem_bloco_thinking": false,
+      "tokens_out": 171,
+      "tokens_in": 2,
+      "chaves_usage": [
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "cache_creation",
+        "inference_geo",
+        "iterations",
+        "speed",
+        "fallback_credit"
+      ],
+      "custo_usd": 0.012972000000000001,
+      "erro": "",
+      "thinking_tokens_usage": 0,
+      "thinking_tokens_modelUsage": 0
+    },
+    {
+      "modelo": "claude-opus-5-5",
+      "modelo_reportado": "claude-opus-5-5",
+      "vinheta": "2",
+      "ms": 3913,
+      "status_processo": 0,
+      "tipos_de_bloco": {
+        "text": 1
+      },
+      "tem_bloco_thinking": false,
+      "tokens_out": 78,
+      "tokens_in": 2,
+      "chaves_usage": [
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "cache_creation",
+        "inference_geo",
+        "iterations",
+        "speed",
+        "fallback_credit"
+      ],
+      "custo_usd": 0.011024,
+      "erro": "",
+      "thinking_tokens_usage": 0,
+      "thinking_tokens_modelUsage": 0
+    },
+    {
+      "modelo": "claude-opus-5-5",
+      "modelo_reportado": "claude-opus-5-5",
+      "vinheta": "3",
+      "ms": 3864,
+      "status_processo": 0,
+      "tipos_de_bloco": {
+        "text": 1
+      },
+      "tem_bloco_thinking": false,
+      "tokens_out": 64,
+      "tokens_in": 2,
+      "chaves_usage": [
+        "input_tokens",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "cache_creation",
+        "inference_geo",
+        "iterations",
+        "speed",
+        "fallback_credit"
+      ],
+      "custo_usd": 0.010695999999999999,
+      "erro": "",
+      "thinking_tokens_usage": 0,
+      "thinking_tokens_modelUsage": 0
+    }
+  ],
+  "thinking_tokens_total": 0
+}

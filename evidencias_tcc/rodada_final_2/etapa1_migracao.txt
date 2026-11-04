@@ -1,0 +1,49 @@
+# Migração 1783500000000 (CadastroMinimoNomeProvisorio) em banco de teste isolado (healthhub-test-db:5435, db healthhub_test_r2)
+data: 2026-11-04T09:05:39-03:00  commit-base: 200fdb4 (alterações da etapa 1 ainda não commitadas)  node: v24.20.0  postgres: 16.15
+so: MINGW64_NT-10.0-26200 / Windows 11
+
+## 1) aplicar todas as migrações do zero
+11 migrations are new migrations must be executed.
+Migration CreateBaseSchema1000000000000 has been executed successfully.
+Migration UpdateSinaisVitaisAddPressaoEPaciente1774448538633 has been executed successfully.
+Migration CreateFilaPacientes1780358400000 has been executed successfully.
+Migration CreateUsers1780500000000 has been executed successfully.
+Migration CreateChat1782600000000 has been executed successfully.
+Migration CreateVisitas1783000000000 has been executed successfully.
+Migration AddAtivoToPacientes1783100000000 has been executed successfully.
+Migration CreateFilaEventos1783200000000 has been executed successfully.
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been executed successfully.
+Migration UniqueFilaPorPaciente1783400000000 has been executed successfully.
+Migration CadastroMinimoNomeProvisorio1783500000000 has been executed successfully.
+
+colunas após aplicar:
+fila_pacientes.idade nullable=YES
+pacientes.cpf nullable=YES
+pacientes.idade nullable=YES
+pacientes.nome_provisorio nullable=NO
+pacientes.sexo nullable=YES
+
+## 2) dois pacientes sem CPF/idade/sexo gravados: 2
+## 3) reverter com cadastros sem CPF (deve RECUSAR, sem inventar valores)
+Error during migration revert:
+Error: Reversão recusada: 2 registro(s) sem CPF, idade ou sexo. Complete ou remova esses cadastros antes de reverter (nenhum valor é inventado).
+
+## 4) removidos os dois, reverter de novo (deve funcionar)
+Migration CadastroMinimoNomeProvisorio1783500000000 has been reverted successfully.
+colunas após reverter:
+fila_pacientes.idade nullable=NO
+pacientes.cpf nullable=NO
+pacientes.idade nullable=NO
+pacientes.sexo nullable=NO
+
+## 5) reaplicar
+UniqueFilaPorPaciente1783400000000 is the last executed migration. It was executed on Tue Jul 07 2026 01:53:20 GMT-0300 (Horário Padrão de Brasília).
+1 migrations are new migrations must be executed.
+Migration CadastroMinimoNomeProvisorio1783500000000 has been executed successfully.
+colunas após reaplicar:
+fila_pacientes.idade nullable=YES
+pacientes.cpf nullable=YES
+pacientes.idade nullable=YES
+pacientes.nome_provisorio nullable=NO
+pacientes.sexo nullable=YES
+migrações registradas: 11
