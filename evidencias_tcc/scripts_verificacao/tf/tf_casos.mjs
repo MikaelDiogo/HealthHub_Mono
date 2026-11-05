@@ -1,4 +1,4 @@
-// Casos TF01–TF08 do Apêndice A (Quadro 16), executados contra a API local, banco de teste isolado, dados FICTÍCIOS, IA simulada (mock).
+// Casos TF01–TF09 do Apêndice A (Quadro 16), executados contra a API local, banco de teste isolado, dados FICTÍCIOS, IA simulada (mock).
 // Uso: source /tmp/testenv_tf.sh; VERSAO=<hash> node tf_casos.mjs   (API em http://localhost:3001 iniciada com o mock de IA)
 // O resultado de cada caso é o OBSERVADO; "aprovado" só quando coincide com o critério esperado do Apêndice. Nada é preenchido à mão.
 import fs from 'node:fs';
@@ -117,6 +117,26 @@ registrar('TF03', 'Desempate / RF09', 'Comparar os dois registros amarelos (cheg
   const depois = (await req(T.medico, 'GET', `/patients/${idp}/vitals`)).data?.length;
   const semResposta = Object.values(testes).every((t) => !/SIMULADA — NÃO/.test(t.corpo));
   registrar('TF08', 'Falha de integração / RF16/RF17', 'Provedor de IA simulado indisponível (429, 500, timeout, resposta vazia)', 'Exibir a falha sem inventar resposta clínica nem perder o registro local', `${JSON.stringify(testes)}; sinais vitais registrados antes=${antes}, depois=${depois}`, semResposta && antes === depois ? 'APROVADO (nível API; a mensagem na tela está em tf08_ui.md)' : 'REPROVADO', { observacao: 'Em 429 e 500 o backend devolve HTTP 500 com mensagem genérica (o 429 vira 500). Nenhuma resposta clínica foi inventada.', testes });
+}
+
+// TF09 — Formato da pressão arterial (texto livre): 120x80, abc e vazio (rodada 3). Observa o registro e a lista "atenção agora" de GET /metricas.
+{
+  const p9 = await cadastrar({ nome: 'FICTÍCIO-09', cpf_ficticio: '90000000009', idade: '45', sexo: 'M' });
+  const f9 = await admitir(p9, { chegada: '09:00', motivo_visita: 'formato da pressão (fictício)' });
+  const base = { frequencia_cardiaca: 72, saturacao_oxigenio: 98, temperatura: 36.5 };
+  const motivoNaLista = async () => ((await req(T.medico, 'GET', '/metricas')).data?.atencao ?? []).find((a) => a.paciente_id === p9.id)?.motivo ?? null;
+  const obs = [];
+  let ok = true;
+  for (const [entrada, critEsperado] of [['120x80', false], ['abc', false], ['', false], ['190X120', true], ['120 / 80', false]]) {
+    const r = await req(T.enfermeiro, 'POST', `/sinais/${p9.id}`, { ...base, ...(entrada === '' ? {} : { pressao_arterial: entrada }) });
+    await sleep(300);
+    const motivo = await motivoNaLista();
+    const critico = !!motivo && /PA /.test(motivo);
+    const bate = (r.status === 201 || r.status === 200) && critico === critEsperado;
+    if (!bate) ok = false;
+    obs.push(`"${entrada}" -> HTTP ${r.status}; PA crítica na lista=${critico}${motivo ? ` (${motivo})` : ''}; esperado crítico=${critEsperado}`);
+  }
+  registrar('TF09', 'Formato da pressão / regra de alerta', 'Registrar pressão como 120x80, abc, vazio (e 190X120, 120 / 80)', 'Registro aceito sem erro; pressão inválida ou vazia não gera alerta; 190X120 é crítica', obs.join(' | '), ok ? 'APROVADO' : 'REPROVADO');
 }
 
 fs.writeFileSync(OUT + 'tf_resultados.json', JSON.stringify({ versao: process.env.VERSAO, data: new Date().toISOString(), executor: 'Claude Code (automação) a pedido do autor', ambiente: 'API local, banco de teste isolado, IA simulada', resultados }, null, 2));
