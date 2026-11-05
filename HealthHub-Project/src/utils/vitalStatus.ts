@@ -1,27 +1,18 @@
 import type { SinalVital } from '../types/patient';
 import { LIMIARES_SINAIS_VITAIS as L, alertasSemFonteAtivos, limiarAtivo } from '../config/limiaresSinaisVitais';
+import { lerPressao, nivelPressao } from './pressaoArterial';
 
 export type VitalStatus = 'critical' | 'warning' | 'normal' | 'unknown';
 
 /*
- * FONTE DOS LIMIARES (levantamento de 03/11/2026; ver evidencias_tcc/rodada_final/limiares_sinais_vitais.md, seção 5).
- * Referência consultada: POP.HC-UFTM-DENF.003 "Rotina de Registro de Sinais Vitais e Controles", versão 6 (HC-UFTM/Ebserh, 2025),
- * https://www.gov.br/hubrasil/pt-br/hospitais-universitarios/regiao-sudeste/hc-uftm/documentos/procedimentos-e-rotinas-operacionais-padrao/pops/POP.HCUFTMDENF.003RotinadeRegistrodeSinaisVitaiseControlesversao6.pdf
- * É um POP de internação (não de triagem), e ele não usa os termos "atenção"/"crítico".
- *
- * COM correspondência no POP (adulto):
- *   - FC: 60 a 100 bpm é a faixa de referência; < 60 bradicardia, > 100 taquicardia (Anexo E).
- *   - SpO₂: 95 a 100 % é normal (Anexo H); "≤ 91" vale 3 pontos no NEWS 2 (Anexo A).
- *   - Temperatura: >= 37,8 °C é o início de "febre baixa" (Anexo F).
- * SEM correspondência no POP (valores adotados pelo desenvolvedor, sem fonte clínica registrada):
- *   - FC > 90 bpm como "atenção" (90 é o teto da faixa de adolescente no Anexo E, não do adulto).
- *   - Temperatura > 38,5 °C como "crítico" (o POP e o NEWS 2 usam cortes em 38,1 e 39,1).
- *   - SpO₂ < 92 como "crítico": coincide com o NEWS 2 (≤ 91), mas no Anexo H o 91 está em "hipóxia leve".
- * Pressão arterial: sem limiar e sem alerta (campo de texto livre).
- * Os valores NÃO foram alterados por causa dessa consulta. Qualquer mudança é decisão clínica do autor/orientador;
- * os limiares de "crítico" também existem em HealthHub-BackEnd/src/modules/metricas/application/calcular-metricas.ts.
- * Os números e a fonte de cada um ficam em config/limiaresSinaisVitais.ts (`fonte: null` = sem fonte clínica registrada).
- * Chave VITE_ALERTAS_SEM_FONTE=false desliga só os alertas com `fonte: null` (padrão: ligados, comportamento de sempre).
+ * FONTE DOS LIMIARES: cada número e a sua fonte ficam em config/limiaresSinaisVitais.ts (rodada 3, 05/11/2026).
+ * Fontes: POP.HC-UFTM-DENF.003 v6 (HC-UFTM/Ebserh, 2025), NEWS2 (RCP, 2017), critérios de SIRS (Bone et al., 1992),
+ * Diretrizes Brasileiras de Hipertensão 2020 (SBC), Linha de cuidado da hipertensão (MS) e Posicionamento sobre Crise Hipertensiva (SBC, 2020).
+ * Os rótulos "atenção" e "crítico" são uma convenção do projeto; as fontes documentam o NÚMERO.
+ * Regras: o nível do paciente é o PIOR entre os sinais (crítico vence atenção). Valor ausente ou <= 0 é desconhecido.
+ * Pressão arterial: texto livre ("120/80", "120x80"); formato inválido ou fora de 30 a 300 mmHg = desconhecida (sem alerta, sem erro).
+ * Os limiares de "crítico" também existem em HealthHub-BackEnd/src/modules/metricas/application/calcular-metricas.ts.
+ * Chave VITE_ALERTAS_SEM_FONTE=false desliga só os alertas com `fonte: null` (hoje nenhum limiar está nessa condição).
  */
 
 /** Calcula o status clínico a partir do último registro de sinais vitais */
@@ -29,27 +20,15 @@ export function getVitalStatus(sinaisVitais?: SinalVital[], semFonte: boolean = 
   const latest = sinaisVitais?.[0];
   if (!latest) return 'unknown';
 
-  const spo2 = Number(latest.saturacao_oxigenio);
-  const fc   = Number(latest.frequencia_cardiaca);
-  const temp = Number(latest.temperatura);
-
-  const hasSpo2 = spo2 > 0;
-  const hasFc   = fc   > 0;
-  const hasTemp = temp > 0;
-
-  if (
-    (hasSpo2 && limiarAtivo(L.spo2.critico, semFonte) && spo2 < L.spo2.critico.abaixoDe) ||
-    (hasFc   && limiarAtivo(L.frequenciaCardiaca.critico, semFonte) && (fc > L.frequenciaCardiaca.critico.acimaDe || fc < L.frequenciaCardiaca.critico.abaixoDe)) ||
-    (hasTemp && limiarAtivo(L.temperatura.critico, semFonte) && temp > L.temperatura.critico.acimaDe)
-  ) return 'critical';
-
-  if (
-    (hasSpo2 && limiarAtivo(L.spo2.atencao, semFonte) && spo2 < L.spo2.atencao.abaixoDe) ||
-    (hasFc   && limiarAtivo(L.frequenciaCardiaca.atencao, semFonte) && fc > L.frequenciaCardiaca.atencao.acimaDe) ||
-    (hasTemp && limiarAtivo(L.temperatura.atencao, semFonte) && temp >= L.temperatura.atencao.aPartirDe)
-  ) return 'warning';
-
-  if (hasSpo2 || hasFc || hasTemp) return 'normal';
+  const niveis = [
+    spo2Status(Number(latest.saturacao_oxigenio), semFonte),
+    fcStatus(Number(latest.frequencia_cardiaca), semFonte),
+    tempStatus(Number(latest.temperatura), semFonte),
+    pressaoStatus(latest.pressao_arterial, semFonte),
+  ];
+  if (niveis.includes('critical')) return 'critical';
+  if (niveis.includes('warning')) return 'warning';
+  if (niveis.includes('normal')) return 'normal';
   return 'unknown';
 }
 
@@ -80,13 +59,13 @@ export function dispatchVitalsUpdated(patientId: string) {
 
 // ─── Status por métrica individual (para CardDashboard) ───────────────────────
 export function spo2Status(v: number, semFonte: boolean = alertasSemFonteAtivos()): VitalStatus {
-  if (v <= 0) return 'unknown';
+  if (!(v > 0)) return 'unknown';
   if (limiarAtivo(L.spo2.critico, semFonte) && v < L.spo2.critico.abaixoDe) return 'critical';
   if (limiarAtivo(L.spo2.atencao, semFonte) && v < L.spo2.atencao.abaixoDe) return 'warning';
   return 'normal';
 }
 export function fcStatus(v: number, semFonte: boolean = alertasSemFonteAtivos()): VitalStatus {
-  if (v <= 0) return 'unknown';
+  if (!(v > 0)) return 'unknown';
   // Bradicardia (<60) é tão clinicamente relevante quanto taquicardia (>100) — faltava esse lado.
   const c = L.frequenciaCardiaca.critico;
   if (limiarAtivo(c, semFonte) && (v > c.acimaDe || v < c.abaixoDe)) return 'critical';
@@ -94,11 +73,18 @@ export function fcStatus(v: number, semFonte: boolean = alertasSemFonteAtivos())
   return 'normal';
 }
 export function tempStatus(v: number, semFonte: boolean = alertasSemFonteAtivos()): VitalStatus {
-  if (v <= 0)   return 'unknown';
-  if (limiarAtivo(L.temperatura.critico, semFonte) && v > L.temperatura.critico.acimaDe) return 'critical';
+  if (!(v > 0)) return 'unknown';
+  if (limiarAtivo(L.temperatura.critico, semFonte) && v >= L.temperatura.critico.aPartirDe) return 'critical';
   // >= 37.8, não > 37.8 — o limiar em si já conta como febre/alerta.
   if (limiarAtivo(L.temperatura.atencao, semFonte) && v >= L.temperatura.atencao.aPartirDe) return 'warning';
   return 'normal';
+}
+
+/** Pressão arterial a partir do texto livre; formato inválido = 'unknown' (sem alerta). */
+export function pressaoStatus(texto: string | null | undefined, semFonte: boolean = alertasSemFonteAtivos()): VitalStatus {
+  const pa = lerPressao(texto);
+  if (!pa) return 'unknown';
+  return nivelPressao(pa.pas, pa.pad, semFonte);
 }
 
 // ─── Cores da classificação de risco → CSS ────────────────────────────────────

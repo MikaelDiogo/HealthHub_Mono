@@ -1,0 +1,58 @@
+{
+  "_leia_me": "Casos de fronteira dos limiares de sinais vitais (rodada 3). 'esperado' foi digitado a mao a partir da tabela do pedido (nao calculado pelo codigo). Lido pelos testes do frontend e do backend (no backend, so o recorte critico). Entrada ausente = sinal nao informado. 'pa' e texto livre.",
+  "casos": [
+    { "id": "fc-59",  "entrada": { "fc": 59 },  "esperado": "critical" },
+    { "id": "fc-60",  "entrada": { "fc": 60 },  "esperado": "normal" },
+    { "id": "fc-90",  "entrada": { "fc": 90 },  "esperado": "normal" },
+    { "id": "fc-91",  "entrada": { "fc": 91 },  "esperado": "warning" },
+    { "id": "fc-100", "entrada": { "fc": 100 }, "esperado": "warning" },
+    { "id": "fc-101", "entrada": { "fc": 101 }, "esperado": "critical" },
+
+    { "id": "spo2-91", "entrada": { "spo2": 91 }, "esperado": "critical" },
+    { "id": "spo2-92", "entrada": { "spo2": 92 }, "esperado": "warning" },
+    { "id": "spo2-94", "entrada": { "spo2": 94 }, "esperado": "warning" },
+    { "id": "spo2-95", "entrada": { "spo2": 95 }, "esperado": "normal" },
+    { "id": "spo2-96", "entrada": { "spo2": 96 }, "esperado": "normal" },
+
+    { "id": "temp-37.7", "entrada": { "temp": 37.7 }, "esperado": "normal" },
+    { "id": "temp-37.8", "entrada": { "temp": 37.8 }, "esperado": "warning" },
+    { "id": "temp-38.5", "entrada": { "temp": 38.5 }, "esperado": "warning" },
+    { "id": "temp-38.6", "entrada": { "temp": 38.6 }, "esperado": "warning" },
+    { "id": "temp-39.0", "entrada": { "temp": 39.0 }, "esperado": "warning" },
+    { "id": "temp-39.1", "entrada": { "temp": 39.1 }, "esperado": "critical" },
+
+    { "id": "pa-90/60",   "entrada": { "pa": "90/60" },   "esperado": "critical" },
+    { "id": "pa-91/60",   "entrada": { "pa": "91/60" },   "esperado": "warning" },
+    { "id": "pa-100/60",  "entrada": { "pa": "100/60" },  "esperado": "warning" },
+    { "id": "pa-101/70",  "entrada": { "pa": "101/70" },  "esperado": "normal" },
+    { "id": "pa-139/89",  "entrada": { "pa": "139/89" },  "esperado": "normal" },
+    { "id": "pa-140/80",  "entrada": { "pa": "140/80" },  "esperado": "warning" },
+    { "id": "pa-120/90",  "entrada": { "pa": "120/90" },  "esperado": "warning" },
+    { "id": "pa-179/119", "entrada": { "pa": "179/119" }, "esperado": "warning" },
+    { "id": "pa-180/80",  "entrada": { "pa": "180/80" },  "esperado": "critical" },
+    { "id": "pa-120/120", "entrada": { "pa": "120/120" }, "esperado": "critical" },
+    { "id": "pa-220/130", "entrada": { "pa": "220/130" }, "esperado": "critical" },
+    { "id": "pa-130/85",  "entrada": { "pa": "130/85" },  "esperado": "normal" },
+    { "id": "pa-85/50",   "entrada": { "pa": "85/50" },   "esperado": "critical" },
+    { "id": "pa-190/120", "entrada": { "pa": "190/120" }, "esperado": "critical" },
+
+    { "id": "pa-formato-x",        "entrada": { "pa": "120x80" },    "esperado": "normal" },
+    { "id": "pa-formato-x-grave",  "entrada": { "pa": "190X120" },   "esperado": "critical" },
+    { "id": "pa-formato-espacos",  "entrada": { "pa": "120 / 80" },  "esperado": "normal" },
+    { "id": "pa-formato-bordas",   "entrada": { "pa": " 90/60 " },   "esperado": "critical" },
+    { "id": "pa-invalida-90",      "entrada": { "pa": "90" },        "esperado": "unknown" },
+    { "id": "pa-invalida-abc",     "entrada": { "pa": "abc" },       "esperado": "unknown" },
+    { "id": "pa-invalida-120/",    "entrada": { "pa": "120/" },      "esperado": "unknown" },
+    { "id": "pa-invalida-/80",     "entrada": { "pa": "/80" },       "esperado": "unknown" },
+    { "id": "pa-invalida-vazio",   "entrada": { "pa": "" },          "esperado": "unknown" },
+    { "id": "pa-invalida-300/20",  "entrada": { "pa": "300/20" },    "esperado": "unknown" },
+    { "id": "pa-invalida-29/80",   "entrada": { "pa": "29/80" },     "esperado": "unknown" },
+    { "id": "pa-invalida-1200/80", "entrada": { "pa": "1200/80" },   "esperado": "unknown" },
+
+    { "id": "pior-vence-fc105-pa150/95", "entrada": { "fc": 105, "pa": "150/95" }, "esperado": "critical" },
+    { "id": "pior-vence-pa190/120-fc72", "entrada": { "fc": 72, "spo2": 98, "temp": 36.5, "pa": "190/120" }, "esperado": "critical" },
+    { "id": "tudo-normal", "entrada": { "fc": 72, "spo2": 98, "temp": 36.5, "pa": "120/80" }, "esperado": "normal" },
+    { "id": "pa-invalida-nao-mascara-normal", "entrada": { "fc": 72, "pa": "abc" }, "esperado": "normal" },
+    { "id": "f14-teste-e", "entrada": { "spo2": 92, "temp": 38.5, "fc": 88, "pa": "130/85" }, "esperado": "warning" }
+  ]
+}

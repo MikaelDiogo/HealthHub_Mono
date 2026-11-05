@@ -27,6 +27,8 @@ describe('tempStatus', () => {
     expect(tempStatus(37.5)).toBe('normal');
     expect(tempStatus(37.8)).toBe('warning'); // limiar exato — antes ficava de fora
     expect(tempStatus(38.0)).toBe('warning');
-    expect(tempStatus(38.6)).toBe('critical');
+    expect(tempStatus(38.6)).toBe('warning'); // rodada 3: antes era crítico (> 38,5); o crítico agora começa em 39,1
+    expect(tempStatus(39.0)).toBe('warning');
+    expect(tempStatus(39.1)).toBe('critical');
   });
 });

@@ -1,4 +1,5 @@
 import { LIMIARES_CRITICOS, alertasSemFonteAtivos, limiarAtivo } from '../../../config/limiares-sinais-vitais';
+import { lerPressao, pressaoCritica } from '../../../config/pressao-arterial';
 
 // Cálculo das métricas operacionais do pronto-atendimento a partir dos dados
 // brutos. Função pura (sem banco) para ser testável e auditável: cada número
@@ -24,6 +25,8 @@ export interface SinaisInput {
   saturacao_oxigenio?: number | null;
   frequencia_cardiaca?: number | null;
   temperatura?: number | null;
+  /** Texto livre (ex.: "120/80"); formato inválido = desconhecida, sem alerta. */
+  pressao_arterial?: string | null;
 }
 
 export const ETAPAS = [
@@ -60,22 +63,22 @@ function media(nums: number[]): number | null {
 }
 
 /**
- * Mesmos limiares de "crítico" do frontend (utils/vitalStatus.ts), que traz o detalhe da fonte consultada
- * (POP.HC-UFTM-DENF.003 v6, Ebserh, 2025). Resumo: FC 60/100 e SpO₂ coincidem com o POP/NEWS 2; a temperatura
- * > 38,5 °C NÃO aparece no POP (ele usa 38,1 e 39,1) e é valor adotado pelo desenvolvedor, sem fonte registrada.
- * Valores não alterados; mudar um lado exige mudar o outro. Os números e a fonte de cada um ficam em
- * config/limiares-sinais-vitais.ts; a chave ALERTAS_SEM_FONTE=false desliga só os alertas com `fonte: null`.
+ * Mesmos limiares de "crítico" do frontend (utils/vitalStatus.ts), com a fonte de cada um em config/limiares-sinais-vitais.ts
+ * (POP.HC-UFTM-DENF.003 v6, NEWS2, SBC). Desde a rodada 3: temperatura >= 39,1 °C e pressão (PAS <= 90, PAS >= 180 ou PAD >= 120).
+ * Mudar um lado exige mudar o outro. A chave ALERTAS_SEM_FONTE=false desliga só os alertas com `fonte: null` (hoje nenhum).
  */
 export function motivoCritico(s: SinaisInput | undefined, semFonte: boolean = alertasSemFonteAtivos()): string | null {
   if (!s) return null;
   const spo2 = Number(s.saturacao_oxigenio ?? 0);
   const fc = Number(s.frequencia_cardiaca ?? 0);
   const temp = Number(s.temperatura ?? 0);
+  const pa = lerPressao(s.pressao_arterial);
   const motivos: string[] = [];
   const L = LIMIARES_CRITICOS;
   if (spo2 > 0 && limiarAtivo(L.spo2, semFonte) && spo2 < L.spo2.abaixoDe) motivos.push(`SpO₂ ${spo2}%`);
   if (fc > 0 && limiarAtivo(L.frequenciaCardiaca, semFonte) && (fc > L.frequenciaCardiaca.acimaDe || fc < L.frequenciaCardiaca.abaixoDe)) motivos.push(`FC ${fc} bpm`);
-  if (temp > 0 && limiarAtivo(L.temperatura, semFonte) && temp > L.temperatura.acimaDe) motivos.push(`Temperatura ${temp} °C`);
+  if (temp > 0 && limiarAtivo(L.temperatura, semFonte) && temp >= L.temperatura.aPartirDe) motivos.push(`Temperatura ${temp} °C`);
+  if (pa && pressaoCritica(pa.pas, pa.pad, semFonte)) motivos.push(`PA ${pa.pas}/${pa.pad}`);
   return motivos.length ? motivos.join(' · ') : null;
 }
 
