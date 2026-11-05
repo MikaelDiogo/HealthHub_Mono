@@ -71,7 +71,7 @@ registrar('TF03', 'Desempate / RF09', 'Comparar os dois registros amarelos (cheg
   await req(T.enfermeiro, 'POST', `/sinais/${p.id}`, SV(nCaso(1)));
   await passo('enfermeiro', 'Em Triagem (Enfermeiro)'); await passo('enfermeiro', 'Aguardando Atendimento', { gravidade: 'Amarelo' }); await passo('medico', 'Em Consulta (Médico)'); await passo('medico', 'Em Observação');
   const alta = await req(T.medico, 'PATCH', `/fila/${f.id}/alta`); log.push(`médico alta: HTTP ${alta.status}`);
-  const c2 = { nome: 'FICTÍCIO-09', cpf_ficticio: '90000000009', idade: '29', sexo: 'M', chegada: '08:40', motivo_visita: 'salto (fictício)' };
+  const c2 = { nome: 'FICTÍCIO-09', cpf_ficticio: '7' + String(Date.now()).slice(-10), idade: '29', sexo: 'M', chegada: '08:40', motivo_visita: 'salto (fictício)' };
   const p2 = await cadastrar(c2); const f2 = await admitir(p2, c2);
   const salto1 = await req(T.medico, 'PUT', `/fila/${f2.id}`, { status: 'Em Consulta (Médico)' });
   const salto2 = await req(T.enfermeiro, 'PUT', `/fila/${f2.id}`, { status: 'Em Observação' });

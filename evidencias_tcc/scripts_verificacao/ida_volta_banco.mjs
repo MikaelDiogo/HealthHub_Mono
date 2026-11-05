@@ -1,6 +1,6 @@
 // Ida e volta pelo banco (rodada 3): registra pela API valores de fronteira, lê de volta e confere o nível.
 // Se o tipo da coluna (float) mudar a igualdade exata, o script RELATA o valor lido; não muda coluna nem limiar.
-// Uso: source ~/testenv.sh; node ida_volta_banco.mjs   (API em http://localhost:3001; nível calculado pelas funções reais do frontend)
+// Uso (dentro de HealthHub-BackEnd, por causa do tsx): source ~/testenv.sh; node --import tsx ../evidencias_tcc/scripts_verificacao/ida_volta_banco.mjs   (API em http://localhost:3001; nível calculado pelas funções reais do frontend)
 import fs from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 const R = fileURLToPath(new URL('../../', import.meta.url)).replace(/\\/g, '/');
