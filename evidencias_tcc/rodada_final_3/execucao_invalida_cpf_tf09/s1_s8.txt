@@ -1,0 +1,63 @@
+# Cenários S1 a S3 — 2026-11-05T15:11:50.046Z — API http://localhost:3001 — versão fcd4891
+
+## S1 — ordenação da fila
+fila: P2 [Vermelho] | P4 [Laranja] | P5 [Amarelo] | P1 [Verde] | P3 [Azul]
+APROVADO S1 ordem P2,P4,P5,P1,P3
+   obtido: ["P2","P4","P5","P1","P3"]
+
+## S2 — desempate por chegada (sem limpar)
+fila: P2 [Vermelho] | P4 [Laranja] | P5 [Amarelo] | P6 [Amarelo] | P7 [Amarelo] | P1 [Verde] | P3 [Azul]
+APROVADO S2 Amarelos em ordem de chegada P5,P6,P7
+   obtido: ["P5","P6","P7"]
+
+## S3 — reavaliação (P5 Amarelo → Vermelho)
+PUT reclassificar → HTTP 200
+fila: P2 [Vermelho] | P5 [Vermelho] | P4 [Laranja] | P6 [Amarelo] | P7 [Amarelo] | P1 [Verde] | P3 [Azul]
+eventos de P5 (do mais recente ao mais antigo; campos devolvidos pela API):
+  {"tipo":"classificado","gravidade":"Vermelho","status_anterior":"Em Triagem (Enfermeiro)","status_novo":"Aguardando Atendimento","justificativa":"Reavaliação fictícia (cenário S3)","usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-11-05T15:11:58.972Z"}
+  {"tipo":"triagem_iniciada","gravidade":null,"status_anterior":"Aguardando Atendimento","status_novo":"Em Triagem (Enfermeiro)","justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-11-05T15:11:58.955Z"}
+  {"tipo":"classificado","gravidade":"Amarelo","status_anterior":"Em Triagem (Enfermeiro)","status_novo":"Aguardando Atendimento","justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-11-05T15:11:56.482Z"}
+  {"tipo":"triagem_iniciada","gravidade":null,"status_anterior":"Aguardando Triagem","status_novo":"Em Triagem (Enfermeiro)","justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-11-05T15:11:56.463Z"}
+  {"tipo":"sinais_registrados","gravidade":null,"status_anterior":null,"status_novo":null,"justificativa":null,"usuario_nome":"Enfermeiro Teste","usuario_role":"enfermeiro","criado_em":"2026-11-05T15:11:56.311Z"}
+  {"tipo":"admitido","gravidade":null,"status_anterior":null,"status_novo":"Aguardando Triagem","justificativa":null,"usuario_nome":"Recepcionista Teste","usuario_role":"recepcionista","criado_em":"2026-11-05T15:11:55.183Z"}
+APROVADO S3 fila P2,P5,P4,P6,P7,P1,P3 e evento (quem, quando, Amarelo → Vermelho)=true
+# S4 — permissão (teste negativo autorizado) — 2026-11-05T15:11:59.157Z — versão fcd4891
+recepcionista → PUT /fila/:id com gravidade=Vermelho: HTTP 403
+corpo: {"message":"Acesso negado para este perfil"}
+cor gravada depois: (nenhuma)
+APROVADO S4: HTTP 403, nenhuma cor gravada=true
+REPROVADO S4-mensagem: mensagem real do documento para a recepção=false (obtido: {"message":"Acesso negado para este perfil"})
+APROVADO S4 (extra) médico: HTTP 403, mensagem do serviço=true
+# S5 — sem tempos na tela (verificação estática do código-fonte) — 2026-11-05T15:12:00.490Z
+textos de tempo-alvo/Manchester encontrados: nenhum
+rótulo "Classificação de risco:" em: HealthHub-Project/src/pages/MobileTriage/index.tsx
+texto "o sistema não controla prazos" em: HealthHub-Project/src/pages/Alerts/index.tsx, HealthHub-Project/src/utils/eventos.ts, HealthHub-BackEnd/src/config/swagger.ts
+APROVADO
+# S7 — regressão (checagens pela API; IA simulada) — 2026-11-05T15:12:00.522Z — versão fcd4891
+
+- [x] Admissão pela API: entrada criada com senha PR-NNN gerada pelo servidor — senha PR-001
+- [x] Sinais vitais críticos (FC 130, SpO₂ 90, 39,2 °C) entram na lista "atenção agora" do painel — SpO₂ 90% · FC 130 bpm · Temperatura 39.2 °C
+- [x] Chat de IA responde (simulado) e NÃO atribui cor nem muda a esteira — HTTP 201; cor antes/depois: sem cor/sem cor
+- [x] Alta pelo médico: sai da esteira e a visita fecha com desfecho — HTTP 204; visita: [{"desfecho":"Alta","risco":"Amarelo"}]
+- [x] Alertas crítico/atenção/normal por valor: cobertos pelos testes unitários (vitalStatus.spec e calcular-metricas.spec); a conferência na fronteira exata está no TF05 — ver logs dos testes
+
+APROVADO — 5/5 itens
+# S8 — saltos de estado (comportamento OBSERVADO) — 2026-11-05T15:12:01.906Z — versão fcd4891
+
+P8 admitido em "Aguardando Triagem". Enfermeiro → PUT /fila/:id { status: "Em Observação" } (pula Triagem, Atendimento e Consulta)
+HTTP 200
+corpo: {"id":"c15de0a2-e74a-4891-900d-60c7e7c2c49c","paciente_id":"e8a8d591-1d8c-4766-92b2-a92ce000fdb9","nome":"P8 Fictício S8","idade":40,"senha":"PR-001","chegada":"08:00 (05/11/2026, 12:12)","status":"Em Observação","gravidade":null,"created_at":"2026-11-05T15:12:01.937Z"}
+status depois: Em Observação
+
+Observação: o salto foi ACEITO: o sistema não restringe transições entre estados da esteira (regra de transição não decidida; ver fila-valores.ts). É um achado/limitação a declarar, não um critério de falha.
+
+RESUMO:
+  S1: APROVADO
+  S2: APROVADO
+  S3: APROVADO
+  S4: APROVADO
+  S4-mensagem: REPROVADO
+  S4-medico: APROVADO
+  S5: APROVADO
+  S7: APROVADO
+  S8: REGISTRADO (sem critério de aprovação)

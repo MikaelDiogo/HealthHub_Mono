@@ -1,0 +1,12 @@
+caso_afetado,valor,estado_antigo,estado_novo,observacao
+C01,SpO2 98 / FC 72 / 36.5 / PA 120/80,Estavel,Estavel,sem mudanca
+C02,SpO2 94 / FC 95 / 37.9 / PA 140/90,Atencao,Atencao,PA 140/90 agora tambem e atencao (ja era atencao pelos outros sinais)
+C03,SpO2 91 / FC 110 / 38.6 / PA 100/60,Critico (SpO2; FC; temperatura),Critico (SpO2; FC),temperatura 38.6 deixou de ser motivo critico (agora atencao); PA 100/60 e atencao
+C04,SpO2 97 / FC 55 / 36.0 / PA 110/70,Critico (FC),Critico (FC),sem mudanca
+C05,SpO2 92 / FC 88 / 38.5 / PA 130/85,Atencao,Atencao,sem mudanca (38.5 ja era atencao; PA 130/85 normal)
+F14 TESTE C,SpO2 91 / FC 110 / 38.6 / PA 100/60,Critico na lista (SpO2; FC; temperatura),Critico na lista (SpO2; FC),motivo da temperatura saiu
+F14 TESTE E,SpO2 92 / FC 88 / 38.5 / PA 130/85,Atencao,Atencao,sem mudanca
+TF05 temperatura,38.6,critico,atencao,mudou (limiar critico agora >= 39.1)
+TF05 temperatura,39.0,critico,atencao,mudou
+TF05 temperatura,39.1,critico,critico,sem mudanca de estado; agora a fronteira exata do limiar
+TF05 pressao,qualquer,sem alerta,conforme tabela (ex.: 190/120 critico; 150/95 atencao),novo

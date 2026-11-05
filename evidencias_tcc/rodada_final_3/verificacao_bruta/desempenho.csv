@@ -1,0 +1,25 @@
+versao,repeticao,endpoint,modo,n,min_ms,p50_ms,p95_ms,p99_ms,max_ms
+antigo,1,"fila=500 GET /fila",sequencial,200,9.5,17.1,31.3,36.8,38.0
+antigo,1,"fila=500 GET /fila",concorrente(10),200,19.2,91.1,105.0,110.3,113.8
+antigo,1,"fila=500 GET /metricas",sequencial,200,48.3,66.1,79.5,82.6,90.4
+antigo,1,"fila=500 GET /metricas",concorrente(10),200,113.3,517.9,592.3,666.0,791.0
+antigo,1,"escrita POST /fila",sequencial,100,20.7,30.7,37.4,45.9,49.4
+antigo,1,"escrita PUT /fila/:id (classificar cor)",sequencial,100,12.5,16.8,32.4,40.8,41.2
+novo,1,"fila=500 GET /fila",sequencial,200,9.7,15.7,35.0,41.0,47.4
+novo,1,"fila=500 GET /fila",concorrente(10),200,10.9,85.8,109.2,114.1,114.7
+novo,1,"fila=500 GET /metricas",sequencial,200,29.8,51.3,69.0,76.1,82.0
+novo,1,"fila=500 GET /metricas",concorrente(10),200,51.8,306.3,381.3,428.9,480.4
+novo,1,"escrita POST /fila",sequencial,100,14.4,30.6,35.0,36.8,47.3
+novo,1,"escrita PUT /fila/:id (classificar cor)",sequencial,100,11.4,15.6,29.3,32.2,32.9
+antigo,2,"fila=500 GET /fila",sequencial,200,7.5,15.6,22.9,38.8,40.9
+antigo,2,"fila=500 GET /fila",concorrente(10),200,15.1,51.0,67.1,75.5,77.8
+antigo,2,"fila=500 GET /metricas",sequencial,200,29.9,45.3,56.5,62.3,65.0
+antigo,2,"fila=500 GET /metricas",concorrente(10),200,112.8,305.3,350.3,358.6,807.2
+antigo,2,"escrita POST /fila",sequencial,100,15.0,29.9,35.6,36.8,37.1
+antigo,2,"escrita PUT /fila/:id (classificar cor)",sequencial,100,11.7,16.4,30.9,35.4,36.5
+novo,2,"fila=500 GET /fila",sequencial,200,7.4,15.5,27.4,46.2,47.7
+novo,2,"fila=500 GET /fila",concorrente(10),200,13.7,50.1,74.0,85.2,88.7
+novo,2,"fila=500 GET /metricas",sequencial,200,29.7,46.1,57.9,68.6,71.1
+novo,2,"fila=500 GET /metricas",concorrente(10),200,61.8,299.6,357.4,384.9,824.2
+novo,2,"escrita POST /fila",sequencial,100,15.9,30.4,35.2,36.5,37.2
+novo,2,"escrita PUT /fila/:id (classificar cor)",sequencial,100,13.2,16.7,31.3,34.9,35.4

@@ -1,0 +1,71 @@
+# S6 — preservação de dados na migração — 2026-11-05T15:14:12.161Z — banco descartável healthhub_s6_91652161 no contêiner healthhub-test-db
+
+## 1) aplicar todas as migrações e voltar ao esquema anterior ao rename (reverter as 3 últimas)
+11 migrations are new migrations must be executed.
+Migration CreateBaseSchema1000000000000 has been executed successfully.
+Migration UpdateSinaisVitaisAddPressaoEPaciente1774448538633 has been executed successfully.
+Migration CreateFilaPacientes1780358400000 has been executed successfully.
+Migration CreateUsers1780500000000 has been executed successfully.
+Migration CreateChat1782600000000 has been executed successfully.
+Migration CreateVisitas1783000000000 has been executed successfully.
+Migration AddAtivoToPacientes1783100000000 has been executed successfully.
+Migration CreateFilaEventos1783200000000 has been executed successfully.
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been executed successfully.
+Migration UniqueFilaPorPaciente1783400000000 has been executed successfully.
+Migration CadastroMinimoNomeProvisorio1783500000000 has been executed successfully.
+CadastroMinimoNomeProvisorio1783500000000 is the last executed migration. It was executed on Wed Jul 08 2026 05:40:00 GMT-0300 (Horário Padrão de Brasília).
+Migration CadastroMinimoNomeProvisorio1783500000000 has been reverted successfully.
+UniqueFilaPorPaciente1783400000000 is the last executed migration. It was executed on Tue Jul 07 2026 01:53:20 GMT-0300 (Horário Padrão de Brasília).
+Migration UniqueFilaPorPaciente1783400000000 has been reverted successfully.
+RenameGravidadeToClassificacaoRisco1783300000000 is the last executed migration. It was executed on Sun Jul 05 2026 22:06:40 GMT-0300 (Horário Padrão de Brasília).
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been reverted successfully.
+coluna de risco em visitas agora: gravidade_manchester
+
+## 2) fixtures FICTÍCIAS (3 pacientes, 6 visitas com cores) e registro ANTES
+{
+  "total": 6,
+  "ids": "513aee49-e2f8-432c-8400-c50583f7c7ad,68fc3cc1-8190-41f2-9f20-991c655a42d5,7b89ebd2-b293-48d1-a14b-abe5d329b87c,abb5666b-bd9d-49dc-8c80-2ed8881d61c8,b30c5956-6ca2-4780-8579-ea797c38ecd7,e8955276-5fab-4fbc-a8c8-23a7c64ac4c3",
+  "cores": "Vermelho,Verde,Laranja,Azul,Amarelo,(sem cor)",
+  "pacientes": 3
+}
+
+## 3) aplicar as migrações seguintes (rename, índice único da fila, cadastro mínimo) e registrar DEPOIS
+CreateFilaEventos1783200000000 is the last executed migration. It was executed on Sat Jul 04 2026 18:20:00 GMT-0300 (Horário Padrão de Brasília).
+3 migrations are new migrations must be executed.
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been executed successfully.
+Migration UniqueFilaPorPaciente1783400000000 has been executed successfully.
+Migration CadastroMinimoNomeProvisorio1783500000000 has been executed successfully.
+coluna de risco em visitas: classificacao_risco
+{
+  "total": 6,
+  "ids": "513aee49-e2f8-432c-8400-c50583f7c7ad,68fc3cc1-8190-41f2-9f20-991c655a42d5,7b89ebd2-b293-48d1-a14b-abe5d329b87c,abb5666b-bd9d-49dc-8c80-2ed8881d61c8,b30c5956-6ca2-4780-8579-ea797c38ecd7,e8955276-5fab-4fbc-a8c8-23a7c64ac4c3",
+  "cores": "Vermelho,Verde,Laranja,Azul,Amarelo,(sem cor)",
+  "pacientes": 3
+}
+
+## 4) reverter (down) as mesmas 3 migrações e conferir
+CadastroMinimoNomeProvisorio1783500000000 is the last executed migration. It was executed on Wed Jul 08 2026 05:40:00 GMT-0300 (Horário Padrão de Brasília).
+Migration CadastroMinimoNomeProvisorio1783500000000 has been reverted successfully.
+UniqueFilaPorPaciente1783400000000 is the last executed migration. It was executed on Tue Jul 07 2026 01:53:20 GMT-0300 (Horário Padrão de Brasília).
+Migration UniqueFilaPorPaciente1783400000000 has been reverted successfully.
+RenameGravidadeToClassificacaoRisco1783300000000 is the last executed migration. It was executed on Sun Jul 05 2026 22:06:40 GMT-0300 (Horário Padrão de Brasília).
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been reverted successfully.
+coluna de risco em visitas: gravidade_manchester
+{
+  "total": 6,
+  "ids": "513aee49-e2f8-432c-8400-c50583f7c7ad,68fc3cc1-8190-41f2-9f20-991c655a42d5,7b89ebd2-b293-48d1-a14b-abe5d329b87c,abb5666b-bd9d-49dc-8c80-2ed8881d61c8,b30c5956-6ca2-4780-8579-ea797c38ecd7,e8955276-5fab-4fbc-a8c8-23a7c64ac4c3",
+  "cores": "Vermelho,Verde,Laranja,Azul,Amarelo,(sem cor)",
+  "pacientes": 3
+}
+
+## 5) reaplicar para deixar o banco no esquema atual e conferir de novo
+CreateFilaEventos1783200000000 is the last executed migration. It was executed on Sat Jul 04 2026 18:20:00 GMT-0300 (Horário Padrão de Brasília).
+3 migrations are new migrations must be executed.
+Migration RenameGravidadeToClassificacaoRisco1783300000000 has been executed successfully.
+Migration UniqueFilaPorPaciente1783400000000 has been executed successfully.
+Migration CadastroMinimoNomeProvisorio1783500000000 has been executed successfully.
+migrações registradas: 11
+
+Banco descartável healthhub_s6_91652161 removido.
+
+RESULTADO S6: APROVADO (contagens, IDs e cores idênticos antes/depois/reversão; coluna classificacao_risco presente e gravidade_manchester restaurada na reversão)

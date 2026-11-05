@@ -1,0 +1,24 @@
+[antigo #1] fila=500 GET /fila sequencial: n=200 min=9.5 p50=17.1 p95=31.3 p99=36.8 max=38.0 ms 
+[antigo #1] fila=500 GET /fila concorrente(10): n=200 min=19.2 p50=91.1 p95=105.0 p99=110.3 max=113.8 ms vazao=108 req/s; respostas!=200=0
+[antigo #1] fila=500 GET /metricas sequencial: n=200 min=48.3 p50=66.1 p95=79.5 p99=82.6 max=90.4 ms 
+[antigo #1] fila=500 GET /metricas concorrente(10): n=200 min=113.3 p50=517.9 p95=592.3 p99=666.0 max=791.0 ms vazao=19 req/s; respostas!=200=0
+[antigo #1] escrita POST /fila sequencial: n=100 min=20.7 p50=30.7 p95=37.4 p99=45.9 max=49.4 ms respostas!=201=0
+[antigo #1] escrita PUT /fila/:id (classificar cor) sequencial: n=100 min=12.5 p50=16.8 p95=32.4 p99=40.8 max=41.2 ms respostas!=200=0
+[novo #1] fila=500 GET /fila sequencial: n=200 min=9.7 p50=15.7 p95=35.0 p99=41.0 max=47.4 ms 
+[novo #1] fila=500 GET /fila concorrente(10): n=200 min=10.9 p50=85.8 p95=109.2 p99=114.1 max=114.7 ms vazao=114 req/s; respostas!=200=0
+[novo #1] fila=500 GET /metricas sequencial: n=200 min=29.8 p50=51.3 p95=69.0 p99=76.1 max=82.0 ms 
+[novo #1] fila=500 GET /metricas concorrente(10): n=200 min=51.8 p50=306.3 p95=381.3 p99=428.9 max=480.4 ms vazao=32 req/s; respostas!=200=0
+[novo #1] escrita POST /fila sequencial: n=100 min=14.4 p50=30.6 p95=35.0 p99=36.8 max=47.3 ms respostas!=201=0
+[novo #1] escrita PUT /fila/:id (classificar cor) sequencial: n=100 min=11.4 p50=15.6 p95=29.3 p99=32.2 max=32.9 ms respostas!=200=0
+[antigo #2] fila=500 GET /fila sequencial: n=200 min=7.5 p50=15.6 p95=22.9 p99=38.8 max=40.9 ms 
+[antigo #2] fila=500 GET /fila concorrente(10): n=200 min=15.1 p50=51.0 p95=67.1 p99=75.5 max=77.8 ms vazao=186 req/s; respostas!=200=0
+[antigo #2] fila=500 GET /metricas sequencial: n=200 min=29.9 p50=45.3 p95=56.5 p99=62.3 max=65.0 ms 
+[antigo #2] fila=500 GET /metricas concorrente(10): n=200 min=112.8 p50=305.3 p95=350.3 p99=358.6 max=807.2 ms vazao=33 req/s; respostas!=200=0
+[antigo #2] escrita POST /fila sequencial: n=100 min=15.0 p50=29.9 p95=35.6 p99=36.8 max=37.1 ms respostas!=201=0
+[antigo #2] escrita PUT /fila/:id (classificar cor) sequencial: n=100 min=11.7 p50=16.4 p95=30.9 p99=35.4 max=36.5 ms respostas!=200=0
+[novo #2] fila=500 GET /fila sequencial: n=200 min=7.4 p50=15.5 p95=27.4 p99=46.2 max=47.7 ms 
+[novo #2] fila=500 GET /fila concorrente(10): n=200 min=13.7 p50=50.1 p95=74.0 p99=85.2 max=88.7 ms vazao=191 req/s; respostas!=200=0
+[novo #2] fila=500 GET /metricas sequencial: n=200 min=29.7 p50=46.1 p95=57.9 p99=68.6 max=71.1 ms 
+[novo #2] fila=500 GET /metricas concorrente(10): n=200 min=61.8 p50=299.6 p95=357.4 p99=384.9 max=824.2 ms vazao=33 req/s; respostas!=200=0
+[novo #2] escrita POST /fila sequencial: n=100 min=15.9 p50=30.4 p95=35.2 p99=36.5 max=37.2 ms respostas!=201=0
+[novo #2] escrita PUT /fila/:id (classificar cor) sequencial: n=100 min=13.2 p50=16.7 p95=31.3 p99=34.9 max=35.4 ms respostas!=200=0
