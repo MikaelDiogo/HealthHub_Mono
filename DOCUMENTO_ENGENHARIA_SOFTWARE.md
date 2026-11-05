@@ -1353,4 +1353,711 @@ flowchart TD
 
 Cada métrica também possui avaliador individual (`spo2Status`, `fcStatus`, `tempStatus`, `pressaoStatus`) usado nos cartões do painel, com os mesmos limiares.
 
+### 9.8 Atividade — Cadeia de interceptação de uma requisição
 
+```mermaid
+flowchart TD
+    REQ["Requisição HTTP"] --> HELMET["helmet()<br/>cabeçalhos de segurança"]
+    HELMET --> BODY{"Payload<br/>≤ 10 KB?"}
+    BODY -->|"não"| E413["413 Payload Too Large"]
+    BODY -->|"sim"| CORS{"Origem na<br/>allowlist?"}
+    CORS -->|"não"| EBLOCK["CORS negado<br/>(sem cabeçalho)"]
+    CORS -->|"sim"| THR{"Rate limit<br/>100/15min OK?"}
+    THR -->|"não"| E429["429 Too Many Requests"]
+    THR -->|"sim"| PUB{"Rota marcada<br/>@Public()?"}
+    PUB -->|"sim"| PIPE
+    PUB -->|"não"| JWT{"Bearer token<br/>válido?"}
+    JWT -->|"não"| E401["401 Unauthorized"]
+    JWT -->|"sim"| ROLE{"@Roles()<br/>declarado?"}
+    ROLE -->|"não"| PIPE
+    ROLE -->|"sim"| CHK{"role do usuário<br/>autorizada?"}
+    CHK -->|"não"| E403["403 Forbidden"]
+    CHK -->|"sim"| PIPE["ValidationPipe<br/>whitelist + transform"]
+    PIPE --> UUID{"ParseUUIDPipe<br/>nos params OK?"}
+    UUID -->|"não"| E400["400 Bad Request"]
+    UUID -->|"sim"| CTRL["Controller → Service<br/>→ Repository → DB"]
+    CTRL --> RES["Resposta JSON"]
+```
+
+---
+
+## 10. Especificação da API
+
+Base: `http://localhost:3001` · Autenticação: `Authorization: Bearer <jwt>` em todas as rotas, exceto `POST /login`.
+
+### 10.1 Autenticação
+
+| Método | Rota | Papéis | Corpo | Resposta |
+|---|---|---|---|---|
+| `POST` | `/login` | público (throttled) | `{ email, password }` | `200 { auth, token, role, nome }` · `401` · `429` |
+
+### 10.2 Pacientes
+
+| Método | Rota | Papéis | Corpo | Resposta |
+|---|---|---|---|---|
+| `GET` | `/patients` | médico, enfermeiro, recepcionista | — | `200 Paciente[]` (com `sinaisVitais`) |
+| `POST` | `/patients` | médico, enfermeiro, recepcionista | `CreatePatientDto` | `201 Paciente` · `400` CPF duplicado |
+| `GET` | `/patients/:id` | médico, enfermeiro | — | `200 Paciente` (com vitais) · `404` |
+| `PUT` | `/patients/:id` | médico, enfermeiro | `UpdatePatientDto` (parcial) | `200 Paciente` · `400` |
+
+**Validação de `CreatePatientDto`**
+
+| Campo | Regra |
+|---|---|
+| `nome_completo` | string, 3–150 caracteres |
+| `cpf` | exatamente 11 dígitos numéricos (`/^\d{11}$/`) |
+| `rg` | opcional, ≤ 20 |
+| `idade` | inteiro 0–150 |
+| `sexo` | ∈ `M`, `F`, `Outro` |
+| `telefone` | opcional, 10 ou 11 dígitos |
+| `endereco` | opcional, ≤ 300 |
+| `alergias` | opcional, ≤ 1000 |
+| `medicamentos_em_uso` | opcional, ≤ 1000 |
+| `anamnese` | opcional, ≤ 5000 |
+
+### 10.3 Sinais vitais
+
+| Método | Rota | Papéis | Corpo | Resposta |
+|---|---|---|---|---|
+| `POST` | `/sinais/:id` | médico, enfermeiro | `CreateSinaisVitaisDto` | `201 SinaisVitais` |
+| `GET` | `/sinais/:patientId/vitals` | médico, enfermeiro | — | `200 SinaisVitais[]` (histórico completo, desc.) |
+| `GET` | `/patients/:id/vitals` | médico, enfermeiro | — | `200 SinaisVitais[]` (12 mais recentes) · `400` |
+
+**Faixas aceitas:** `frequencia_cardiaca` 0–300 · `saturacao_oxigenio` 0–100 · `temperatura` 25–45 · `pressao_arterial` texto ≤ 20 · `hora` numérico (default = `HHMM` atual).
+
+### 10.4 Esteira de Cuidado
+
+| Método | Rota | Papéis | Corpo | Resposta |
+|---|---|---|---|---|
+| `GET` | `/fila` | médico, enfermeiro, recepcionista | — | `200 FilaPaciente[]` (ordem de chegada) |
+| `POST` | `/fila` | médico, enfermeiro, recepcionista | `CreateFilaDto` | `201 FilaPaciente` · `400` já na fila |
+| `PUT` | `/fila/:id` | médico, enfermeiro | `{ status, gravidade? }` | `200 FilaPaciente` · `404` |
+| `DELETE` | `/fila/:id` | **médico** | — | `204` · `404` |
+
+### 10.5 Visitas
+
+| Método | Rota | Papéis | Corpo | Resposta |
+|---|---|---|---|---|
+| `GET` | `/patients/:id/visitas` | ⚠️ qualquer autenticado | — | `200 { visitas, total }` |
+| `PATCH` | `/patients/:id/visitas/fechar` | ⚠️ qualquer autenticado | `CloseVisitaDto` | `200 Visita \| null` |
+
+`desfecho` ∈ `Alta`, `Internacao`, `Transferencia`, `Saida Voluntaria` (default `Alta`) · `classificacao_risco` ∈ `Vermelho`, `Laranja`, `Amarelo`, `Verde`, `Azul`.
+
+### 10.6 Inteligência artificial
+
+| Método | Rota | Papéis | Corpo | Resposta |
+|---|---|---|---|---|
+| `POST` | `/patients/:id/chat` | médico, enfermeiro | `{ message, patientContext, history? }` | `200 { reply, source }` · `500` · `503` |
+| `POST` | `/patients/:id/chat/audio` | médico, enfermeiro | `multipart/form-data` campo `audio` | `200 { transcription }` · `400` · `500` · `503` |
+
+### 10.7 Chat interno
+
+| Método | Rota | Papéis | Corpo | Resposta |
+|---|---|---|---|---|
+| `GET` | `/chat/contacts` | autenticado | — | `200 {id, nome, role}[]` (exclui o próprio) |
+| `GET` | `/chat/conversations` | autenticado | — | `200 ConversationSummary[]` |
+| `POST` | `/chat/conversations` | autenticado | `{ user_id }` | `200 Conversation` (idempotente) · `400` |
+| `GET` | `/chat/conversations/:id/messages` | participante | — | `200 Message[]` (100, cronológico) · `403` |
+| `POST` | `/chat/conversations/:id/messages` | participante | `{ content, priority? }` | `201 Message` · `403` |
+| `POST` | `/chat/conversations/:id/read` | participante | — | `204` · `403` |
+
+### 10.8 Protocolo WebSocket
+
+| Direção | Evento | Carga | Semântica |
+|---|---|---|---|
+| handshake | `auth.token` | JWT | Falha → `error` + desconexão imediata |
+| servidor | *(join implícito)* | — | Cliente entra na sala `user:<id>` |
+| cliente → servidor | `message:send` | `{ conversationId, content, priority? }` | ACK `{ ok, message }` ou `{ error }`; conteúdo truncado em 2000 caracteres |
+| servidor → cliente | `message:new` | `Message` | Emitido a cada participante, inclusive ao remetente |
+| cliente → servidor | `conversation:read` | `{ conversationId }` | ACK `{ ok }` ou `{ error }` |
+
+### 10.9 Convenção de erros
+
+| Código | Uso no sistema |
+|---|---|
+| `400` | Falha de validação de DTO, CPF/fila duplicados, UUID inválido |
+| `401` | Token ausente, inválido ou expirado; credenciais inválidas |
+| `403` | Papel não autorizado; não participante da conversa |
+| `404` | Paciente, entrada de fila ou recurso inexistente |
+| `429` | Rate limit global ou de login excedido |
+| `500` | Falha do provedor de IA |
+| `503` | `GROQ_API_KEY` não configurada |
+
+---
+
+## 11. Segurança, Privacidade e LGPD
+
+### 11.1 Arquitetura de segurança em profundidade
+
+```mermaid
+flowchart TB
+    subgraph L1["Camada 1 — Transporte e cabeçalhos"]
+        A1["helmet() · CSP, HSTS, noSniff"]
+        A2["CORS por allowlist de ambiente"]
+        A3["Limite de payload 10 KB"]
+    end
+    subgraph L2["Camada 2 — Abuso"]
+        B1["ThrottlerModule global · 100 req/15 min"]
+        B2["Throttle de login · 10 tentativas/15 min (prod)"]
+    end
+    subgraph L3["Camada 3 — Autenticação"]
+        C1["JwtAuthGuard global (deny-by-default)"]
+        C2["@Public() como exceção explícita"]
+        C3["JWT HS256 · expiração 1 dia"]
+        C4["Handshake do WebSocket autenticado"]
+    end
+    subgraph L4["Camada 4 — Autorização"]
+        D1["RolesGuard global + @Roles()"]
+        D2["isParticipant() no chat (autorização por recurso)"]
+    end
+    subgraph L5["Camada 5 — Entrada"]
+        E1["ValidationPipe whitelist (descarta campos extras)"]
+        E2["class-validator com limites de tamanho e faixa"]
+        E3["ParseUUIDPipe em todos os :id"]
+        E4["FileFilter · apenas audio/* · 25 MB"]
+    end
+    subgraph L6["Camada 6 — Dados"]
+        F1["bcrypt custo 12"]
+        F2["Parametrização de queries pelo TypeORM"]
+        F3["ON DELETE CASCADE (integridade referencial)"]
+        F4["Segredos apenas em variáveis de ambiente"]
+    end
+    subgraph L7["Camada 7 — Cliente"]
+        G1["Verificação de exp antes de cada requisição"]
+        G2["Logout automático em 401"]
+        G3["Guardas de rota por papel"]
+    end
+
+    L1 --> L2 --> L3 --> L4 --> L5 --> L6
+    L7 -.->|"defesa complementar,<br/>não substitui o servidor"| L3
+```
+
+### 11.2 Controles implementados
+
+| Controle | Implementação | Arquivo |
+|---|---|---|
+| Deny-by-default de autenticação | `APP_GUARD` global; rota pública requer decorator | `app.module.ts` |
+| Fail-fast de configuração | Boot aborta sem `SECRET_KEY` | `env.validation.ts` |
+| Degradação avisada de IA | Log de aviso e `503` sem `GROQ_API_KEY` | `env.validation.ts`, `clinical-chat.service.ts` |
+| Mensagem de erro uniforme no login | "Credenciais inválidas" para usuário inexistente e senha errada | `auth.service.ts` |
+| Semente sem senha em código | Exige `SEED_*_SENHA`; aborta se ausente | `seed.ts` |
+| Logs de SQL só fora de produção | `logging: !isProduction` | `typeorm.config.ts` |
+| Truncamento de conteúdo no gateway | `.slice(0, 2000)` | `chat.gateway.ts` |
+| Aceite de termos | Modal bloqueante; recusa faz logout | `TermosUsoModal`, `Layouts/index.tsx` |
+
+### 11.3 Conformidade LGPD
+
+| Princípio (Art. 6º) | Aplicação no HealthHub |
+|---|---|
+| Finalidade | Dados coletados exclusivamente para assistência à saúde |
+| Necessidade | Recepcionista opera formulário reduzido e não acessa dados clínicos |
+| Segurança | Criptografia de senha, RBAC, validação, cabeçalhos endurecidos |
+| Transparência | Política de dados consultável e exportável em PDF |
+| Não transferência a terceiros | Integração com Telegram **descartada por decisão de arquitetura**; comunicação 100% interna |
+| Prevenção | Rate limit, limite de payload, expiração de sessão |
+
+**Lacunas de conformidade abertas** (ver seção 13): ausência de `audit_logs`, de mecanismo de anonimização/eliminação a pedido do titular, e envio de texto livre (anamnese e pergunta) à Groq API sem filtro de identificação (o nome e os demais identificadores estruturados deixaram de ser enviados em 03/11/2026).
+
+### 11.4 Análise de ameaças (STRIDE resumido)
+
+| Ameaça | Vetor | Mitigação atual | Resíduo |
+|---|---|---|---|
+| **S**poofing | Roubo de JWT no `localStorage` | Expiração de 1 dia; verificação de `exp` | XSS expõe o token — cookie `HttpOnly` seria mais forte |
+| **T**ampering | Alteração de payload | `whitelist: true` descarta campos não declarados | — |
+| **R**epudiation | Negar autoria de conduta | Mensagens imutáveis com autor denormalizado | Sem `audit_logs` para ações clínicas |
+| **I**nfo disclosure | Acesso indevido a prontuário | RBAC por rota; recepcionista sem acesso clínico | Rotas de visita sem `@Roles` |
+| **D**oS | Flood de requisições | Throttler global + limite de payload | Sem limite por usuário no WebSocket |
+| **E**levation | Chamada direta à API com papel inferior | `RolesGuard` no servidor (não só no cliente) | — |
+
+---
+
+## 12. Qualidade, Testes e Verificação
+
+### 12.1 Situação atual
+
+```mermaid
+flowchart LR
+    subgraph HAVE["Verificação existente"]
+        A["Tipagem estática<br/>TypeScript strict"]
+        B["ESLint 9 + regras React Hooks<br/>(frontend)"]
+        C["Validação em runtime<br/>class-validator"]
+        D["Smoke test manual de WS<br/>scripts/ws-smoke-test.mjs"]
+        E["Checklist manual de validação<br/>PLANO_MIGRACAO.md §9"]
+    end
+
+    subgraph MISSING["Ausente"]
+        F["Testes unitários<br/>(nenhum arquivo .spec.ts)"]
+        G["Testes de integração<br/>de repositórios"]
+        H["Testes E2E<br/>(supertest / Playwright)"]
+        I["Pipeline de CI"]
+        J["Cobertura medida"]
+    end
+
+    style MISSING fill:#fee,stroke:#c33
+```
+
+Não existe nenhum arquivo `*.spec.ts` ou `*.test.ts` no repositório, nem configuração de Jest/Vitest, nem workflow de CI. A verificação hoje é **manual e por tipos**.
+
+### 12.2 Estratégia de teste recomendada
+
+| Nível | Alvo prioritário | Ferramenta sugerida | Por que primeiro |
+|---|---|---|---|
+| Unitário | `CreateFilaService`, `UpdateFilaService`, `CreateVisitaService`, `CloseVisitaService` | Jest + repositórios falsos | Concentram as regras de negócio e o acoplamento entre módulos |
+| Unitário | `vitalStatus.ts` (limiares clínicos) | Vitest | Função pura, alto valor clínico, custo de teste próximo de zero |
+| Unitário | `AuthService` | Jest + mock de bcrypt/JwtService | Superfície de segurança crítica |
+| Integração | `TypeormChatRepository` (`unreadCount`, `findDirectConversation`) | Jest + Postgres em Testcontainers | Lógica de SQL não coberta por tipos |
+| E2E API | Matriz RBAC completa da seção 3.1 | Supertest | Regressão de autorização é a falha mais custosa |
+| E2E UI | Fluxo recepção → triagem → consulta → alta | Playwright | Valida a máquina de estados ponta a ponta |
+| Contrato | Eventos WebSocket | socket.io-client em teste | Já existe base em `ws-smoke-test.mjs` |
+
+### 12.3 Cenários de teste de aceitação (prontos para automação)
+
+| ID | Cenário | Resultado esperado |
+|---|---|---|
+| CT-01 | Login com senha errada | `401` "Credenciais inválidas" |
+| CT-02 | 11 tentativas de login em produção | 11ª retorna `429` |
+| CT-03 | Recepcionista chama `GET /patients/:id` | `403` |
+| CT-04 | Enfermeiro chama `DELETE /fila/:id` | `403` |
+| CT-05 | Cadastro com CPF de 10 dígitos | `400` de validação |
+| CT-06 | Cadastro com CPF já existente | `400` "CPF já está cadastrado" |
+| CT-07 | Corpo com campo desconhecido | Campo descartado; requisição prossegue |
+| CT-08 | Admitir paciente já na fila | `400` |
+| CT-09 | Admissão gera exatamente uma visita ativa | `GET /patients/:id/visitas` → 1 com `Em Atendimento` |
+| CT-10 | Duas admissões seguidas do mesmo paciente | Continua com 1 visita ativa (idempotência) |
+| CT-11 | `PUT /fila/:id` com `status = 'Alta'` | Visita fechada com `alta` preenchida |
+| CT-12 | Usuário não participante lista mensagens | `403` |
+| CT-13 | Mensagem enviada por A | Chega em B via `message:new` em < 1 s |
+| CT-14 | Socket sem token no handshake | Desconexão imediata com `error` |
+| CT-15 | `POST /patients/:id/chat` sem `GROQ_API_KEY` | `503` |
+| CT-16 | Upload de PDF no endpoint de áudio | `400` "Apenas arquivos de áudio" |
+| CT-17 | Token expirado em requisição | Frontend limpa sessão e redireciona |
+| CT-18 | SpO₂ = 91 na última medição | Cartão em `critical` |
+| CT-19 | Temperatura = 38,0 na última medição | Cartão em `warning` |
+| CT-20 | Paciente sem medições | Cartão em `unknown` |
+
+---
+
+## 13. Débito Técnico e Defeitos Identificados
+
+Itens levantados por leitura do código, com severidade e correção proposta.
+
+| ID | Severidade | Achado | Evidência | Impacto | Correção proposta |
+|---|:--:|---|---|---|---|
+| **DEB-01** | 🔴 Alta | **Visitas nunca são fechadas pelo fluxo de alta.** `CareContext.avançarFluxo` traduz `status = 'Alta'` em `DELETE /fila/:id`, e `DeleteFilaService` não chama `CloseVisitaService`. O código de fechamento em `UpdateFilaService` é inalcançável por esse caminho. | `context/CareContext.tsx` (`if (novoStatus === 'Alta') → api.delete`) vs. `update-fila.service.ts` (`ALTA_STATUSES`) | Toda visita permanece `Em Atendimento` com `alta = NULL`. O histórico de visitas — base declarada para o trabalho futuro de ML — nasce inconsistente. | Fechar a visita em `DeleteFilaService`, **ou** fazer o frontend enviar `PUT` com `status='Alta'` antes do `DELETE`. Preferir a primeira: mantém a regra no servidor. |
+| **DEB-02** | 🟠 Média | **Rotas de visita sem `@Roles`.** `VisitasController` só é protegido pelo `JwtAuthGuard` global. | `visitas/presentation/visitas.controller.ts` | Recepcionista lê histórico clínico (gravidade, desfecho, observações) e pode fechar visita — contradiz a política aplicada em `patients`. | `@Roles('medico','enfermeiro')` na leitura e no fechamento. |
+| **DEB-03** | 🟠 Média | **[Resolvido em 03/11/2026 — migration 1783400000000 e transação em `admitirAtomico`] Admissão não era atômica.** `INSERT fila_pacientes` e `INSERT visitas` ocorrem em conexões independentes. | `create-fila.service.ts` | Falha no segundo insert deixa fila sem visita; estado precisa de reconciliação manual. | Envolver o caso de uso em `DataSource.transaction()`. |
+| **DEB-04** | 🟠 Média | **`removerPaciente` exposto a papéis sem permissão.** O ícone de remoção aparece nas colunas do Kanban para qualquer papel, mas `DELETE /fila/:id` exige `medico`. | `pages/Alerts/index.tsx` vs. `fila.controller.ts` | Enfermeiro e recepcionista recebem `403` sem tratamento visível — falha silenciosa de UX. | Ocultar o controle conforme `role` e tratar `403` com aviso. |
+| **DEB-05** | 🟠 Média | **URL de API fixa em código.** `http://localhost:3001` aparece literal em dois arquivos. | `services/api.ts`, `services/chatService.ts` | Impede build para homologação/produção sem editar o código. | `import.meta.env.VITE_API_URL` com fallback local. |
+| **DEB-06** | 🟠 Média | **Sem trilha de auditoria.** `audit_logs` estava previsto no plano e não existe. | Ausência de migration/módulo | Acesso a prontuário e emissão de PDF não deixam rastro — fragiliza a posição LGPD e a irretratabilidade. | Interceptor NestJS gravando `(user_id, ação, recurso, timestamp, IP)`. |
+| **DEB-07** | 🟠 Média | **Nenhum teste automatizado.** | Repositório sem `*.spec.ts` e sem CI | Toda regressão depende de teste manual; a matriz RBAC não tem rede de proteção. | Implementar a seção 12.2 começando por fila/visitas e pela matriz de papéis. |
+| **DEB-08** | 🟡 Baixa | **Contador de senha em memória do cliente.** `let senhaCounter = 1` reinicia a cada recarga e é independente por aba. | `Alerts/index.tsx`, `MobileTriage/index.tsx` | Senhas duplicadas com dois atendentes simultâneos. | Gerar a senha no backend por sequência diária. |
+| **DEB-09** | 🟡 Baixa | **`fila_pacientes.chegada` é `varchar` com hora local do cliente.** | migration `CreateFilaPacientes` | Impede cálculo confiável de tempo de espera — métrica central em pronto-atendimento. | Migrar para `timestamptz` preenchido pelo servidor. |
+| **DEB-10** | 🟡 Baixa | **`sinais_vitais.hora` como inteiro `HHMM`.** | `sinais-vitais.entity.ts` | Não é ordenável entre dias; redundante com `created_at`. | Depreciar em favor de `created_at`. |
+| **DEB-11** | 🟡 Baixa | **`ConversationType` inclui `'patient'` sem implementação.** | `conversation.entity.ts` | Tipo morto no domínio; sugere recurso inexistente. | Implementar a thread por paciente ou remover o valor. |
+| **DEB-12** | 🟡 Baixa | **CORS do WebSocket com `origin: true`.** Aceita qualquer origem, ao contrário da allowlist do HTTP. | `chat.gateway.ts` | Inconsistência de política entre os dois canais. | Reaproveitar a mesma allowlist do `main.ts`. |
+| **DEB-13** | 🟡 Baixa | **`listUserConversations` gera N+1 consultas.** `buildSummary` executa 3–4 queries por conversa. | `typeorm-chat.repository.ts` | Custo linear no número de conversas do usuário. | Consolidar em uma query com agregação/`LEFT JOIN LATERAL`. |
+| **DEB-14** | 🟡 Baixa | **`result[0]` assumido como o grupo.** Se `findGroupConversation` retornar `null`, a lista fica com um elemento `undefined`. | `typeorm-chat.repository.ts` | Erro potencial no cliente em base sem a linha semente. | Tratar ausência do grupo explicitamente. |
+| **DEB-15** | 🟡 Baixa | **README do backend desatualizado.** Descreve Express, "Service Layer" e porta 3333. | `HealthHub-BackEnd/Readme.md` | Documentação divergente do código (NestJS, porta 3001). | Reescrever refletindo a arquitetura atual. |
+| **DEB-16** | 🟡 Baixa | **Swagger previsto e não implementado.** | Plano §3.1 vs. `package.json` | API sem documentação executável. | Adicionar `@nestjs/swagger` com decorators nos DTOs. |
+| **DEB-17** | 🟡 Baixa | **`.env.example` retém chaves de Supabase/Vite não usadas.** | `.env.example` | Confunde quem configura o ambiente. | Remover as entradas obsoletas. |
+| **DEB-18** | 🟡 Baixa | **PDF gerado no cliente.** Layout e dados dependem do navegador. | `pages/ExportPDF`, `Alerts` | Inconsistência entre máquinas; impede anexar PDF ao chat. | Módulo `pdf` server-side (`GET /patients/:id/pdf`). |
+| **DEB-19** | 🟠 Média | **Domínios de valor sem `CHECK` nem tabela de referência.** `status`, `desfecho`, `classificacao_risco` e `role` são `varchar` livres; a regra existe só em TypeScript. | migrations vs. `@IsIn`, `PatientStatus`, `UserRole` | Escrita fora da API (script, correção manual, migration futura) grava valor inválido sem o banco reclamar; consultas analíticas ficam sujeitas a variação de grafia. | Adicionar `CHECK` nas colunas, ou tabelas de domínio com FK. O `CHECK` é suficiente e mais barato. |
+| **DEB-20** | 🟡 Baixa | **Denormalização acidental em `fila_pacientes`.** `nome` e `idade` são cópias de `pacientes`, sem a justificativa histórica que `messages` tem. | migration `CreateFilaPacientes`, `CareContext.admitirPaciente` | **[Mitigado em 04/11/2026: a edição do cadastro atualiza nome e idade das entradas da esteira na mesma transação e emite `fila:changed`; as colunas continuam duplicadas.]** Antes, corrigir o nome do paciente durante o atendimento não atualizava o cartão do Kanban — dois valores divergentes na mesma tela. | Remover as colunas e obter os dados por join/`relations`. |
+| **DEB-21** | 🟠 Média | **Unicidade de fila e de visita ativa garantida só na aplicação.** Não há `UNIQUE` em `fila_pacientes.paciente_id` nem índice parcial de visita aberta. | RN-02, RN-03 verificadas com `SELECT` prévio | Duas admissões simultâneas do mesmo paciente passam pela verificação antes de qualquer `INSERT` e duplicam o registro. | `UNIQUE (paciente_id)` na fila e `CREATE UNIQUE INDEX ON visitas (paciente_id) WHERE alta IS NULL`. |
+
+### 13.1 Priorização
+
+```mermaid
+quadrantChart
+    title Débito técnico — impacto vs. esforço
+    x-axis "Baixo esforço" --> "Alto esforço"
+    y-axis "Baixo impacto" --> "Alto impacto"
+    quadrant-1 "Planejar"
+    quadrant-2 "Fazer agora"
+    quadrant-3 "Oportunista"
+    quadrant-4 "Reavaliar"
+    "DEB-01 visita nao fecha": [0.18, 0.95]
+    "DEB-02 roles em visitas": [0.08, 0.72]
+    "DEB-03 transacao": [0.30, 0.68]
+    "DEB-04 botao sem permissao": [0.15, 0.45]
+    "DEB-05 URL fixa": [0.10, 0.55]
+    "DEB-06 audit logs": [0.62, 0.80]
+    "DEB-07 testes": [0.85, 0.88]
+    "DEB-08 senha no cliente": [0.32, 0.38]
+    "DEB-09 chegada varchar": [0.42, 0.50]
+    "DEB-13 N+1 no chat": [0.45, 0.30]
+    "DEB-16 swagger": [0.28, 0.32]
+    "DEB-18 PDF no servidor": [0.70, 0.42]
+    "DEB-19 CHECK de dominio": [0.20, 0.58]
+    "DEB-20 denormalizacao fila": [0.35, 0.25]
+    "DEB-21 unicidade no banco": [0.16, 0.62]
+```
+
+---
+
+## 14. Infraestrutura, Build e Implantação
+
+### 14.1 Topologia de desenvolvimento
+
+```mermaid
+flowchart TB
+    subgraph DEV["Estação de desenvolvimento · Windows"]
+        subgraph NODE["Node.js"]
+            VITE["Vite dev server<br/>localhost:5173<br/>npm run dev"]
+            NEST["NestJS watch<br/>localhost:3001<br/>nest start --watch"]
+        end
+        subgraph DOCKER["Docker Desktop"]
+            PG[("healthhub-db<br/>postgres:16-alpine<br/>host 5433 → 5432<br/>volume healthhub_pgdata")]
+        end
+    end
+    GROQ["api.groq.com"]
+
+    VITE -->|"REST + WS"| NEST
+    NEST -->|"pg"| PG
+    NEST -->|"HTTPS"| GROQ
+```
+
+### 14.2 Variáveis de ambiente
+
+| Variável | Obrigatória | Efeito se ausente |
+|---|:--:|---|
+| `SECRET_KEY` | ✅ | **Boot aborta** |
+| `DATABASE_URL` *ou* `DB_HOST`… | ⚠️ | Aviso no log; cai nos defaults locais |
+| `GROQ_API_KEY` | ⛔ | Aviso; rotas de IA respondem `503` |
+| `PORT` | ⛔ | Default `3001` |
+| `NODE_ENV` | ⛔ | Não-produção: CORS permissivo local, log de SQL ativo |
+| `ALLOWED_ORIGINS` | ⚠️ em produção | Sem origem liberada em produção |
+| `SEED_*_SENHA` | ✅ para semear | `seed.ts` aborta |
+
+### 14.3 Procedimento de implantação
+
+```mermaid
+flowchart LR
+    A["git clone"] --> B["npm install<br/>(back e front)"]
+    B --> C["configurar .env<br/>SECRET_KEY + DB + GROQ"]
+    C --> D["docker compose up -d<br/>(PostgreSQL)"]
+    D --> E["npm run migration:run"]
+    E --> F["npm run seed"]
+    F --> G["npm run build<br/>(back: nest build · front: tsc + vite build)"]
+    G --> H["npm run start:prod<br/>+ servir dist/ do frontend"]
+```
+
+```bash
+docker compose -f HealthHub-BackEnd/docker-compose.yml up -d
+```
+
+```bash
+cd HealthHub-BackEnd && npm run migration:run && npm run seed
+```
+
+### 14.4 Scripts disponíveis
+
+| Projeto | Script | Ação |
+|---|---|---|
+| Backend | `dev` / `start:dev` | `nest start --watch` |
+| Backend | `build` | `nest build` |
+| Backend | `start:prod` | `node dist/main` |
+| Backend | `migration:run` / `:generate` / `:revert` | TypeORM CLI via `tsx` |
+| Backend | `seed` | Cria os três usuários de papel |
+| Frontend | `dev` | Vite dev server |
+| Frontend | `build` | `tsc -b && vite build` |
+| Frontend | `lint` | ESLint 9 |
+| Frontend | `preview` | Serve o build local |
+
+**Utilitários:** `scripts/importarPsv.ts` (importação de dataset clínico PhysioNet) e `scripts/ws-smoke-test.mjs` (verificação manual do canal WebSocket).
+
+---
+
+## 15. Métricas do Produto de Software
+
+### 15.1 Tamanho
+
+| Métrica | Backend | Frontend | Total |
+|---|--:|--:|--:|
+| Arquivos TypeScript | 83 | 35 | **118** |
+| Linhas de código | 2.759 | 8.168 | **10.927** |
+| Módulos de domínio | 7 | — | 7 |
+| Entidades persistidas | 8 | — | 8 |
+| Migrations | 6 | — | 6 |
+| Endpoints REST | 20 | — | 20 |
+| Eventos WebSocket | 3 | — | 3 |
+| Casos de uso (services) | 23 | — | 23 |
+| Páginas / rotas de tela | — | 9 | 9 |
+| Componentes reutilizáveis | — | 11 | 11 |
+
+### 15.2 Distribuição de complexidade no frontend
+
+| Arquivo | Linhas | Observação |
+|---|--:|---|
+| `pages/ExportPDF/index.tsx` | 844 | Layout de PDF codificado imperativamente com jsPDF |
+| `pages/MobileTriage/index.tsx` | 809 | Trilha mobile completa em um arquivo |
+| `pages/Chat/index.tsx` | 674 | Lista de conversas + janela + painel de detalhes |
+| `pages/Alerts/index.tsx` | 551 | Kanban + modais + geração de guia de alta |
+| `components/TermosUsoModal/index.tsx` | 524 | Texto legal embutido no componente |
+| `pages/Patients/index.tsx` | 494 | Abas de dados clínicos e histórico de visitas |
+
+> Seis arquivos concentram ~48 % do código do frontend. É o principal indicador a favor da **Fase 2** (modularização por feature), ainda pendente no plano de migração.
+
+### 15.3 Aderência arquitetural do backend
+
+| Indicador | Resultado |
+|---|---|
+| Módulos com as 4 camadas completas | 6 de 7 (`ai` não tem `domain`/`infrastructure` — não persiste estado) |
+| Casos de uso dependentes de interface, não de ORM | 23 de 23 |
+| Controllers com validação por DTO em corpo mutável | 100 % |
+| Rotas com `:id` usando `ParseUUIDPipe` | 100 % |
+| Controllers com política de papel declarada | 6 de 7 (`visitas` pendente — DEB-02) |
+
+---
+
+## 16. Gestão de Configuração e Processo
+
+### 16.1 Repositório
+
+| Aspecto | Situação |
+|---|---|
+| Estrutura | Monorepo com dois pacotes independentes |
+| Branch de trabalho | `master` (branch principal de referência: `main`) |
+| Commits registrados | 16 (janela 27/08/2026 – 28/08/2026, após reinicialização do histórico) |
+| Padrão de mensagem | Conventional Commits (`feat:`, `fix:`) |
+| Segredos | `.env` fora do versionamento; `.env.example` como modelo |
+| Versionamento de esquema | Exclusivamente por migrations TypeORM |
+
+### 16.2 Ciclo de desenvolvimento adotado
+
+Modelo **incremental orientado a fases com gates**, definido em `PLANO_MIGRACAO.md`:
+
+```mermaid
+flowchart LR
+    F1["<b>Fase 1</b><br/>Backend NestJS<br/>auth · patients · vitals<br/>fila · ai"]
+    G1{"Gate 1<br/>frontend legado<br/>100% funcional"}
+    F2["<b>Fase 2</b><br/>Frontend modular<br/>por feature"]
+    G2{"Gate 2<br/>paridade visual<br/>e funcional"}
+    F3["<b>Fase 3</b><br/>Tempo real<br/>chat · notificações"]
+    G3{"Gate 3<br/>mensagens entre<br/>dois navegadores"}
+    F4["<b>Fase 4</b><br/>Expansão<br/>PDF server-side<br/>audit_logs"]
+
+    F1 --> G1 --> F2 --> G2 --> F3 --> G3 --> F4
+
+    style F1 fill:#d4edda,stroke:#28a745
+    style G1 fill:#d4edda,stroke:#28a745
+    style F3 fill:#fff3cd,stroke:#ffc107
+    style G3 fill:#fff3cd,stroke:#ffc107
+    style F2 fill:#f8d7da,stroke:#dc3545
+    style F4 fill:#f8d7da,stroke:#dc3545
+```
+
+**Estado real:** Fase 1 concluída. Fase 3 antecipada e concluída para o chat (as notificações persistentes não foram feitas). Fase 2 e Fase 4 pendentes — a regra de "não avançar sem gate" foi flexibilizada para entregar o chat antes da modularização do frontend.
+
+### 16.3 Decisões arquiteturais registradas (ADR)
+
+| ADR | Decisão | Justificativa | Consequência |
+|---|---|---|---|
+| ADR-01 | Migrar Express 5 → NestJS 10 | DI nativa, guards declarativos, suporte a WebSocket, estrutura imposta | Reescrita completa da camada HTTP; ganho de testabilidade |
+| ADR-02 | Clean Architecture por módulo | Isolar regra de negócio do ORM e do framework | Mais arquivos por funcionalidade; troca de ORM localizada |
+| ADR-03 | **Descartar integração com Telegram** | Dado de paciente é sensível; LGPD veda trânsito por terceiros | Necessidade de construir chat interno próprio |
+| ADR-04 | Mensagens imutáveis com autor denormalizado | Rastro clínico auditável; leitura sem join | Renomear usuário não retroage nas mensagens antigas (correto para auditoria) |
+| ADR-05 | `last_read_at` pelo relógio do banco | Relógio do Node causava contagem errada de não lidas por fuso | Repositório precisa de query builder em vez de `save()` |
+| ADR-06 | Grupo Geral com participação implícita | Evita manter N linhas de participante por usuário | `isParticipant` tem ramo especial para `type = 'group'` |
+| ADR-07 | Visita aberta automaticamente pela fila | Histórico sem passo manual extra para a equipe | Acoplamento `FilaModule → VisitasModule` |
+| ADR-08 | Abandonar Supabase por PostgreSQL em Docker | Conexão direta com problema de IPv6; controle local no desenvolvimento | Necessidade de `docker compose` no ambiente |
+| ADR-09 | Migrar Zod → class-validator | Alinhamento com o `ValidationPipe` do NestJS | DTOs como classes; `whitelist` reproduz o `strip` do Zod |
+| ADR-10 | `synchronize: false` sempre | Reprodutibilidade e revisão de mudança de esquema | Toda alteração exige migration escrita |
+
+---
+
+## 17. Riscos
+
+| ID | Risco | Prob. | Impacto | Exposição | Mitigação |
+|---|---|:--:|:--:|:--:|---|
+| R-01 | Histórico de visitas inconsistente invalida o estudo de ML | Alta | Alto | 🔴 | Corrigir DEB-01 antes de acumular volume; script de reconciliação das visitas abertas |
+| R-02 | Regressão de autorização sem testes automatizados | Alta | Alto | 🔴 | Suíte E2E da matriz RBAC (CT-03, CT-04) |
+| R-03 | Indisponibilidade da Groq API interrompe o apoio clínico | Média | Médio | 🟠 | Já degrada com `503`; exibir aviso claro na UI e manter fluxo manual |
+| R-04 | Vazamento de dados sensíveis para provedor de IA | Média | Alto | 🔴 | **Parcialmente mitigado (03/11/2026):** o nome e os demais identificadores já não são enviados (`contextoSemIdentificacao`); textos livres (anamnese, pergunta) seguem sem filtro; registrar consentimento |
+| R-05 | Token em `localStorage` capturado por XSS | Baixa | Alto | 🟠 | Migrar para cookie `HttpOnly` + CSRF; auditar renderização de conteúdo do chat |
+| R-06 | Concentração de conhecimento em um único desenvolvedor | Alta | Médio | 🟠 | Este documento; ADRs; Swagger (DEB-16) |
+| R-07 | Arquivos de 800+ linhas travam a evolução do frontend | Alta | Médio | 🟠 | Executar a Fase 2 (modularização por feature) |
+| R-08 | Ausência de auditoria em questionamento legal | Média | Alto | 🔴 | Implementar `audit_logs` (DEB-06) |
+| R-09 | Senhas duplicadas com atendimento simultâneo | Média | Baixo | 🟡 | Gerar senha no servidor (DEB-08) |
+| R-10 | Deploy impedido pela URL fixa no cliente | Alta | Baixo | 🟡 | Variável de ambiente Vite (DEB-05) |
+
+---
+
+## 18. Evolução e Roadmap
+
+### 18.1 Sequência recomendada
+
+```mermaid
+gantt
+    dateFormat YYYY-MM-DD
+    title Roadmap proposto — HealthHub
+    axisFormat %d/%m
+
+    section Correções críticas
+    DEB-01 fechamento de visita      :crit, a1, 2026-09-04, 2d
+    DEB-02 @Roles em visitas         :crit, a2, after a1, 1d
+    DEB-03 transação na admissão     :a3, after a2, 2d
+    DEB-05 URL por variável          :a4, after a3, 1d
+
+    section Integridade do banco
+    DEB-21 unicidade no banco        :crit, g1, after a4, 1d
+    DEB-19 CHECK de domínio          :g2, after g1, 2d
+    DEB-20 remover denormalização    :g3, after g2, 2d
+
+    section Rede de proteção
+    Unitários fila + visitas         :b1, after a4, 4d
+    E2E da matriz RBAC               :b2, after b1, 4d
+    Swagger dos endpoints            :b3, after b2, 3d
+
+    section Conformidade
+    audit_logs + interceptor         :c1, after b3, 5d
+    Anonimização do contexto de IA   :c2, after c1, 3d
+
+    section Fase 2 — Frontend modular
+    Estrutura app/ + shared/         :d1, after c2, 4d
+    Módulos auth · patients          :d2, after d1, 5d
+    Módulos alerts · monitoring      :d3, after d2, 5d
+    Módulos chat · export · triage   :d4, after d3, 5d
+
+    section Fase 4 — Expansão
+    Módulo pdf server-side           :e1, after d4, 6d
+    Notificações persistentes        :e2, after e1, 6d
+
+    section Pesquisa
+    Dataset de visitas consolidado   :f1, after e2, 5d
+    Classificador de gravidade       :f2, after f1, 12d
+```
+
+### 18.2 Funcionalidades planejadas e não implementadas
+
+| Funcionalidade | Fonte do requisito | Estado | Dependência crítica |
+|---|---|---|---|
+| Notificações persistentes (sino + toasts) | Plano §7.2 | Não iniciada | Tabela `notifications` + gateway de notificações |
+| PDF server-side com anexo no chat | Plano §7.3 | Não iniciada | Módulo `pdf` (`pdfmake`/`puppeteer`) |
+| `audit_logs` de acesso a dados clínicos | Plano §7.3, §9 | Não iniciada | Interceptor global |
+| Documentação Swagger | Plano §3.1 | Não iniciada | `@nestjs/swagger` |
+| Frontend modular por feature | Plano §4, Fase 2 | Não iniciada | Refatoração dos 6 arquivos maiores |
+| Thread de conversa por paciente | `ConversationType = 'patient'` | Tipo declarado, sem implementação | Vincular `conversations` a `pacientes` |
+| Marca de "paciente recorrente" na admissão | Registro de projeto | Não iniciada | `countByPacienteId` (já existe no repositório) |
+
+### 18.3 Trilha de aprendizado de máquina (pesquisa do TCC)
+
+O módulo `visitas` foi projetado como fonte de dados para análise. Viabilidade avaliada:
+
+```mermaid
+flowchart TB
+    DS["<b>Base de dados</b><br/>visitas × sinais_vitais × pacientes"]
+
+    subgraph N1["Nível 1 — Estatística descritiva"]
+        E1["Frequência de retorno<br/>por paciente"]
+        E2["Horários de pico<br/>de admissão"]
+        E3["Distribuição de gravidade<br/>por faixa etária"]
+        E4["Tempo médio de<br/>permanência por desfecho"]
+    end
+
+    subgraph N2["Nível 2 — Não supervisionado"]
+        C1["K-means sobre<br/>sinais vitais + gravidade"]
+        C2["Perfis de paciente<br/>de pronto-atendimento"]
+    end
+
+    subgraph N3["Nível 3 — Supervisionado ⭐"]
+        S1["<b>Sugestão automática de classificação de risco<br/>(futuro, fora do escopo atual; hoje a cor é sempre manual)</b><br/>features: FC, SpO₂, PA, Temp, idade<br/>rótulo: classificacao_risco"]
+    end
+
+    subgraph N4["Nível 4 — Preditivo"]
+        P1["Predição de readmissão<br/>em 30 dias"]
+        P2["Risco de agravamento<br/>durante observação"]
+    end
+
+    DS --> N1 --> N2 --> N3 --> N4
+
+    S1 -.->|"mais viável para o TCC:<br/>rótulo limpo já coletado<br/>na operação"| OUT["Apoio à triagem<br/>(sugestão, nunca decisão)"]
+
+    style N3 fill:#d4edda,stroke:#28a745
+```
+
+**Pré-condições técnicas para essa trilha:** corrigir DEB-01 (sem `alta` preenchida não há como calcular permanência nem desfecho real) e garantir volume mínimo de visitas fechadas com gravidade registrada. Recomenda-se também tratar o campo `chegada` da fila (DEB-09) para permitir cálculo confiável de tempo de espera.
+
+---
+
+## 19. Glossário
+
+| Termo | Definição |
+|---|---|
+| **Esteira de Cuidado** | Quadro Kanban que representa o fluxo do paciente no pronto-atendimento, das colunas *Aguardando Triagem* a *Alta* |
+| **Classificação de risco** | Escala em cores definida para o protótipo, atribuída manualmente pelo enfermeiro, conforme diretrizes de acolhimento com classificação de risco do Ministério da Saúde (2009). Sem tempos-alvo. |
+| **Visita** | Episódio único de atendimento de um paciente, da chegada ao desfecho; permite reaproveitar o cadastro entre atendimentos |
+| **Desfecho** | Encerramento clínico da visita: Alta, Internação, Transferência ou Saída Voluntária |
+| **Anamnese** | Histórico clínico relatado pelo paciente e registrado pelo profissional |
+| **Sinais vitais** | Frequência cardíaca (FC), saturação de oxigênio (SpO₂), pressão arterial (PA) e temperatura |
+| **Senha de atendimento** | Identificador sequencial entregue ao paciente na recepção (`PR-001`, `REC-001`) |
+| **RBAC** | *Role-Based Access Control* — autorização por papel do usuário |
+| **DTO** | *Data Transfer Object* — classe que declara e valida o formato de entrada de um endpoint |
+| **Guard** | Componente NestJS que autoriza ou nega o acesso antes do controller |
+| **Gateway** | Componente NestJS que expõe eventos WebSocket |
+| **Clean Architecture** | Organização em camadas com dependências apontando para o domínio |
+| **Migration** | Script versionado de alteração do esquema do banco |
+| **Deny-by-default** | Política em que o acesso é negado salvo permissão explícita |
+| **ACK** | Confirmação de recebimento de um evento WebSocket pelo servidor |
+| **N+1** | Antipadrão em que uma consulta de lista dispara uma consulta adicional por item |
+| **LGPD** | Lei Geral de Proteção de Dados Pessoais (Lei 13.709/2018) |
+| **PhysioNet** | Repositório público de dados clínicos usado como fonte para importação de sinais vitais |
+
+---
+
+## Anexo A — Índice de arquivos por responsabilidade
+
+### Backend (`HealthHub-BackEnd/src`)
+
+| Caminho | Responsabilidade |
+|---|---|
+| `main.ts` | Bootstrap, helmet, CORS, limite de payload, `ValidationPipe` global |
+| `app.module.ts` | Composição de módulos, JWT global, throttler, guards globais |
+| `config/env.validation.ts` | Validação fail-fast das variáveis de ambiente |
+| `config/typeorm.config.ts` | Configuração do TypeORM (`DATABASE_URL` ou `DB_*`) |
+| `database/data-source.ts` | DataSource para a CLI de migrations |
+| `database/migrations/` | 6 migrations versionadas |
+| `database/seed.ts` | Criação dos usuários dos três papéis |
+| `shared/guards/` | `JwtAuthGuard`, `RolesGuard` |
+| `shared/decorators/` | `@Public()`, `@Roles()` |
+| `modules/auth/` | Login, JWT, repositório de usuário |
+| `modules/patients/` | CRUD de prontuário |
+| `modules/sinais-vitais/` | Medições seriadas, histórico, últimas 12 |
+| `modules/fila/` | Esteira de Cuidado; orquestra abertura/fechamento de visita |
+| `modules/visitas/` | Episódios de atendimento |
+| `modules/ai/` | Chat clínico (Groq) e transcrição (Whisper) |
+| `modules/chat/` | Chat interno REST + WebSocket |
+| `scripts/importarPsv.ts` | Importação do dataset PhysioNet |
+| `scripts/ws-smoke-test.mjs` | Verificação manual do canal WebSocket |
+
+### Frontend (`HealthHub-Project/src`)
+
+| Caminho | Responsabilidade |
+|---|---|
+| `main.tsx` | Raiz React + `MantineProvider` com o tema HealthHub |
+| `App.tsx` | Rotas, `PrivateRoute`, `RoleRoute`, `MobileBlock` |
+| `theme.ts` | Paletas `hub`/`slate`, tipografia, defaults de componentes |
+| `context/AuthContext.tsx` | Papel e nome do usuário; `setAuth`/`clearAuth` |
+| `context/CareContext.tsx` | Estado da fila e operações de fluxo |
+| `services/api.ts` | Cliente axios com interceptors de JWT e `401` |
+| `services/chatService.ts` | Socket.IO com ACK, dedupe, reconexão e fallback REST |
+| `hooks/useMobile.ts` | Detecção de viewport ≤ 768 px |
+| `utils/vitalStatus.ts` | Classificação clínica e cores da classificação de risco |
+| `utils/formatters.ts` | Máscaras de CPF e telefone |
+| `utils/gerarPDFPolitica.ts` | PDF da política de dados |
+| `Layouts/index.tsx` | `AppShell`, sidebar, bolha de chat, modal de termos |
+| `Layouts/MobileLayout.tsx` | Casca da trilha mobile |
+| `pages/Login` | Autenticação com painel institucional |
+| `pages/Dashboard` | Painel de sinais vitais |
+| `pages/Patients` | Lista, cadastro e abas de prontuário/visitas |
+| `pages/Monitoring` | Assistente de IA com entrada por texto e áudio |
+| `pages/Alerts` | Kanban da Esteira de Cuidado e guia de alta |
+| `pages/ExportPDF` | Exportação de prontuário |
+| `pages/Chat` | Interface de chat interno |
+| `pages/MobileTriage` | Triagem otimizada para celular |
+| `pages/PoliticaDados` | Política de tratamento de dados |
+| `components/` | `SideBar`, `Buttons`, `CardPatient`, `CardDashboard`, `GraphVital`, `ChatBubble`, `TermosUsoModal`, `PageShell`, `InputField`, `FilterField`, `PatientSideBarCard` |
+
+---
+
+*Documento de Engenharia de Software — HealthHub · versão 1.0 · 03/09/2026*
