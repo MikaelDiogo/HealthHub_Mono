@@ -47,8 +47,8 @@ GROQ_API_KEY=<sua chave em console.groq.com>
 # Porta da API (opcional, padrão 3001)
 PORT=3001
 
-# Alertas de sinais vitais sem fonte clínica registrada (FC > 90, temperatura > 38,5 e SpO2 < 92). Opcional, padrão true.
-# false desliga só esses; os alertas com fonte (POP.HC-UFTM-DENF.003 v6) continuam. Veja src/config/limiares-sinais-vitais.ts
+# Alertas de sinais vitais sem fonte clínica registrada (fonte: null). Opcional, padrão true. Desde a rodada 3 nenhum limiar está sem fonte:
+# hoje a chave não desliga nenhum alerta real. Veja src/config/limiares-sinais-vitais.ts
 ALERTAS_SEM_FONTE=true
 
 # Senhas para o seed (apenas desenvolvimento)

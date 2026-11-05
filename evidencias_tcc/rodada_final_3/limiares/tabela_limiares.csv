@@ -1,0 +1,9 @@
+sinal,nivel,operador,valor,fonte,anexo_ou_quadro,mudou
+FC (bpm),critico,< ou >,60 / 100,"POP.HC-UFTM-DENF.003 v6 (Ebserh, 2025)",Anexo E (adulto 60 a 100),nao
+FC (bpm),atencao,>,90,"Criterios de SIRS (Bone et al., Chest 1992); NEWS2 (RCP 2017)","SIRS: FC > 90; NEWS2: 91 a 110 = 1 ponto",so a fonte
+SpO2 (%),critico,<,92,"NEWS2 (RCP 2017)","escala 1: <= 91 = 3 pontos",so a fonte
+SpO2 (%),atencao,<,95,"POP.HC-UFTM-DENF.003 v6; NEWS2","POP Anexo H (normal 95 a 100); NEWS2 94 a 95 = 1 ponto",nao
+Temperatura (C),critico,>=,39.1,"POP.HC-UFTM-DENF.003 v6; NEWS2","POP Anexo F (febre alta 39,1 a 40,0); NEWS2 >= 39,1 = 2 pontos",sim (antes > 38.5)
+Temperatura (C),atencao,>=,37.8,"POP.HC-UFTM-DENF.003 v6",Anexo F (febre baixa a partir de 37,8),nao
+Pressao (mmHg),critico,"PAS <= / >= ; PAD >=","90 / 180 ; 120","NEWS2; POP; Posicionamento Luso-Brasileiro de Emergencias Hipertensivas 2020 (SBC); Linha de cuidado HAS (MS)","PAS <= 90: NEWS2 (3 pontos) e POP Anexo A; PAS >= 180 ou PAD >= 120: SBC 2020, MS e POP Anexo D",novo
+Pressao (mmHg),atencao,"PAS 91 a 100 ; PAS >= ; PAD >=","91-100 ; 140 ; 90","NEWS2; POP; Diretrizes Brasileiras de Hipertensao 2020 (SBC); Linha de cuidado HAS (MS)","PAS 91-100: NEWS2 (2 pontos) e POP Anexo A; PAS >= 140 ou PAD >= 90: Diretriz 2020 Quadro 3.4 e MS",novo

@@ -1,5 +1,7 @@
 # Limiares de alerta de sinais vitais — levantamento (Tarefa 8)
 
+> **Nota (05/11/2026):** este documento é **anterior** à mudança dos limiares. Na rodada 3 a temperatura crítica passou de `> 38,5` para `>= 39,1`, a pressão arterial passou a ter alerta e todos os limiares ganharam fonte. O estado atual está em `evidencias_tcc/rodada_final_3/limiares_com_fonte.md`. O texto abaixo é mantido como registro histórico.
+
 Levantado em 03/11/2026 sobre o commit `05e5823` (branch `evolucao-estrutura`). **Nenhum valor foi alterado e nenhum valor clínico foi escolhido ou inferido por mim.** A tabela só descreve o que o código faz hoje.
 
 ## 1. Limiares de alerta (o que muda a cor/estado na tela e a lista "atenção")
