@@ -8,7 +8,7 @@ Scripts usados para verificar o HealthHub em **banco de teste isolado**, com **d
 |---|---|
 | `cenarios22/f01.mjs` … `f16_f17.mjs`, `c01_c05.mjs` | Os 22 cenários (F01 a F17 e C01 a C05) pela **tela** (navegador headless) e pela API. `lib.mjs` é a biblioteca comum |
 | `e2e_eventos.mjs` | Registro de eventos da esteira pela API (14 checagens) |
-| `s1_s8.mjs` | S1 (ordem), S2 (desempate), S3 (reavaliação e evento), S4 (permissão; a mensagem real para a recepção é um item à parte, reprovado por divergência conhecida), S5 (textos sem tempos, estático), S7 (regressão) e S8 (salto de estado, só registra). É a versão consolidada e sem caminhos pessoais; o script original por fases, usado em 03/11/2026, continua em `evidencias/testes/cenarios_accr.mjs` |
+| `s1_s8.mjs` | S1 (ordem), S2 (desempate), S3 (reavaliação e evento), S4 (permissão; S4-mensagem confere a mensagem do documento para a recepção; reprovava até a correção da rodada 3), S5 (textos sem tempos, estático), S7 (regressão) e S8 (salto de estado, só registra). É a versão consolidada e sem caminhos pessoais; o script original por fases, usado em 03/11/2026, continua em `evidencias/testes/cenarios_accr.mjs` |
 | `s6_migration.mjs` | S6: migrações preservam os dados (antes/depois/reversão), em banco **descartável** criado e removido pelo próprio script |
 | `tf/tf_casos.mjs` | TF01 a TF08 do Apêndice A (TF01 usa só o nome, a regra do cadastro mínimo) |
 | `tf/tf05_fronteiras.mjs` | TF05: alertas nas fronteiras dos limiares (chama as funções reais) |

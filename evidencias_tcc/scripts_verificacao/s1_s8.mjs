@@ -101,9 +101,9 @@ reg('s4', `recepcionista → PUT /fila/:id com gravidade=Vermelho: HTTP ${neg.st
 const msgOk = JSON.stringify(neg.data).includes('Apenas o enfermeiro pode atribuir a categoria de risco.');
 ok('S4', 'Permissão: recepção não grava cor (HTTP 403 e nenhuma cor gravada)', neg.status === 403 && !depois?.gravidade, { http: neg.status, cor_gravada: depois?.gravidade ?? null, nota: 'A parte da tela (o seletor não aparece para a recepção) é conferida no F10/F13 e nas capturas.' });
 reg('s4', `${resultados.at(-1).resultado} S4: HTTP ${neg.status}, nenhuma cor gravada=${!depois?.gravidade}`);
-// A mensagem exigida pelo documento ('Apenas o enfermeiro pode atribuir a categoria de risco.') vem do serviço; a recepção é barrada ANTES, pelo
-// RolesGuard (PUT /fila/:id não lista recepcionista), com a mensagem genérica. Registrado como DIVERGÊNCIA OBSERVADA, sem alterar o critério.
-ok('S4-mensagem', 'Mensagem real para a recepção (critério do documento)', msgOk, { mensagem_obtida_recepcao: neg.data, nota: 'Divergência conhecida: a recepção recebe a mensagem genérica do guard; a mensagem do serviço aparece para quem passa pelo guard sem ser enfermeiro (médico, abaixo).' });
+// A mensagem exigida pelo documento ('Apenas o enfermeiro pode atribuir a categoria de risco.'): desde a rodada 3 (correção S4) o RolesGuard a devolve
+// também para a recepção quando o corpo traz `gravidade` (decorator @NegacaoPorCampo); sem esse campo a recusa segue genérica. O critério não foi alterado.
+ok('S4-mensagem', 'Mensagem real para a recepção (critério do documento)', msgOk, { mensagem_obtida_recepcao: neg.data, nota: 'Antes da correção S4 a recepção recebia a mensagem genérica do guard (reprovado); agora recebe a mensagem do documento. Sem o campo gravidade a recusa continua genérica.' });
 reg('s4', `${resultados.at(-1).resultado} S4-mensagem: mensagem real do documento para a recepção=${msgOk} (obtido: ${JSON.stringify(neg.data)})`);
 const negMed = await req(T.medico, 'PUT', `/fila/${nomes.P9.entrada.id}`, { status: 'Aguardando Atendimento', gravidade: 'Vermelho' });
 const msgMed = JSON.stringify(negMed.data).includes('Apenas o enfermeiro pode atribuir a categoria de risco.');
