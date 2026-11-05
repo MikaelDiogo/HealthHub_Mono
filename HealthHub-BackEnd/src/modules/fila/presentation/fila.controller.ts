@@ -1,7 +1,7 @@
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put, Req } from '@nestjs/common';
 import { Request } from 'express';
-import { Roles } from '../../../shared/decorators/roles.decorator';
+import { NegacaoPorCampo, Roles } from '../../../shared/decorators/roles.decorator';
 import { JwtPayload } from '../../../shared/guards/jwt-auth.guard';
 import { CreateFilaService } from '../application/create-fila.service';
 import { ListFilaService } from '../application/list-fila.service';
@@ -41,9 +41,10 @@ export class FilaController {
   }
 
   // Atualização de status: apenas médico e enfermeiro
-  @ApiOperation({ summary: "Altera etapa e/ou registra a cor escolhida manualmente (justificativa opcional)", description: "Perfis permitidos: medico, enfermeiro." })
+  @ApiOperation({ summary: "Altera etapa e/ou registra a cor escolhida manualmente (justificativa opcional)", description: "Perfis permitidos: medico, enfermeiro. Recepção recebe 403 (com a mensagem 'Apenas o enfermeiro pode atribuir a categoria de risco.' quando envia gravidade)." })
   @Put(':id')
   @Roles('medico', 'enfermeiro')
+  @NegacaoPorCampo('gravidade', 'Apenas o enfermeiro pode atribuir a categoria de risco.')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() body: UpdateFilaDto, @Req() req: AuthedRequest) {
     return this.updateFila.execute(id, body, req.user.role, req.user.id);
   }
