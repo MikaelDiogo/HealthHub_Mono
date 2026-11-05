@@ -5,7 +5,7 @@
 // `fonte`: documento que sustenta o NÚMERO (os rótulos "atenção"/"crítico" são convenção do projeto); `null` = sem fonte clínica registrada.
 export const FONTE_POP = 'POP.HC-UFTM-DENF.003 v6 (HC-UFTM/Ebserh, 2025)';
 export const FONTE_NEWS2 = 'NEWS2 (Royal College of Physicians, 2017)';
-export const FONTE_CRISE_HIPERTENSIVA = 'Posicionamento Brasileiro sobre Crise Hipertensiva (SBC, Arq Bras Cardiol, 2020)';
+export const FONTE_CRISE_HIPERTENSIVA = 'Posicionamento Luso-Brasileiro de Emergências Hipertensivas 2020 (SBC; Arq Bras Cardiol 2020; 114(4):736-751)';
 export const FONTE_LINHA_CUIDADO_HAS = 'Linha de cuidado do adulto com hipertensão arterial sistêmica (Ministério da Saúde)';
 
 export interface LimiarFonte {
@@ -23,7 +23,7 @@ export const LIMIARES_CRITICOS = {
   pressaoArterial: {
     pasAte: 90, pasDe: 180, padDe: 120,
     fonte: `PAS ≤ 90: ${FONTE_NEWS2} (3 pontos) e ${FONTE_POP}, Anexo A. PAS ≥ 180 ou PAD ≥ 120: crise hipertensiva, ${FONTE_CRISE_HIPERTENSIVA}; ${FONTE_LINHA_CUIDADO_HAS}; ${FONTE_POP}, Anexo D (hipertensão grave)`,
-    fonte_pressao_critica: 'SBC (Posicionamento sobre Crise Hipertensiva, 2020): PAS >= 180 e/ou PAD >= 120; Ministério da Saúde (Linha de cuidado HAS): acima de 180 e acima de 120; POP Anexo D: >180 e/ou >120. Adotada a redação da SBC.',
+    fonte_pressao_critica: 'SBC (Posicionamento Luso-Brasileiro de Emergências Hipertensivas, 2020): PAS >= 180 e/ou PAD >= 120; Ministério da Saúde (Linha de cuidado HAS): acima de 180 e acima de 120; POP Anexo D: >180 e/ou >120. Adotada a redação da SBC.',
   } as { pasAte: number; pasDe: number; padDe: number } & LimiarFonte & { fonte_pressao_critica: string },
 } as const;
 

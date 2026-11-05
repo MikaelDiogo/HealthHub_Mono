@@ -15,7 +15,7 @@ describe('limiares críticos (rodada 3) e suas fontes', () => {
     expect(L.frequenciaCardiaca.fonte).toContain(FONTE_POP);
     expect(L.spo2.fonte).toContain('NEWS2');
     expect(L.temperatura.fonte).toContain('Anexo F');
-    expect(L.pressaoArterial.fonte).toContain('Crise Hipertensiva');
+    expect(L.pressaoArterial.fonte).toContain('Emergências Hipertensivas');
   });
   it('a pressão crítica registra as três redações da crise hipertensiva', () => {
     const t = L.pressaoArterial.fonte_pressao_critica;

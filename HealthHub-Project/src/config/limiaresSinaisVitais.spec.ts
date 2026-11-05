@@ -39,7 +39,7 @@ describe('fonte de cada limiar: nenhum está sem fonte', () => {
     expect(L.spo2.atencao.fonte).toContain('Anexo H');
     expect(L.temperatura.critico.fonte).toContain('Anexo F');
     expect(L.temperatura.atencao.fonte).toContain('Anexo F');
-    expect(L.pressaoArterial.critico.fonte).toContain('Crise Hipertensiva');
+    expect(L.pressaoArterial.critico.fonte).toContain('Emergências Hipertensivas');
     expect(L.pressaoArterial.atencao.fonte).toContain('Quadro 3.4');
   });
   it('a pressão crítica registra as três redações da crise hipertensiva', () => {

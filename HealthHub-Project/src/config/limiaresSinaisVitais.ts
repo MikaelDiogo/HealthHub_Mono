@@ -11,7 +11,7 @@ export const FONTE_NEWS2 = 'NEWS2 (Royal College of Physicians, 2017)';
 export const FONTE_SIRS = 'Critérios de SIRS (Bone et al., Chest, 1992; consenso ACCP/SCCM)';
 export const FONTE_DIRETRIZ_HAS = 'Diretrizes Brasileiras de Hipertensão Arterial 2020 (SBC), Quadro 3.4';
 export const FONTE_LINHA_CUIDADO_HAS = 'Linha de cuidado do adulto com hipertensão arterial sistêmica (Ministério da Saúde)';
-export const FONTE_CRISE_HIPERTENSIVA = 'Posicionamento Brasileiro sobre Crise Hipertensiva (SBC, Arq Bras Cardiol, 2020)';
+export const FONTE_CRISE_HIPERTENSIVA = 'Posicionamento Luso-Brasileiro de Emergências Hipertensivas 2020 (SBC; Arq Bras Cardiol 2020; 114(4):736-751)';
 
 export interface LimiarFonte {
   /** Documento que sustenta o valor; null = sem fonte clínica registrada */
@@ -45,7 +45,7 @@ export const LIMIARES_SINAIS_VITAIS = {
       fonte: `PAS ≤ 90: ${FONTE_NEWS2} (3 pontos) e ${FONTE_POP}, Anexo A. PAS ≥ 180 ou PAD ≥ 120: crise hipertensiva, ${FONTE_CRISE_HIPERTENSIVA}; ${FONTE_LINHA_CUIDADO_HAS}; ${FONTE_POP}, Anexo D (hipertensão grave)`,
       // As três redações do mesmo conceito: SBC "PAS ≥ 180 e/ou PAD ≥ 120"; Ministério da Saúde "acima de 180 e acima de 120"; tabela do POP ">180 e/ou >120".
       // O projeto usa a redação do Posicionamento da SBC (>=, "ou"); a diferença de redação (> x >=; "e" x "ou") foi registrada, não "harmonizada".
-      fonte_pressao_critica: 'SBC (Posicionamento sobre Crise Hipertensiva, 2020): PAS >= 180 e/ou PAD >= 120; Ministério da Saúde (Linha de cuidado HAS): acima de 180 e acima de 120; POP Anexo D: >180 e/ou >120. Adotada a redação da SBC.',
+      fonte_pressao_critica: 'SBC (Posicionamento Luso-Brasileiro de Emergências Hipertensivas, 2020): PAS >= 180 e/ou PAD >= 120; Ministério da Saúde (Linha de cuidado HAS): acima de 180 e acima de 120; POP Anexo D: >180 e/ou >120. Adotada a redação da SBC.',
     } as { pasAte: number; pasDe: number; padDe: number } & LimiarFonte & { fonte_pressao_critica: string },
     atencao: {
       pasDe: 91, pasAte: 100, pasAcimaDe: 140, padDe: 90,
