@@ -1,0 +1,10 @@
+[TF01] APROVADO — status=201; id criado=e48c2d3d-aab3-4de9-ac5d-228ab773745e; id lido=e48c2d3d-aab3-4de9-ac5d-228ab773745e; nome igual=true; cpf/idade/sexo=null/null/null
+[TF02] APROVADO — fila: FICTÍCIO-03[Laranja] | FICTÍCIO-01[Amarelo] | FICTÍCIO-02[Amarelo] | FICTÍCIO-04[Verde] | FICTÍCIO-05[Azul] | FICTÍCIO-06[sem cor]
+[TF03] APROVADO — posições: FICTÍCIO-01=2, FICTÍCIO-02=3
+[TF04] APROVADO — HTTP 400 {"error":"Registre os sinais vitais do paciente antes de classificar o risco."}; gravidade gravada=null
+[TF06] DOCUMENTADO (saltos e retrocesso ACEITOS; sem validação de transição) — Fluxo: enfermeiro→"Em Triagem (Enfermeiro)": HTTP 200; enfermeiro→"Aguardando Atendimento": HTTP 200; medico→"Em Consulta (Médico)": HTTP 200; medico→"Em Observação": HTT
+[TF07] OBSERVADO (sem matriz aprovada para comparar; ver arquivo) — matriz observada em tf07_matriz_perfis.md (14 operações; 10 com ao menos um 403); sem login → 401
+[TF08] APROVADO (nível API; a mensagem na tela está em tf08_ui.md) — {"__ERRO_429__":{"http":500,"corpo":"{\"error\":\"Assistente clínico indisponível.\"}"},"__ERRO_500__":{"http":500,"corpo":"{\"error\":\"Assistente clínico indisponível.\
+[TF09] APROVADO — "120x80" -> HTTP 201; PA crítica na lista=false; esperado crítico=false | "abc" -> HTTP 201; PA crítica na lista=false; esperado crítico=false | "" -> HTTP 201; PA crític
+
+resumo: TF01=APROVADO TF02=APROVADO TF03=APROVADO TF04=APROVADO TF06=DOCUMENTADO TF07=OBSERVADO TF08=APROVADO TF09=APROVADO

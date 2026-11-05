@@ -1,0 +1,16 @@
+OK   admissão (recepção) cria fila {"status":"Aguardando Triagem"}
+OK   sinais vitais (enfermeiro) {"status":201}
+OK   iniciar triagem {"status":200}
+OK   classificar cor com justificativa {"status":200}
+OK   consulta iniciada (médico) {"status":200}
+OK   enfermeiro PUT Alta → 403 e nenhum evento novo {"status":403,"antes":5,"depois":5}
+OK   alta (médico) via PATCH {"status":204}
+OK   eventos do paciente A na ordem esperada {"tipos":["admitido","sinais_registrados","triagem_iniciada","classificado","consulta_iniciada","alta"]}
+OK   classificação traz cor, justificativa, autor (nome+perfil) e data ISO {"gravidade":"Amarelo","role":"enfermeiro","tem_nome":true,"criado_em":"2026-11-05T17:06:26.467Z"}
+OK   removido da esteira registra evento e preserva a cor {"delete_status":204,"tipos":["removido_da_fila","classificado","sinais_registrados","admitido"]}
+OK   recepção lendo eventos → 403 {"status":403}
+OK   sem login → 401 {"status":401}
+OK   enfermeiro lendo eventos → 200 {"status":200}
+OK   justificativa > 500 caracteres → 400 {"status":400}
+
+RESUMO 14/14

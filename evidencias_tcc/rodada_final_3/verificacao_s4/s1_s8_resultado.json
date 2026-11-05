@@ -1,0 +1,119 @@
+{
+  "versao": "0dd2303",
+  "data": "2026-11-05T17:06:40.525Z",
+  "api": "http://localhost:3001",
+  "resultados": [
+    {
+      "id": "S1",
+      "nome": "Ordenação da fila",
+      "resultado": "APROVADO",
+      "esperado": [
+        "P2",
+        "P4",
+        "P5",
+        "P1",
+        "P3"
+      ],
+      "obtido": [
+        "P2",
+        "P4",
+        "P5",
+        "P1",
+        "P3"
+      ]
+    },
+    {
+      "id": "S2",
+      "nome": "Desempate por chegada",
+      "resultado": "APROVADO",
+      "esperado": [
+        "P5",
+        "P6",
+        "P7"
+      ],
+      "obtido": [
+        "P5",
+        "P6",
+        "P7"
+      ]
+    },
+    {
+      "id": "S3",
+      "nome": "Reavaliação",
+      "resultado": "APROVADO",
+      "esperado": [
+        "P2",
+        "P5",
+        "P4",
+        "P6",
+        "P7",
+        "P1",
+        "P3"
+      ],
+      "obtido": [
+        "P2",
+        "P5",
+        "P4",
+        "P6",
+        "P7",
+        "P1",
+        "P3"
+      ],
+      "evento_reclassificacao_registrado": true
+    },
+    {
+      "id": "S4",
+      "nome": "Permissão: recepção não grava cor (HTTP 403 e nenhuma cor gravada)",
+      "resultado": "APROVADO",
+      "http": 403,
+      "cor_gravada": null,
+      "nota": "A parte da tela (o seletor não aparece para a recepção) é conferida no F10/F13 e nas capturas."
+    },
+    {
+      "id": "S4-mensagem",
+      "nome": "Mensagem real para a recepção (critério do documento)",
+      "resultado": "APROVADO",
+      "mensagem_obtida_recepcao": {
+        "error": "Apenas o enfermeiro pode atribuir a categoria de risco."
+      },
+      "nota": "Antes da correção S4 a recepção recebia a mensagem genérica do guard (reprovado); agora recebe a mensagem do documento. Sem o campo gravidade a recusa continua genérica."
+    },
+    {
+      "id": "S4-medico",
+      "nome": "(extra) médico também não grava cor, com a mensagem do serviço",
+      "resultado": "APROVADO",
+      "http": 403,
+      "corpo": {
+        "error": "Apenas o enfermeiro pode atribuir a categoria de risco."
+      }
+    },
+    {
+      "id": "S5",
+      "nome": "Sem tempos na tela (estático)",
+      "resultado": "APROVADO",
+      "tempos": [],
+      "rotulo": [
+        "HealthHub-Project/src/pages/MobileTriage/index.tsx"
+      ],
+      "prazos": [
+        "HealthHub-Project/src/pages/Alerts/index.tsx",
+        "HealthHub-Project/src/utils/eventos.ts",
+        "HealthHub-BackEnd/src/config/swagger.ts"
+      ]
+    },
+    {
+      "id": "S7",
+      "nome": "Regressão",
+      "resultado": "APROVADO",
+      "itens": 5
+    },
+    {
+      "id": "S8",
+      "nome": "Saltos de estado",
+      "resultado": "REGISTRADO (sem critério de aprovação)",
+      "http": 200,
+      "status_depois": "Em Observação",
+      "aceito": true
+    }
+  ]
+}

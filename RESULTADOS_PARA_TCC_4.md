@@ -2,7 +2,9 @@
 
 Rodada 3 do HealthHub (pedido 4). Data: 05/11/2026. Branch de trabalho `limiares-com-fonte` (ponto de restauração: etiqueta `pre-limiares-fonte`, commit `bb85584`). **Nenhuma chamada real à Groq** nesta rodada (provedor simulado). Nenhum dado real, nenhum segredo nos arquivos.
 
-**Versão testada (código):** `fcd4891e68e5ed67ea9eaaf9a1d970efab621ca3`. Depois dele só entraram scripts e evidências, sem mudança de código de produto (commits `5dfd8fc` e `87c4eb3` mexem só em `evidencias_tcc/scripts_verificacao/`). O clone limpo usou `87c4eb3` para rodar os scripts; o código de `HealthHub-BackEnd/src` e `HealthHub-Project/src` é idêntico ao de `fcd4891`. O hash final publicado e a etiqueta `tcc-rodada-final-3` estão no `LEIAME.txt` do ZIP.
+**ATUALIZAÇÃO (correção do S4-mensagem, pedida depois da entrega):** o S4-mensagem deixou de ser divergência. A recepção, ao tentar gravar a cor de risco, agora recebe a mensagem do documento ("Apenas o enfermeiro pode atribuir a categoria de risco."). A recusa continua sendo 403 e a lista de perfis da rota **não mudou**. Commits `833090b` (código + teste novo) e `0dd2303` (scripts e README). Backend: **254 testes** (250 + 4 novos), builds ok. Verificação refeita em clone limpo, banco novo, em `0dd2303`: ver a seção "Correção do S4-mensagem" no fim desta parte. O hash final publicado e a etiqueta estão no `LEIAME.txt` do ZIP.
+
+**Versão testada na rodada 3 original (código):** `fcd4891e68e5ed67ea9eaaf9a1d970efab621ca3`. Depois dele só entraram scripts e evidências, sem mudança de código de produto (commits `5dfd8fc` e `87c4eb3` mexem só em `evidencias_tcc/scripts_verificacao/`). O clone limpo usou `87c4eb3` para rodar os scripts; o código de `HealthHub-BackEnd/src` e `HealthHub-Project/src` é idêntico ao de `fcd4891`. O hash final publicado e a etiqueta `tcc-rodada-final-3` estão no `LEIAME.txt` do ZIP.
 
 ## Etapas 1 e 2: limiares com fonte e implementação
 
@@ -39,7 +41,7 @@ Texto livre (coluna `varchar`, **sem migração, sem campo novo, sem mudar as fa
 | Busca por `38.5`, `38,5`, `92`, `95`, `> 90` fora da configuração | sem outro uso | nenhum uso solto restante (só comentários históricos e testes) |
 
 ### Testes alterados (com o motivo) e novos
-Contagens: backend **187 → 250**; frontend **47 → 109** (todos passam; builds do backend e do frontend ok).
+Contagens: backend **187 → 250** (depois da correção do S4: **254**); frontend **47 → 109** (todos passam; builds do backend e do frontend ok).
 
 | Teste | Mudança | Motivo |
 |---|---|---|
@@ -79,7 +81,7 @@ Detalhe em `limiares/fontes_limiares.md`. Resumo:
 | **F18** (novo: PA 190/120, 85/50, 130/85 na tela do médico) | **APROVADO** (Crítico, Crítico, Estável; cartão PA e lista "atenção agora" coerentes) |
 | Registro de eventos (API) | 14/14 |
 | S1, S2, S3, S4, S4-médico, S5, S6, S7 | APROVADO |
-| S4-mensagem | **REPROVADO** (divergência já conhecida e documentada na rodada 2: a recepção recebe a mensagem genérica "Acesso negado para este perfil"; fora do escopo desta rodada, não foi alterado) |
+| S4-mensagem | **REPROVADO na execução original** (a recepção recebia a mensagem genérica); **APROVADO depois da correção** (ver "Correção do S4-mensagem") |
 | S8 | REGISTRADO (salto de estado aceito; sem critério de aprovação) |
 | TF01 a TF04, TF08 | APROVADO |
 | TF05 (fronteiras, 26 casos: SpO₂, FC, temperatura, pressão) | **26/26** (`limiares/fronteiras_resultados.csv`) |
@@ -118,9 +120,21 @@ Mesma metodologia (aquecimento 10, 200 por linha, 10 simultâneos; escrita com 1
 ## Antes e depois (casos afetados)
 Em `limiares/antes_depois.csv`. Resumo: C01, C02, C04, C05 e F14-TESTE E **não mudam de estado**; C03 e F14-TESTE C continuam Crítico mas **sem a temperatura 38,6 como motivo** (agora Atenção); TF05: temperatura 38,6 e 39,0 passam de crítico para atenção, 39,1 é crítico; pressão passa a ter alerta.
 
+## Correção do S4-mensagem (pós-entrega)
+
+**O que estava errado.** O `PUT /fila/:id` só permite médico e enfermeiro. A recepção era barrada por um filtro genérico (`RolesGuard`) **antes** do serviço, então via "Acesso negado para este perfil" em vez da mensagem do documento.
+
+**O que mudou (3 arquivos de código).** Um decorator novo, `@NegacaoPorCampo('gravidade', 'Apenas o enfermeiro pode atribuir a categoria de risco.')`, na rota `PUT /fila/:id`; o `RolesGuard` lê esse decorator e, quando quem é barrado envia o campo `gravidade`, devolve essa mensagem (`{"error": "..."}`, como já faz o serviço para o médico). **Não mudou:** o status (403), a lista de perfis (`medico`, `enfermeiro`), nenhuma permissão, nenhum outro endpoint. Sem o campo `gravidade` a resposta continua a genérica. A mudança é só de texto da recusa.
+
+**Testes.** Novo `fila-negacao.http.spec.ts` (4 casos: recepção com `gravidade` recebe a mensagem e o serviço não é chamado; recepção sem `gravidade` recebe a genérica; médico e enfermeiro continuam passando; sem login 401). Backend **254 testes** passam; `nest build` ok.
+
+**Verificação (clone limpo, banco novo com 11 migrações + seed, IA simulada, commit `0dd2303`)** em `verificacao_s4/`: eventos 14/14; S1, S2, S3, S4, **S4-mensagem**, S4-médico, S5, S6, S7 **todos APROVADO** (S8 registrado); TF01 a TF04, TF08 e TF09 aprovados, TF05 26/26 (rodado), TF06 documentado e TF07 observado com a **mesma matriz de perfis** da execução anterior (14 operações, 10 com 403); ida e volta pelo banco 10/10; S6 aprovado; concorrência 20 repetições, 0 duplicidade, 0 5xx. Resposta observada para a recepção: `{"error":"Apenas o enfermeiro pode atribuir a categoria de risco."}`.
+
+**O que NÃO foi refeito, e por quê.** Os 22 cenários + F18 pela **tela** e as capturas **não** foram rodados de novo nesta correção: o frontend é byte a byte o mesmo e o backend só mudou o texto de uma resposta 403 (o servidor de desenvolvimento do front foi encerrado pelo sistema por falta de memória e não o reiniciei sem sua ordem). Os resultados dos cenários e das capturas valem para o código de `fcd4891`, cujo frontend é idêntico. Se preferir tudo refeito na versão final, é só pedir.
+
 ## Pendências que dependem de mim
 1. **Orientador:** confirmar o uso dos limiares e a nomenclatura "atenção/crítico" como convenção do projeto (as fontes não usam esses rótulos); validar clinicamente não é papel do sistema.
 2. **TCC:** citar o **título real** da fonte da SBC (Posicionamento Luso-Brasileiro de Emergências Hipertensivas 2020); conferir as **páginas da Diretriz 2020** (516-658) e, se quiser, o artigo original de Bone et al. (1992); trocar as figuras 19, 20 e 30 e adicionar as novas; atualizar o texto que dizia "temperatura > 38,5 °C" e "pressão sem alerta"; citar que a chave `ALERTAS_SEM_FONTE` hoje não desliga nenhum alerta.
-3. **S4-mensagem** continua reprovado por divergência conhecida (mensagem genérica para a recepção), documentada, fora do escopo.
+3. ~~S4-mensagem reprovado~~: **corrigido** (ver "Correção do S4-mensagem"). Para o TCC: a recepção recebe a mensagem do documento quando tenta gravar a cor; se tentar outra alteração na rota (ex.: mudar a etapa), recebe a mensagem genérica "Acesso negado para este perfil", ambos com 403.
 4. Pendências antigas: preço e medição na VPS; limite de login (10 tentativas só em produção); nome do autor em Termos/Política/PDF (mantido por decisão sua).
 5. Limpeza que **não** fiz sem sua ordem: banco `healthhub_test_r3`, clones `HealthHub_r3_clone` e `HealthHub_r2_clone` e as pastas soltas do `git status`.

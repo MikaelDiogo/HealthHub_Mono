@@ -1,0 +1,11 @@
+campo,enviado,lido_de_volta,igual,nivel_esperado,nivel_obtido,aprovado
+temperatura,37.8,37.8,sim,warning,warning,sim
+temperatura,39.1,39.1,sim,critical,critical,sim
+saturacao_oxigenio,92,92,sim,warning,warning,sim
+saturacao_oxigenio,94,94,sim,warning,warning,sim
+saturacao_oxigenio,95,95,sim,normal,normal,sim
+frequencia_cardiaca,90,90,sim,normal,normal,sim
+frequencia_cardiaca,91,91,sim,warning,warning,sim
+pressao_arterial,180/80,180/80,sim,critical,critical,sim
+pressao_arterial,179/119,179/119,sim,warning,warning,sim
+pressao_arterial,90/60,90/60,sim,critical,critical,sim
