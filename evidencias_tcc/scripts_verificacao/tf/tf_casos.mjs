@@ -107,16 +107,33 @@ registrar('TF03', 'Desempate / RF09', 'Comparar os dois registros amarelos (cheg
   registrar('TF07', 'Acesso / RNF04', 'Contas fictícias de perfis distintos executando as operações do sistema', 'Permitir só as operações autorizadas na matriz de perfis (ainda a documentar)', `matriz observada em tf07_matriz_perfis.md (${ops.length} operações; ${sem403} com ao menos um 403); sem login → ${semAuth.status}`, 'OBSERVADO (sem matriz aprovada para comparar; ver arquivo)', { matriz });
 }
 
-// TF08 — Falha de integração / RF16/RF17 (provedor de IA simulado indisponível)
+// TF08 — Falha de integração / RF16/RF17 (provedor de IA simulado). Rodada 4: o 429 do provedor vira HTTP 429 com a mensagem do pedido.
+// Esperados escritos à mão a partir do pedido da rodada 4 (não calculados pelo código testado).
 {
+  const MSG_429 = 'O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente.';
   const c = nCaso(1); const idp = P[1].id;
   await req(T.enfermeiro, 'POST', `/sinais/${idp}`, SV(c));
   const antes = (await req(T.medico, 'GET', `/patients/${idp}/vitals`)).data?.length;
-  const testes = {};
-  for (const gat of ['__ERRO_429__', '__ERRO_500__', '__TIMEOUT__', '__VAZIO__']) { const r = await req(T.medico, 'POST', `/patients/${idp}/chat`, { message: gat, patientContext: { alergias: 'x' }, history: [] }); testes[gat] = { http: r.status, corpo: JSON.stringify(r.data).slice(0, 140) }; }
+  const chat = async (gat) => { const r = await fetch(API + `/patients/${idp}/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${T.medico}` }, body: JSON.stringify({ message: gat, patientContext: { alergias: 'x' }, history: [] }) }); const x = await r.text(); let d = null; try { d = JSON.parse(x); } catch { d = x; } return { http: r.status, retry_after: r.headers.get('retry-after'), corpo: d }; };
+  const audio = async (nome) => { const fd = new FormData(); fd.append('audio', new Blob([Buffer.from('bytes de teste')], { type: 'audio/webm' }), nome); const r = await fetch(API + `/patients/${idp}/chat/audio`, { method: 'POST', headers: { Authorization: `Bearer ${T.medico}` }, body: fd }); const x = await r.text(); let d = null; try { d = JSON.parse(x); } catch { d = x; } return { http: r.status, retry_after: r.headers.get('retry-after'), corpo: d }; };
+  const obt = { '__ERRO_429__': await chat('__ERRO_429__'), '__ERRO_429_RETRY__': await chat('__ERRO_429_RETRY__'), '__ERRO_500__': await chat('__ERRO_500__'), '__TIMEOUT__': await chat('__TIMEOUT__'), '__VAZIO__': await chat('__VAZIO__'),
+    'audio erro429': await audio('erro429.webm'), 'audio retry429': await audio('retry429.webm'), 'audio erro (400 do provedor)': await audio('erro.webm') };
   const depois = (await req(T.medico, 'GET', `/patients/${idp}/vitals`)).data?.length;
-  const semResposta = Object.values(testes).every((t) => !/SIMULADA — NÃO/.test(t.corpo));
-  registrar('TF08', 'Falha de integração / RF16/RF17', 'Provedor de IA simulado indisponível (429, 500, timeout, resposta vazia)', 'Exibir a falha sem inventar resposta clínica nem perder o registro local', `${JSON.stringify(testes)}; sinais vitais registrados antes=${antes}, depois=${depois}`, semResposta && antes === depois ? 'APROVADO (nível API; a mensagem na tela está em tf08_ui.md)' : 'REPROVADO', { observacao: 'Em 429 e 500 o backend devolve HTTP 500 com mensagem genérica (o 429 vira 500). Nenhuma resposta clínica foi inventada.', testes });
+  const e429 = (o, retry) => o.http === 429 && o.corpo?.statusCode === 429 && o.corpo?.message === MSG_429 && Object.keys(o.corpo).length === 2 && o.retry_after === retry;
+  const e500 = (o, msg) => o.http === 500 && o.corpo?.error === msg && !/SIMULADO/.test(JSON.stringify(o.corpo)) && o.retry_after === null;
+  const checagens = {
+    'chat 429 sem retry-after: HTTP 429, corpo {statusCode,message} exato, sem Retry-After': e429(obt['__ERRO_429__'], null),
+    'chat 429 com retry-after 30: HTTP 429, mesma mensagem, Retry-After: 30': e429(obt['__ERRO_429_RETRY__'], '30'),
+    'chat 500 do provedor: HTTP 500 genérico, sem corpo externo': e500(obt['__ERRO_500__'], 'Assistente clínico indisponível.'),
+    'chat timeout: HTTP 500 genérico': e500(obt['__TIMEOUT__'], 'Assistente clínico indisponível.'),
+    'áudio 429 sem retry-after: HTTP 429, mesma mensagem, sem Retry-After': e429(obt['audio erro429'], null),
+    'áudio 429 com retry-after 30: HTTP 429, mesma mensagem, Retry-After: 30': e429(obt['audio retry429'], '30'),
+    'áudio com outro erro do provedor: HTTP 500 genérico': e500(obt['audio erro (400 do provedor)'], 'Falha ao transcrever o áudio.'),
+    'nenhuma resposta clínica inventada': Object.values(obt).every((o) => !/SIMULADA — NÃO/.test(JSON.stringify(o.corpo))),
+    'sinais vitais registrados antes = depois': antes === depois,
+  };
+  const falhas = Object.entries(checagens).filter(([, v]) => !v).map(([k]) => k);
+  registrar('TF08', 'Falha de integração / RF16/RF17', 'Provedor de IA simulado: 429 (com e sem retry-after), 500, timeout, resposta vazia; chat e áudio', 'HTTP 429 + {"statusCode":429,"message":"' + MSG_429 + '"} para o 429 (Retry-After só quando o provedor informa); HTTP 500 genérico para os demais erros do provedor; nenhum dado clínico inventado; registro local intacto', JSON.stringify(obt) + `; sinais vitais antes=${antes}, depois=${depois}`, falhas.length === 0 ? 'APROVADO (nível API; a mensagem na tela está em tf08_ui.md)' : 'REPROVADO: ' + falhas.join(' | '), { observacao: 'Rodada 4: antes o 429 virava HTTP 500; agora é HTTP 429 com mensagem própria. O mock não manda retry-after no cenário __ERRO_429__.', checagens, obtido_por_cenario: obt });
 }
 
 // TF09 — Formato da pressão arterial (texto livre): 120x80, abc e vazio (rodada 3). Observa o registro e a lista "atenção agora" de GET /metricas.

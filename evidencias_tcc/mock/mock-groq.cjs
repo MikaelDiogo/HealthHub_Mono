@@ -1,7 +1,8 @@
 // PROVEDOR SIMULADO — não chama a Groq. Carregar com: node -r ./mock-groq.cjs dist/main
 // Substitui o adaptador HTTP do axios SÓ para api.groq.com, sem alterar o código do projeto.
 // Registra cada requisição "enviada" em MOCK_LOG (jsonl) para medir o que sairia da máquina.
-// Cenários por texto da mensagem: __ERRO_429__, __ERRO_500__, __TIMEOUT__, __VAZIO__ (demais: resposta simulada).
+// Cenários por texto da mensagem: __ERRO_429__ (429 sem retry-after), __ERRO_429_RETRY__ (429 com retry-after: 30), __ERRO_500__, __TIMEOUT__, __VAZIO__ (demais: resposta simulada).
+// Áudio: nome de arquivo com "erro429" → 429 sem retry-after; com "retry429" → 429 com retry-after: 30; com "erro" → 400.
 const fs = require('fs');
 const path = require('path');
 const axios = require(path.join(process.cwd(), 'node_modules', 'axios'));
@@ -27,8 +28,9 @@ axios.defaults.adapter = async (config) => {
       bytes_corpo: Buffer.byteLength(JSON.stringify(corpo)), sistema: msgs[0]?.content, ultima_mensagem: ultima,
     };
     registrar(resumo);
-    const falha = (status, data) => { const e = new Error('Request failed with status code ' + status); e.response = { status, data }; e.isAxiosError = true; return e; };
+    const falha = (status, data, headers = {}) => { const e = new Error('Request failed with status code ' + status); e.response = { status, data, headers }; e.isAxiosError = true; return e; };
     if (ultima.includes('__TIMEOUT__')) { const e = new Error('timeout of 30000ms exceeded'); e.code = 'ECONNABORTED'; throw e; }
+    if (ultima.includes('__ERRO_429_RETRY__')) throw falha(429, { error: { message: 'SIMULADO: limite de requisições (rate limit) atingido', type: 'tokens' } }, { 'retry-after': '30' });
     if (ultima.includes('__ERRO_429__')) throw falha(429, { error: { message: 'SIMULADO: limite de requisições (rate limit) atingido', type: 'tokens' } });
     if (ultima.includes('__ERRO_500__')) throw falha(500, { error: { message: 'SIMULADO: erro interno do provedor' } });
     const data = ultima.includes('__VAZIO__') ? { choices: [] } : { choices: [{ message: { content: '[RESPOSTA SIMULADA — NÃO É DO MODELO REAL] Texto fixo do mock para teste de integração.' } }] };
@@ -44,6 +46,8 @@ axios.defaults.adapter = async (config) => {
     const nomeArq = (texto.match(/name="file"; filename="([^"]*)"/) || [])[1];
     const tipoArq = (texto.match(/Content-Type: ([^\r]*)/) || [])[1];
     registrar({ ...base, tipo: 'audio', modelo: campo('model'), language: campo('language'), response_format: campo('response_format'), arquivo: nomeArq, content_type_arquivo: tipoArq, bytes_corpo_multipart: bruto.length });
+    if (nomeArq && nomeArq.includes('retry429')) { const e = new Error('Request failed with status code 429'); e.response = { status: 429, data: { error: { message: 'SIMULADO: limite' } }, headers: { 'retry-after': '30' } }; e.isAxiosError = true; throw e; }
+    if (nomeArq && nomeArq.includes('erro429')) { const e = new Error('Request failed with status code 429'); e.response = { status: 429, data: { error: { message: 'SIMULADO: limite' } }, headers: {} }; e.isAxiosError = true; throw e; }
     if (nomeArq && nomeArq.includes('erro')) { const e = new Error('Request failed with status code 400'); e.response = { status: 400, data: { error: { message: 'SIMULADO: áudio ilegível' } } }; e.isAxiosError = true; throw e; }
     return { data: { text: '[TRANSCRIÇÃO SIMULADA — NÃO É DO MODELO REAL] paciente refere dor de cabeça' }, status: 200, statusText: 'OK', headers: {}, config, request: {} };
   }

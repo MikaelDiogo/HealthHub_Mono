@@ -10,7 +10,8 @@ Scripts usados para verificar o HealthHub em **banco de teste isolado**, com **d
 | `e2e_eventos.mjs` | Registro de eventos da esteira pela API (14 checagens) |
 | `s1_s8.mjs` | S1 (ordem), S2 (desempate), S3 (reavaliação e evento), S4 (permissão; S4-mensagem confere a mensagem do documento para a recepção; reprovava até a correção da rodada 3), S5 (textos sem tempos, estático), S7 (regressão) e S8 (salto de estado, só registra). É a versão consolidada e sem caminhos pessoais; o script original por fases, usado em 03/11/2026, continua em `evidencias/testes/cenarios_accr.mjs` |
 | `s6_migration.mjs` | S6: migrações preservam os dados (antes/depois/reversão), em banco **descartável** criado e removido pelo próprio script |
-| `tf/tf_casos.mjs` | TF01 a TF08 do Apêndice A (TF01 usa só o nome, a regra do cadastro mínimo) |
+| `tf/tf_casos.mjs` | TF01 a TF09 do Apêndice A (TF01 usa só o nome, a regra do cadastro mínimo; TF08 desde a rodada 4 confere o HTTP 429 com a mensagem própria, com e sem retry-after, no chat e no áudio) |
+| `capturas_rodada4.mjs` | As 3 capturas da rodada 4 (Figuras 28, 29 e 30: 429 da IA simulado, termos da IA e 1ª página do PDF da política), com o manifesto; IA **simulada** |
 | `tf/tf05_fronteiras.mjs` | TF05: alertas nas fronteiras dos limiares (chama as funções reais) |
 | `tf/tf08_ui.mjs` | TF08: o que a tela mostra quando a IA falha |
 | `concorrencia.mjs` | Admissão concorrente (senha sem repetição, 409 no mesmo paciente) |

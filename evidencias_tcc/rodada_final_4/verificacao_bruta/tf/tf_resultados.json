@@ -1,0 +1,221 @@
+{
+  "versao": "4714bb1",
+  "data": "2026-11-10T14:37:58.903Z",
+  "executor": "Claude Code (automação) a pedido do autor",
+  "ambiente": "API local, banco de teste isolado, IA simulada",
+  "resultados": [
+    {
+      "id": "TF01",
+      "regra": "Cadastro / RF02",
+      "entrada": "Cadastrar FICTÍCIO-01 só com o nome (dados mínimos)",
+      "esperado": "Salvar e recuperar o registro com o nome e sem trocar a identidade; CPF, idade e sexo ausentes (null)",
+      "obtido": "status=201; id criado=df515142-7be2-4a2b-92bf-191f071cc023; id lido=df515142-7be2-4a2b-92bf-191f071cc023; nome igual=true; cpf/idade/sexo=null/null/null",
+      "resultado": "APROVADO"
+    },
+    {
+      "id": "TF02",
+      "regra": "Classificação de risco / RF09",
+      "entrada": "Inserir os cinco registros de fila (amarelo×2, laranja, verde, azul) e classificá-los",
+      "esperado": "Entre classificados: Laranja, Amarelo, Amarelo, Verde, Azul (não há Vermelho no roteiro). Não triados: registrar separadamente",
+      "obtido": "fila: FICTÍCIO-03[Laranja] | FICTÍCIO-01[Amarelo] | FICTÍCIO-02[Amarelo] | FICTÍCIO-04[Verde] | FICTÍCIO-05[Azul] | FICTÍCIO-06[sem cor]",
+      "resultado": "APROVADO",
+      "observacao": "Não triado (FICTÍCIO-06): posição 6 de 6 (observado; é ordem a revisar, não regra clínica aprovada). Obs.: a ordem de chegada usa o instante de gravação no servidor, não o texto do horário informado no campo \"chegada\"."
+    },
+    {
+      "id": "TF03",
+      "regra": "Desempate / RF09",
+      "entrada": "Comparar os dois registros amarelos (chegadas 08:00 e 08:05)",
+      "esperado": "FICTÍCIO-01 antes de FICTÍCIO-02",
+      "obtido": "posições: FICTÍCIO-01=2, FICTÍCIO-02=3",
+      "resultado": "APROVADO"
+    },
+    {
+      "id": "TF04",
+      "regra": "Pré-condição / RF11",
+      "entrada": "Tentar registrar a categoria antes de salvar sinais vitais",
+      "esperado": "Bloquear a classificação (regra 4.1.1)",
+      "obtido": "HTTP 400 {\"error\":\"Registre os sinais vitais do paciente antes de classificar o risco.\"}; gravidade gravada=null",
+      "resultado": "APROVADO"
+    },
+    {
+      "id": "TF06",
+      "regra": "Estados / RF10/RF12",
+      "entrada": "Percorrer o fluxo de estados e tentar transições não previstas",
+      "esperado": "Documentar o backend atual (sem validação de transições); sem inventar bloqueio existente",
+      "obtido": "Fluxo: enfermeiro→\"Em Triagem (Enfermeiro)\": HTTP 200; enfermeiro→\"Aguardando Atendimento\": HTTP 200; medico→\"Em Consulta (Médico)\": HTTP 200; medico→\"Em Observação\": HTTP 200; médico alta: HTTP 204. Saltos: \"Aguardando Triagem\"→\"Em Consulta (Médico)\" HTTP 200; →\"Em Observação\" HTTP 200; retroceder→\"Aguardando Triagem\" HTTP 200",
+      "resultado": "DOCUMENTADO (saltos e retrocesso ACEITOS; sem validação de transição)",
+      "observacao": "Sem critério de aprovado/reprovado: registra o comportamento atual (ver fila-valores.ts). A matriz de transições aprovada não existe; teste de correção futuro fica pendente."
+    },
+    {
+      "id": "TF07",
+      "regra": "Acesso / RNF04",
+      "entrada": "Contas fictícias de perfis distintos executando as operações do sistema",
+      "esperado": "Permitir só as operações autorizadas na matriz de perfis (ainda a documentar)",
+      "obtido": "matriz observada em tf07_matriz_perfis.md (14 operações; 10 com ao menos um 403); sem login → 401",
+      "resultado": "OBSERVADO (sem matriz aprovada para comparar; ver arquivo)",
+      "matriz": {
+        "GET /fila": [
+          200,
+          200,
+          200
+        ],
+        "POST /patients (cadastrar)": [
+          201,
+          201,
+          201
+        ],
+        "GET /patients": [
+          200,
+          200,
+          200
+        ],
+        "POST /sinais/:id": [
+          403,
+          201,
+          201
+        ],
+        "GET /patients/:id/vitals": [
+          403,
+          200,
+          200
+        ],
+        "PUT /fila/:id (iniciar triagem)": [
+          403,
+          200,
+          200
+        ],
+        "PUT /fila/:id (classificar cor)": [
+          403,
+          200,
+          403
+        ],
+        "PUT /fila/:id (status Alta)": [
+          403,
+          403,
+          200
+        ],
+        "GET /patients/:id/eventos": [
+          403,
+          200,
+          200
+        ],
+        "POST /patients/:id/chat (IA)": [
+          403,
+          201,
+          201
+        ],
+        "GET /metricas": [
+          200,
+          200,
+          200
+        ],
+        "PATCH /patients/:id/visitas/fechar": [
+          403,
+          403,
+          200
+        ],
+        "PATCH /fila/:id/alta": [
+          403,
+          403,
+          204
+        ],
+        "DELETE /fila/:id": [
+          403,
+          403,
+          404
+        ]
+      }
+    },
+    {
+      "id": "TF08",
+      "regra": "Falha de integração / RF16/RF17",
+      "entrada": "Provedor de IA simulado: 429 (com e sem retry-after), 500, timeout, resposta vazia; chat e áudio",
+      "esperado": "HTTP 429 + {\"statusCode\":429,\"message\":\"O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente.\"} para o 429 (Retry-After só quando o provedor informa); HTTP 500 genérico para os demais erros do provedor; nenhum dado clínico inventado; registro local intacto",
+      "obtido": "{\"__ERRO_429__\":{\"http\":429,\"retry_after\":null,\"corpo\":{\"statusCode\":429,\"message\":\"O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente.\"}},\"__ERRO_429_RETRY__\":{\"http\":429,\"retry_after\":\"30\",\"corpo\":{\"statusCode\":429,\"message\":\"O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente.\"}},\"__ERRO_500__\":{\"http\":500,\"retry_after\":null,\"corpo\":{\"error\":\"Assistente clínico indisponível.\"}},\"__TIMEOUT__\":{\"http\":500,\"retry_after\":null,\"corpo\":{\"error\":\"Assistente clínico indisponível.\"}},\"__VAZIO__\":{\"http\":201,\"retry_after\":null,\"corpo\":{\"reply\":\"\",\"source\":\"groq\"}},\"audio erro429\":{\"http\":429,\"retry_after\":null,\"corpo\":{\"statusCode\":429,\"message\":\"O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente.\"}},\"audio retry429\":{\"http\":429,\"retry_after\":\"30\",\"corpo\":{\"statusCode\":429,\"message\":\"O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente.\"}},\"audio erro (400 do provedor)\":{\"http\":500,\"retry_after\":null,\"corpo\":{\"error\":\"Falha ao transcrever o áudio.\"}}}; sinais vitais antes=2, depois=2",
+      "resultado": "APROVADO (nível API; a mensagem na tela está em tf08_ui.md)",
+      "observacao": "Rodada 4: antes o 429 virava HTTP 500; agora é HTTP 429 com mensagem própria. O mock não manda retry-after no cenário __ERRO_429__.",
+      "checagens": {
+        "chat 429 sem retry-after: HTTP 429, corpo {statusCode,message} exato, sem Retry-After": true,
+        "chat 429 com retry-after 30: HTTP 429, mesma mensagem, Retry-After: 30": true,
+        "chat 500 do provedor: HTTP 500 genérico, sem corpo externo": true,
+        "chat timeout: HTTP 500 genérico": true,
+        "áudio 429 sem retry-after: HTTP 429, mesma mensagem, sem Retry-After": true,
+        "áudio 429 com retry-after 30: HTTP 429, mesma mensagem, Retry-After: 30": true,
+        "áudio com outro erro do provedor: HTTP 500 genérico": true,
+        "nenhuma resposta clínica inventada": true,
+        "sinais vitais registrados antes = depois": true
+      },
+      "obtido_por_cenario": {
+        "__ERRO_429__": {
+          "http": 429,
+          "retry_after": null,
+          "corpo": {
+            "statusCode": 429,
+            "message": "O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente."
+          }
+        },
+        "__ERRO_429_RETRY__": {
+          "http": 429,
+          "retry_after": "30",
+          "corpo": {
+            "statusCode": 429,
+            "message": "O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente."
+          }
+        },
+        "__ERRO_500__": {
+          "http": 500,
+          "retry_after": null,
+          "corpo": {
+            "error": "Assistente clínico indisponível."
+          }
+        },
+        "__TIMEOUT__": {
+          "http": 500,
+          "retry_after": null,
+          "corpo": {
+            "error": "Assistente clínico indisponível."
+          }
+        },
+        "__VAZIO__": {
+          "http": 201,
+          "retry_after": null,
+          "corpo": {
+            "reply": "",
+            "source": "groq"
+          }
+        },
+        "audio erro429": {
+          "http": 429,
+          "retry_after": null,
+          "corpo": {
+            "statusCode": 429,
+            "message": "O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente."
+          }
+        },
+        "audio retry429": {
+          "http": 429,
+          "retry_after": "30",
+          "corpo": {
+            "statusCode": 429,
+            "message": "O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente."
+          }
+        },
+        "audio erro (400 do provedor)": {
+          "http": 500,
+          "retry_after": null,
+          "corpo": {
+            "error": "Falha ao transcrever o áudio."
+          }
+        }
+      }
+    },
+    {
+      "id": "TF09",
+      "regra": "Formato da pressão / regra de alerta",
+      "entrada": "Registrar pressão como 120x80, abc, vazio (e 190X120, 120 / 80)",
+      "esperado": "Registro aceito sem erro; pressão inválida ou vazia não gera alerta; 190X120 é crítica",
+      "obtido": "\"120x80\" -> HTTP 201; PA crítica na lista=false; esperado crítico=false | \"abc\" -> HTTP 201; PA crítica na lista=false; esperado crítico=false | \"\" -> HTTP 201; PA crítica na lista=false; esperado crítico=false | \"190X120\" -> HTTP 201; PA crítica na lista=true (PA 190/120); esperado crítico=true | \"120 / 80\" -> HTTP 201; PA crítica na lista=false; esperado crítico=false",
+      "resultado": "APROVADO"
+    }
+  ]
+}

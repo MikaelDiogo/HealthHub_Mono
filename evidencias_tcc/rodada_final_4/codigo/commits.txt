@@ -1,0 +1,1 @@
+4714bb1 feat(ia): 429 do provedor vira HTTP 429 com mensagem propria (chat e audio) e trava dos textos legais contra 'data de nascimento'

@@ -1,0 +1,13 @@
+ DOCUMENTO_ENGENHARIA_SOFTWARE.md                   | 30 ++++++++--
+ .../audio-transcription.service.spec.ts            | 21 +++++++
+ .../ai/application/audio-transcription.service.ts  |  2 +
+ .../ai/infrastructure/groq-chat.provider.spec.ts   | 31 +++++++++-
+ .../ai/infrastructure/groq-chat.provider.ts        |  2 +
+ .../modules/ai/infrastructure/limite-de-taxa.ts    | 32 +++++++++++
+ .../modules/ai/presentation/ai-limite-http.spec.ts | 67 ++++++++++++++++++++++
+ .../src/modules/ai/presentation/ai.controller.ts   | 12 +++-
+ HealthHub-Project/src/pages/Monitoring/index.tsx   | 10 +++-
+ HealthHub-Project/src/utils/aiErro.spec.ts         | 35 +++++++++++
+ HealthHub-Project/src/utils/aiErro.ts              | 13 +++++
+ HealthHub-Project/src/utils/textosLegais.spec.ts   | 27 +++++++++
+ 12 files changed, 270 insertions(+), 12 deletions(-)
