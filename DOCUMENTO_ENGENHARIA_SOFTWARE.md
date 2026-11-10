@@ -1243,7 +1243,9 @@ sequenceDiagram
         Note over CCS: injeta alergias, medicamentos,<br/>sinais vitais e anamnese (sem nome) —<br/>exige alerta em negrito para risco de alergia
         CCS->>CCS: filtra histórico (só user/assistant)
         CCS->>GROQ: POST /chat/completions (gpt-oss-120b, 1024 tokens, timeout 30s)
-        alt erro / timeout
+        alt provedor responde 429 (limite de requisições)
+            CCS-->>MON: 429 "O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente." (+ Retry-After só se o provedor informou)
+        else outro erro / timeout
             CCS-->>MON: 500 "Assistente clínico indisponível."
         else sucesso
             GROQ-->>CCS: choices[0].message.content
@@ -1447,8 +1449,8 @@ Base: `http://localhost:3001` · Autenticação: `Authorization: Bearer <jwt>` e
 
 | Método | Rota | Papéis | Corpo | Resposta |
 |---|---|---|---|---|
-| `POST` | `/patients/:id/chat` | médico, enfermeiro | `{ message, patientContext, history? }` | `200 { reply, source }` · `500` · `503` |
-| `POST` | `/patients/:id/chat/audio` | médico, enfermeiro | `multipart/form-data` campo `audio` | `200 { transcription }` · `400` · `500` · `503` |
+| `POST` | `/patients/:id/chat` | médico, enfermeiro | `{ message, patientContext, history? }` | `200 { reply, source }` · `429` · `500` · `503` |
+| `POST` | `/patients/:id/chat/audio` | médico, enfermeiro | `multipart/form-data` campo `audio` | `200 { transcription }` · `400` · `429` · `500` · `503` |
 
 ### 10.7 Chat interno
 
@@ -1479,9 +1481,25 @@ Base: `http://localhost:3001` · Autenticação: `Authorization: Bearer <jwt>` e
 | `401` | Token ausente, inválido ou expirado; credenciais inválidas |
 | `403` | Papel não autorizado; não participante da conversa |
 | `404` | Paciente, entrada de fila ou recurso inexistente |
-| `429` | Rate limit global ou de login excedido |
-| `500` | Falha do provedor de IA |
+| `429` | Rate limit global ou de login excedido; limite de requisições do provedor de IA (ver 10.9.1) |
+| `500` | Falha do provedor de IA (exceto o limite de requisições) |
 | `503` | `GROQ_API_KEY` não configurada |
+
+#### 10.9.1 Limite de requisições do provedor de IA (HTTP 429, rodada 4)
+
+Quando a Groq recusa uma chamada por excesso de requisições (HTTP 429 do provedor), o chat de texto (`POST /patients/:id/chat`) e a transcrição de áudio (`POST /patients/:id/chat/audio`) respondem **HTTP 429** com este corpo exato:
+
+```json
+{
+  "statusCode": 429,
+  "message": "O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente."
+}
+```
+
+- Cabeçalho `Retry-After`: repassado (em segundos) **somente** se o provedor informou `retry-after` com número inteiro; caso contrário a resposta não traz o cabeçalho (nenhum valor é inventado).
+- O corpo do provedor não é repassado ao navegador; fica só no log do servidor.
+- Os demais erros do provedor continuam `500` com `{ "error": "Assistente clínico indisponível." }` (chat) ou `{ "error": "Falha ao transcrever o áudio." }` (áudio); sem chave configurada continua `503`. Note que esses usam o campo `error`, e o 429 usa `message`.
+- Tela: o chat de monitoramento mostra a `message` do 429; para qualquer outro erro mostra "Erro ao conectar com o assistente.". No áudio, só o 429 gera aviso no chat.
 
 ---
 
@@ -1872,7 +1890,7 @@ flowchart LR
 |---|---|:--:|:--:|:--:|---|
 | R-01 | Histórico de visitas inconsistente invalida o estudo de ML | Alta | Alto | 🔴 | Corrigir DEB-01 antes de acumular volume; script de reconciliação das visitas abertas |
 | R-02 | Regressão de autorização sem testes automatizados | Alta | Alto | 🔴 | Suíte E2E da matriz RBAC (CT-03, CT-04) |
-| R-03 | Indisponibilidade da Groq API interrompe o apoio clínico | Média | Médio | 🟠 | Já degrada com `503`; exibir aviso claro na UI e manter fluxo manual |
+| R-03 | Indisponibilidade da Groq API interrompe o apoio clínico | Média | Médio | 🟠 | Já degrada com `503`; o limite de requisições (429) tem mensagem específica na UI (10.9.1); manter fluxo manual |
 | R-04 | Vazamento de dados sensíveis para provedor de IA | Média | Alto | 🔴 | **Parcialmente mitigado (03/11/2026):** o nome e os demais identificadores já não são enviados (`contextoSemIdentificacao`); textos livres (anamnese, pergunta) seguem sem filtro; registrar consentimento |
 | R-05 | Token em `localStorage` capturado por XSS | Baixa | Alto | 🟠 | Migrar para cookie `HttpOnly` + CSRF; auditar renderização de conteúdo do chat |
 | R-06 | Concentração de conhecimento em um único desenvolvedor | Alta | Médio | 🟠 | Este documento; ADRs; Swagger (DEB-16) |

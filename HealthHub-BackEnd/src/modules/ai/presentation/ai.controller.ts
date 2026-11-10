@@ -1,4 +1,4 @@
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import {
   BadRequestException,
   Body,
@@ -7,6 +7,7 @@ import {
   ParseUUIDPipe,
   Post,
   UploadedFile,
+  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -14,6 +15,12 @@ import { memoryStorage } from 'multer';
 import { Roles } from '../../../shared/decorators/roles.decorator';
 import { ChatMessage, ClinicalChatService, PatientContext } from '../application/clinical-chat.service';
 import { AudioTranscriptionService } from '../application/audio-transcription.service';
+import { LimiteDeTaxaFilter, MENSAGEM_LIMITE_DE_TAXA } from '../infrastructure/limite-de-taxa';
+
+const RESPOSTA_429 = {
+  status: 429,
+  description: `Provedor de IA com limite de requisições. Corpo: {"statusCode":429,"message":"${MENSAGEM_LIMITE_DE_TAXA}"}. Traz o cabeçalho Retry-After (segundos) só quando o provedor o informou.`,
+};
 
 interface ChatBody {
   message: string;
@@ -24,6 +31,7 @@ interface ChatBody {
 @ApiTags('IA')
 @ApiBearerAuth()
 @Controller('patients')
+@UseFilters(LimiteDeTaxaFilter)
 export class AiController {
   constructor(
     private readonly clinicalChat: ClinicalChatService,
@@ -31,6 +39,7 @@ export class AiController {
   ) {}
 
   @ApiOperation({ summary: "Chat de apoio clínico com IA (texto)", description: "Perfis permitidos: medico, enfermeiro." })
+  @ApiResponse(RESPOSTA_429)
   @Post(':id/chat')
   @Roles('medico', 'enfermeiro')
   chat(@Param('id', ParseUUIDPipe) _id: string, @Body() body: ChatBody) {
@@ -40,6 +49,7 @@ export class AiController {
     return this.clinicalChat.execute(body.message, body.patientContext, body.history);
   }
 
+  @ApiResponse(RESPOSTA_429)
   @Post(':id/chat/audio')
   @Roles('medico', 'enfermeiro')
   @UseInterceptors(

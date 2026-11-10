@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException, ServiceUnavailableException }
 import axios from 'axios';
 import type { ChatMessage, PatientContext } from '../application/clinical-chat.service';
 import type { AiChatReply, IAiChatProvider } from '../domain/ai-chat-provider.interface';
+import { ehLimiteDeTaxa, erroDeLimite } from './limite-de-taxa';
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const MODEL = 'openai/gpt-oss-120b';
@@ -62,6 +63,7 @@ export class GroqChatProvider implements IAiChatProvider {
       const detail = err.response?.data ?? err.message;
       // O corpo do provedor fica só no log do servidor; o navegador recebe mensagem genérica.
       console.error('[HealthHub Chat] Groq erro:', status, JSON.stringify(detail));
+      if (ehLimiteDeTaxa(err)) throw erroDeLimite(err);
       throw new InternalServerErrorException({ error: 'Assistente clínico indisponível.' });
     }
   }

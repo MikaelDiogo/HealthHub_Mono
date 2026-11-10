@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
+import { LimiteDeTaxaException } from '../infrastructure/limite-de-taxa';
 
 // Provedor SIMULADO: nenhuma chamada real à Groq.
 vi.mock('axios', () => ({ default: { post: vi.fn() } }));
@@ -35,6 +36,26 @@ describe('AudioTranscriptionService (com axios simulado)', () => {
     try { await new AudioTranscriptionService().execute(arquivo); } catch (e) { erro = e; }
     expect(erro).toBeInstanceOf(InternalServerErrorException);
     expect(corpoDe(erro)).not.toContain('SIMULADO');
+  });
+});
+
+describe('AudioTranscriptionService: limite de requisições (429, simulado)', () => {
+  beforeEach(() => { vi.clearAllMocks(); process.env.GROQ_API_KEY = 'CHAVE-SIMULADA-NAO-REAL'; vi.spyOn(console, 'error').mockImplementation(() => {}); });
+  afterEach(() => { delete process.env.GROQ_API_KEY; vi.restoreAllMocks(); });
+  const pegar = async (err: unknown) => { post.mockRejectedValue(err); try { await new AudioTranscriptionService().execute(arquivo); } catch (e) { return e as LimiteDeTaxaException; } return undefined; };
+
+  it('429 do provedor: HTTP 429 com a mensagem do pedido e sem o corpo do provedor', async () => {
+    const erro = await pegar({ message: 'Request failed with status code 429', response: { status: 429, data: { error: { message: 'SIMULADO: limite' } }, headers: {} } });
+    expect(erro).toBeInstanceOf(LimiteDeTaxaException);
+    expect(erro!.getStatus()).toBe(429);
+    expect(erro!.getResponse()).toEqual({ statusCode: 429, message: 'O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente.' });
+    expect(JSON.stringify(erro!.getResponse())).not.toContain('SIMULADO');
+    expect(erro!.retryAfter).toBeUndefined();
+  });
+
+  it('429 com retry-after do provedor: repassa o valor', async () => {
+    const erro = await pegar({ message: 'x', response: { status: 429, data: {}, headers: { 'retry-after': '45' } } });
+    expect(erro!.retryAfter).toBe('45');
   });
 });
 

@@ -15,6 +15,7 @@ import { PageShell } from '../../components/PageShell';
 import type { Patient } from '../../types/patient';
 import { chatService } from '../../services/chatService';
 import { parseAiReply } from '../../utils/aiResponse';
+import { mensagemDeErroDaIa, ehLimiteDaIa } from '../../utils/aiErro';
 
 type RecordingState = 'idle' | 'recording' | 'transcribing';
 
@@ -111,8 +112,8 @@ export const Monitoring = () => {
         id: Date.now() + 1, sender: 'ai', text: parsed.ok ? parsed.reply : parsed.error,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       }]);
-    } catch {
-      setMessages((prev) => [...prev, { id: Date.now() + 2, sender: 'ai', text: 'Erro ao conectar com o assistente.', time: '' }]);
+    } catch (err) {
+      setMessages((prev) => [...prev, { id: Date.now() + 2, sender: 'ai', text: mensagemDeErroDaIa(err), time: '' }]);
     } finally {
       setSendingMessage(false);
     }
@@ -135,7 +136,10 @@ export const Monitoring = () => {
           formData.append('audio', audioBlob, 'audio.webm');
           const { data } = await api.post(`/patients/${selectedPatientId}/chat/audio`, formData);
           if (data?.transcription) setChatInput(data.transcription);
-        } catch { } finally { setRecordingState('idle'); }
+        } catch (err) {
+          // Só o 429 mostra aviso (mensagem do backend); os demais erros do áudio continuam silenciosos, como antes.
+          if (ehLimiteDaIa(err)) setMessages((prev) => [...prev, { id: Date.now() + 3, sender: 'ai', text: mensagemDeErroDaIa(err), time: '' }]);
+        } finally { setRecordingState('idle'); }
       };
       mediaRecorder.start();
       setRecordingState('recording');

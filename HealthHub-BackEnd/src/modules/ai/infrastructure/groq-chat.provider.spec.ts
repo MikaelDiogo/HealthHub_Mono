@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
+import { HttpException, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
+import { LimiteDeTaxaException } from './limite-de-taxa';
 
 // Provedor SIMULADO: nenhuma chamada real à Groq. Toda resposta abaixo é fabricada pelo teste.
 vi.mock('axios', () => ({ default: { post: vi.fn() } }));
@@ -26,7 +27,8 @@ describe('GroqChatProvider (com axios simulado)', () => {
     await expect(new GroqChatProvider().execute('Olá', undefined as any)).resolves.toBeTruthy();
   });
 
-  it.each([[429, 'SIMULADO: limite de requisições'], [500, 'SIMULADO: erro interno do provedor']])(
+  // Rodada 4: o 429 deixou de cair neste caso (antes esperava 500). Só o 500 e os demais erros seguem genéricos.
+  it.each([[500, 'SIMULADO: erro interno do provedor'], [400, 'SIMULADO: requisição inválida']])(
     'erro %s do provedor: a resposta ao cliente NÃO traz o corpo bruto do provedor, mas o log do servidor traz',
     async (status, texto) => {
       const log = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -41,6 +43,31 @@ describe('GroqChatProvider (com axios simulado)', () => {
       expect(JSON.stringify(log.mock.calls)).toContain(texto);
     },
   );
+
+  const pegar = async (err: unknown) => { post.mockRejectedValue(err); try { await new GroqChatProvider().execute('Olá', {}, []); } catch (e) { return e as HttpException; } return undefined; };
+
+  it('429 do provedor: HTTP 429 com a mensagem do pedido, sem o corpo do provedor e sem Retry-After inventado', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const erro = await pegar({ response: { status: 429, data: { error: { message: 'SIMULADO: limite de requisições' } }, headers: {} }, message: 'falhou' });
+    expect(erro).toBeInstanceOf(LimiteDeTaxaException);
+    expect(erro!.getStatus()).toBe(429);
+    expect(erro!.getResponse()).toEqual({ statusCode: 429, message: 'O assistente de IA está com muitas solicitações no momento. Aguarde cerca de um minuto e tente novamente.' });
+    expect(corpoDe(erro)).not.toContain('SIMULADO');
+    expect((erro as LimiteDeTaxaException).retryAfter).toBeUndefined();
+    expect(log).toHaveBeenCalled();
+  });
+
+  it('429 com retry-after do provedor: guarda o valor para o cabeçalho Retry-After', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const erro = await pegar({ response: { status: 429, data: {}, headers: { 'retry-after': '30' } }, message: 'falhou' });
+    expect((erro as LimiteDeTaxaException).retryAfter).toBe('30');
+  });
+
+  it('429 com retry-after em formato estranho (data ou texto): descarta, não inventa valor', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const erro = await pegar({ response: { status: 429, data: {}, headers: { 'retry-after': 'Wed, 21 Oct 2026 07:28:00 GMT' } }, message: 'falhou' });
+    expect((erro as LimiteDeTaxaException).retryAfter).toBeUndefined();
+  });
 
   it('timeout do provedor também não vaza detalhe', async () => {
     vi.spyOn(console, 'error').mockImplementation(() => {});

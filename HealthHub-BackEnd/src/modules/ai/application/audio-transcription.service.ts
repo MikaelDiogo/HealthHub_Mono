@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
 import axios from 'axios';
 import FormData from 'form-data';
+import { ehLimiteDeTaxa, erroDeLimite } from '../infrastructure/limite-de-taxa';
 
 const GROQ_TRANSCRIPTION_URL = 'https://api.groq.com/openai/v1/audio/transcriptions';
 
@@ -35,6 +36,7 @@ export class AudioTranscriptionService {
       return { transcription: response.data.text };
     } catch (err: any) {
       console.error('[HealthHub] Falha na transcrição de áudio:', err.message);
+      if (ehLimiteDeTaxa(err)) throw erroDeLimite(err);
       throw new InternalServerErrorException({ error: 'Falha ao transcrever o áudio.' });
     }
   }
