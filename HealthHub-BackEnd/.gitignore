@@ -30,3 +30,5 @@ ormconfig.json
 
 # Datasets / arquivos de treinamento
 data/
+# Excecao: tabela oficial da CID-10 (DATASUS) usada pelo modulo de IA (rodada 5)
+!src/modules/ai/data/

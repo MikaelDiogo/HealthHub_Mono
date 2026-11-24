@@ -4,6 +4,7 @@
   "sourceRoot": "src",
   "compilerOptions": {
     "deleteOutDir": true,
+    "assets": [{ "include": "modules/ai/data/cid10/*.CSV", "watchAssets": false }],
     "plugins": [{ "name": "@nestjs/swagger", "options": { "classValidatorShim": true, "introspectComments": false } }]
   }
 }

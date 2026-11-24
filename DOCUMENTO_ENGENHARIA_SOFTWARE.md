@@ -1501,6 +1501,28 @@ Quando a Groq recusa uma chamada por excesso de requisições (HTTP 429 do prove
 - Os demais erros do provedor continuam `500` com `{ "error": "Assistente clínico indisponível." }` (chat) ou `{ "error": "Falha ao transcrever o áudio." }` (áudio); sem chave configurada continua `503`. Note que esses usam o campo `error`, e o 429 usa `message`.
 - Tela: o chat de monitoramento mostra a `message` do 429; para qualquer outro erro mostra "Erro ao conectar com o assistente.". No áudio, só o 429 gera aviso no chat.
 
+### 10.10 Conferência de códigos CID-10 na tabela oficial do DATASUS (rodada 5)
+
+O prompt do chat clínico pede o código CID-10 provável, mas o modelo pode errar ou inventar códigos. O sistema passou a **conferir, localmente, cada código citado pela IA** contra a CID-10 publicada pelo DATASUS (Ministério da Saúde), **versão 2008**, e a mostrar a descrição oficial ou o aviso de que o código não consta.
+
+- **Fonte e arquivos:** `CID-10-SUBCATEGORIAS.CSV` (12.451 linhas de dados: 12.188 com código de 4 caracteres e 263 com 3) e `CID-10-CATEGORIAS.CSV` (2.045), copiados sem alterar nenhum byte (ISO-8859-1, CRLF) para `HealthHub-BackEnd/src/modules/ai/data/cid10/`, com SHA-256 e a procedência no `README.md` dessa pasta. O `nest-cli.json` copia os CSV para `dist/` no build.
+- **Serviço:** `Cid10Service` (`application/cid10.service.ts`) lê os dois arquivos uma vez e confere cada código (`i21.9`, `I219` e `I21.9` são o mesmo). Resultados: `subcategoria` (consta no arquivo de subcategorias; inclui categorias sem subcategorias, como `I10`), `categoria` (código de 3 caracteres de uma categoria que tem subcategorias, como `I21`: válido, mas pouco específico) e `nao_consta`. A descrição exibida é **sempre a do arquivo**, nunca a que o modelo escreveu.
+- **Extração conservadora** (`application/cid10-extracao.ts`): só linhas que contêm a palavra `CID` (palavra inteira, qualquer caixa); dentro delas, uma letra **maiúscula**, dois dígitos e, opcionalmente, ponto e um dígito (`I10`, `E11.9`). Não extrai intervalos sem espaço (`T36-T50`), tokens colados a letras ou dígitos (`CID10`, `COVID19`), códigos de quatro caracteres sem ponto (`E119`) nem o número logo depois de "vitamina" (`vitamina B12`); `A4` e `T4` não têm dois dígitos.
+- **Bloco no fim da resposta** (o contrato `{ reply, source }` não muda; é só mais texto, separado por uma linha em branco; o texto do modelo fica intacto, também quando a resposta vem truncada):
+
+```
+Conferência na CID-10 (DATASUS, versão 2008):
+- I10 – <descrição oficial>: consta na tabela.
+- I21 – <descrição oficial>: consta como categoria (sem o quarto caractere).
+- X123 – não consta na tabela CID-10 do DATASUS (versão 2008).
+```
+
+  Se a resposta cita CID mas nenhum código é identificado: `Conferência na CID-10 (DATASUS, versão 2008): nenhum código identificado na resposta.` Se não cita CID, nada é acrescentado. Os códigos aparecem sem ponto, como na tabela.
+- **Privacidade:** a conferência é só no servidor. Nada da tabela e nenhum código vai à Groq; o bloco de respostas anteriores também é retirado do histórico antes de reenviar a conversa ao provedor.
+- **Falha da tabela:** se os arquivos não puderem ser lidos, a resposta do modelo segue sem o bloco (o erro vai ao log). Os erros do provedor (429, 500, 503) não mudam.
+- **Prompt:** só a regra 6 mudou, para pedir **logo após as hipóteses diagnósticas** (e não no fim, onde o limite de tokens pode cortar) uma linha começando por `CID-10:` com os códigos da CID-10 (versão brasileira do DATASUS) no formato `código – descrição`, separados por ponto e vírgula.
+- **Limites:** a tabela é de 2008 (códigos novos, como COVID-19 `U07.1`, **não constam**: verificado); a conferência mostra se o código **existe**, não se é o **adequado** ao paciente; a decisão clínica é do profissional.
+
 ---
 
 ## 11. Segurança, Privacidade e LGPD

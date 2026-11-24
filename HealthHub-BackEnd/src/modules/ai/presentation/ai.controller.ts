@@ -38,7 +38,7 @@ export class AiController {
     private readonly audioTranscription: AudioTranscriptionService,
   ) {}
 
-  @ApiOperation({ summary: "Chat de apoio clínico com IA (texto)", description: "Perfis permitidos: medico, enfermeiro." })
+  @ApiOperation({ summary: "Chat de apoio clínico com IA (texto)", description: "Perfis permitidos: medico, enfermeiro. Se a resposta citar CID, o texto termina com um bloco \"Conferência na CID-10 (DATASUS, versão 2008)\", conferido localmente na tabela oficial (nada da tabela vai à IA)." })
   @ApiResponse(RESPOSTA_429)
   @Post(':id/chat')
   @Roles('medico', 'enfermeiro')

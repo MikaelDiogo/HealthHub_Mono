@@ -1,0 +1,2 @@
+# CSV da CID-10 do DATASUS: nunca converter fim de linha nem codificacao (ISO-8859-1, CRLF)
+HealthHub-BackEnd/src/modules/ai/data/cid10/*.CSV binary

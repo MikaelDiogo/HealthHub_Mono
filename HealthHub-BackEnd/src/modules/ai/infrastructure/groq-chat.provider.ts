@@ -23,7 +23,7 @@ function buildSystemPrompt(ctx: PatientContext = {}): string {
 3. Para comparações clínicas use tabela Markdown com vantagens, desvantagens, indicações e contraindicações.
 4. Nunca recuse uma questão clínica — ofereça sempre sua melhor análise. A decisão final é do médico.
 5. Ao citar medicamentos, inclua posologia padrão e ajustes para insuficiência renal/hepática quando pertinente.
-6. Sempre que possível forneça referências a diretrizes de prática e sugira o CID provável.
+6. Sempre que possível forneça referências a diretrizes de prática. Logo após as hipóteses diagnósticas (e não no fim da resposta), escreva uma linha começando por "CID-10:" com os códigos prováveis da CID-10 (versão brasileira do DATASUS), no formato código – descrição, separados por ponto e vírgula.
 7. Máximo 4 parágrafos ou uma tabela + 2 parágrafos. Sem rodeios.`;
 }
 
