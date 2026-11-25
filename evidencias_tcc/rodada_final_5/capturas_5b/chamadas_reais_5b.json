@@ -1,0 +1,169 @@
+{
+ "commit": "d74513650791f3a502eef7988eb2043be84d71a6",
+ "etapa": "2A",
+ "pergunta": "Quais os diagnósticos diferenciais mais prováveis, os sinais de alerta a pesquisar e a conduta inicial? Sugira o CID provável.",
+ "paciente": "FICTÍCIO-06 (fictício)",
+ "chamadas_ja_registradas_antes": 0,
+ "limite_total": 6,
+ "parou": null,
+ "criterio": {
+  "chamadas_com_linha_CID10_nas_primeiras_3_linhas": 3,
+  "chamadas_com_linha_e_bloco": 3,
+  "de": 3,
+  "atingido_2_de_3": true
+ },
+ "sugestao": null,
+ "chamadas": [
+  {
+   "chamada": 1,
+   "etapa": "2A",
+   "via": "tela",
+   "http_groq": 200,
+   "tempo_total_ms": 3148,
+   "finish_reason": "length",
+   "completion_tokens": 1024,
+   "reasoning_tokens": 369,
+   "max_tokens_enviado": 1024,
+   "chars_resposta_modelo": 2181,
+   "posicao_linha_CID10": 1,
+   "na_primeira_linha": true,
+   "codigos_extraidos": [
+    "M545",
+    "M544"
+   ],
+   "conferencia": [
+    {
+     "codigo_oficial": "M54.5",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Dor lombar baixa"
+    },
+    {
+     "codigo_oficial": "M54.4",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Lumbago com ciática"
+    }
+   ],
+   "resposta_final_tem_bloco": true,
+   "verificacao_do_nome": {
+    "nome_do_paciente_enviado_a_groq": false,
+    "mensagens_verificadas": 2,
+    "mensagens_verificadas_por_papel": {
+     "system": 1,
+     "user": 1
+    }
+   }
+  },
+  {
+   "chamada": 2,
+   "etapa": "2A",
+   "via": "api",
+   "http_groq": 200,
+   "tempo_total_ms": 2469,
+   "finish_reason": "length",
+   "completion_tokens": 1024,
+   "reasoning_tokens": 475,
+   "max_tokens_enviado": 1024,
+   "chars_resposta_modelo": 1975,
+   "posicao_linha_CID10": 1,
+   "na_primeira_linha": true,
+   "codigos_extraidos": [
+    "M545",
+    "M512",
+    "S320",
+    "M544",
+    "M865"
+   ],
+   "conferencia": [
+    {
+     "codigo_oficial": "M54.5",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Dor lombar baixa"
+    },
+    {
+     "codigo_oficial": "M51.2",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Outros deslocamentos discais intervertebrais especificados"
+    },
+    {
+     "codigo_oficial": "S32.0",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Fratura de vértebra lombar"
+    },
+    {
+     "codigo_oficial": "M54.4",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Lumbago com ciática"
+    },
+    {
+     "codigo_oficial": "M86.5",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Outra osteomielite crônica hematogênica"
+    }
+   ],
+   "resposta_final_tem_bloco": true,
+   "verificacao_do_nome": {
+    "nome_do_paciente_enviado_a_groq": false,
+    "mensagens_verificadas": 2,
+    "mensagens_verificadas_por_papel": {
+     "system": 1,
+     "user": 1
+    }
+   },
+   "http_api": 201,
+   "chars_resposta_final": 2330
+  },
+  {
+   "chamada": 3,
+   "etapa": "2A",
+   "via": "api",
+   "http_groq": 200,
+   "tempo_total_ms": 2449,
+   "finish_reason": "length",
+   "completion_tokens": 1024,
+   "reasoning_tokens": 338,
+   "max_tokens_enviado": 1024,
+   "chars_resposta_modelo": 2419,
+   "posicao_linha_CID10": 1,
+   "na_primeira_linha": true,
+   "codigos_extraidos": [
+    "M545",
+    "M519",
+    "M532",
+    "R102"
+   ],
+   "conferencia": [
+    {
+     "codigo_oficial": "M54.5",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Dor lombar baixa"
+    },
+    {
+     "codigo_oficial": "M51.9",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Transtorno não especificado de disco intervertebral"
+    },
+    {
+     "codigo_oficial": "M53.2",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Instabilidades da coluna vertebral"
+    },
+    {
+     "codigo_oficial": "R10.2",
+     "situacao": "subcategoria",
+     "descricao_oficial": "Dor pélvica e perineal"
+    }
+   ],
+   "resposta_final_tem_bloco": true,
+   "verificacao_do_nome": {
+    "nome_do_paciente_enviado_a_groq": false,
+    "mensagens_verificadas": 2,
+    "mensagens_verificadas_por_papel": {
+     "system": 1,
+     "user": 1
+    }
+   },
+   "http_api": 201,
+   "chars_resposta_final": 2709
+  }
+ ]
+}

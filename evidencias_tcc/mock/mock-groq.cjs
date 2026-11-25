@@ -1,7 +1,7 @@
 // PROVEDOR SIMULADO — não chama a Groq. Carregar com: node -r ./mock-groq.cjs dist/main
 // Substitui o adaptador HTTP do axios SÓ para api.groq.com, sem alterar o código do projeto.
 // Registra cada requisição "enviada" em MOCK_LOG (jsonl) para medir o que sairia da máquina.
-// Cenários por texto da mensagem: __ERRO_429__ (429 sem retry-after), __ERRO_429_RETRY__ (429 com retry-after: 30), __ERRO_500__, __TIMEOUT__, __VAZIO__ (demais: resposta simulada).
+// Cenários por texto da mensagem: __ERRO_429__ (429 sem retry-after), __ERRO_429_RETRY__ (429 com retry-after: 30), __ERRO_500__, __TIMEOUT__, __VAZIO__, __CID__ (resposta com linha CID-10: de 3 códigos, para a Figura 26c) (demais: resposta simulada).
 // Áudio: nome de arquivo com "erro429" → 429 sem retry-after; com "retry429" → 429 com retry-after: 30; com "erro" → 400.
 const fs = require('fs');
 const path = require('path');
@@ -33,6 +33,10 @@ axios.defaults.adapter = async (config) => {
     if (ultima.includes('__ERRO_429_RETRY__')) throw falha(429, { error: { message: 'SIMULADO: limite de requisições (rate limit) atingido', type: 'tokens' } }, { 'retry-after': '30' });
     if (ultima.includes('__ERRO_429__')) throw falha(429, { error: { message: 'SIMULADO: limite de requisições (rate limit) atingido', type: 'tokens' } });
     if (ultima.includes('__ERRO_500__')) throw falha(500, { error: { message: 'SIMULADO: erro interno do provedor' } });
+    if (ultima.includes('__CID__')) {
+      const linhas = ['CID-10: I10 – Hipertensão essencial (primária); I21 – Infarto agudo do miocárdio; U07.1 – COVID-19', '', '[RESPOSTA SIMULADA — NÃO É DO MODELO REAL] Texto fixo do mock para mostrar o bloco de conferência: um código que consta (I10), uma categoria (I21) e um que não consta na tabela de 2008 (U07.1).'];
+      return { data: { choices: [{ message: { content: linhas.join(String.fromCharCode(10)) } }] }, status: 200, statusText: 'OK', headers: {}, config, request: {} };
+    }
     const data = ultima.includes('__VAZIO__') ? { choices: [] } : { choices: [{ message: { content: '[RESPOSTA SIMULADA — NÃO É DO MODELO REAL] Texto fixo do mock para teste de integração.' } }] };
     return { data, status: 200, statusText: 'OK', headers: {}, config, request: {} };
   }

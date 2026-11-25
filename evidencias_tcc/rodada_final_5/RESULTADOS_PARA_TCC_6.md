@@ -1,3 +1,5 @@
+> **SUBSTITUÍDO por `RESULTADOS_PARA_TCC_7.md` (versão final X2, COMPLETA).** Este arquivo é o histórico da tentativa anterior (X, INCOMPLETA), mantido sem alteração do conteúdo.
+
 # RESULTADOS PARA O TCC (6): rodada 5 (conferência dos códigos CID na tabela oficial do DATASUS)
 
 **Estado:** a parte de código, tabela, testes e verificação em clone limpo está **completa e aprovada**. **Dois itens do pedido NÃO foram atendidos como escritos**, por causa do comportamento real do modelo (seção 8): o modelo não escreveu a linha `CID-10:` em nenhuma das 3 chamadas reais, então a **Figura 26 não mostra o bloco de conferência**. Por isso o pacote está marcado INCOMPLETO nesse ponto.

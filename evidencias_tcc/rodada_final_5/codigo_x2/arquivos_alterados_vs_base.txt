@@ -1,0 +1,135 @@
+ .gitattributes                                     |   2 +
+ DOCUMENTO_ENGENHARIA_SOFTWARE.md                   |  22 +
+ HealthHub-BackEnd/.gitignore                       |   4 +-
+ HealthHub-BackEnd/nest-cli.json                    |   1 +
+ .../scripts/verificar-build-cid10.mjs              |  29 +
+ HealthHub-BackEnd/src/modules/ai/ai.module.ts      |   2 +
+ .../modules/ai/application/cid10-assets.spec.ts    |  23 +
+ .../modules/ai/application/cid10-extracao.spec.ts  | 138 ++++
+ .../src/modules/ai/application/cid10-extracao.ts   |  88 +++
+ .../modules/ai/application/cid10.service.spec.ts   |  99 +++
+ .../src/modules/ai/application/cid10.service.ts    |  73 ++
+ .../ai/application/clinical-chat-cid.spec.ts       | 115 ++++
+ .../ai/application/clinical-chat.service.ts        |  18 +-
+ .../ai/application/historico-seguro.spec.ts        |  59 ++
+ .../src/modules/ai/application/historico-seguro.ts |  31 +
+ .../modules/ai/data/cid10/CID-10-CATEGORIAS.CSV    | Bin 0 -> 197561 bytes
+ .../modules/ai/data/cid10/CID-10-SUBCATEGORIAS.CSV | Bin 0 -> 1352723 bytes
+ .../src/modules/ai/data/cid10/README.md            |  39 ++
+ .../ai/infrastructure/groq-chat.provider.ts        |   2 +-
+ .../src/modules/ai/presentation/ai.controller.ts   |   2 +-
+ HealthHub-Project/src/pages/Monitoring/index.tsx   |   7 +-
+ .../src/utils/blocoConferenciaCid.spec.ts          |  31 +
+ HealthHub-Project/src/utils/historicoChat.spec.ts  |  25 +
+ HealthHub-Project/src/utils/historicoChat.ts       |  10 +
+ .../rodada_final_5/RESULTADOS_PARA_TCC_6.md        | 134 ++++
+ .../rodada_final_5/capturas/chamadas_reais.json    |  59 ++
+ .../capturas/fig26_chat_ia_cid_conferencia_r5.png  | Bin 0 -> 131613 bytes
+ .../fig26b_chat_ia_cid_bloco_conferencia_r5.png    | Bin 0 -> 174454 bytes
+ .../rodada_final_5/capturas/figuras_manifesto.csv  |   3 +
+ .../rodada_final_5/capturas/registro_groq.jsonl    |   3 +
+ .../rodada_final_5/codigo/arquivos_alterados_X.txt |  20 +
+ evidencias_tcc/rodada_final_5/codigo/commits.txt   |   1 +
+ .../rodada_final_5/codigo/mudancas_X.patch         | 749 ++++++++++++++++++++
+ .../guia_alta_TESTE_B_\342\200\224_Souza.pdf"      | 458 +++++++++++++
+ .../prontuario_TESTE_C_\342\200\224_Lima.pdf"      | 761 +++++++++++++++++++++
+ .../cenarios22/prints/C01_alta.png                 | Bin 0 -> 62659 bytes
+ .../cenarios22/prints/C01_antes.png                | Bin 0 -> 74200 bytes
+ .../cenarios22/prints/C01_painel.png               | Bin 0 -> 102268 bytes
+ .../cenarios22/prints/C01_triagem.png              | Bin 0 -> 74538 bytes
+ .../cenarios22/prints/C02_alta.png                 | Bin 0 -> 62659 bytes
+ .../cenarios22/prints/C02_antes.png                | Bin 0 -> 74333 bytes
+ .../cenarios22/prints/C02_painel.png               | Bin 0 -> 104088 bytes
+ .../cenarios22/prints/C02_triagem.png              | Bin 0 -> 74946 bytes
+ .../cenarios22/prints/C03_alta.png                 | Bin 0 -> 62659 bytes
+ .../cenarios22/prints/C03_antes.png                | Bin 0 -> 73842 bytes
+ .../cenarios22/prints/C03_painel.png               | Bin 0 -> 106406 bytes
+ .../cenarios22/prints/C03_triagem.png              | Bin 0 -> 74483 bytes
+ .../cenarios22/prints/C04_alta.png                 | Bin 0 -> 62659 bytes
+ .../cenarios22/prints/C04_antes.png                | Bin 0 -> 73363 bytes
+ .../cenarios22/prints/C04_painel.png               | Bin 0 -> 106388 bytes
+ .../cenarios22/prints/C04_triagem.png              | Bin 0 -> 74075 bytes
+ .../cenarios22/prints/C05_alta.png                 | Bin 0 -> 62659 bytes
+ .../cenarios22/prints/C05_antes.png                | Bin 0 -> 74060 bytes
+ .../cenarios22/prints/C05_painel.png               | Bin 0 -> 105642 bytes
+ .../cenarios22/prints/C05_triagem.png              | Bin 0 -> 74643 bytes
+ .../cenarios22/prints/F01_login_enfermeiro.png     | Bin 0 -> 113572 bytes
+ .../cenarios22/prints/F01_login_medico.png         | Bin 0 -> 113584 bytes
+ .../cenarios22/prints/F01_login_recepcionista.png  | Bin 0 -> 58869 bytes
+ .../cenarios22/prints/F01_senha_errada.png         | Bin 0 -> 20272 bytes
+ .../cenarios22/prints/F01_tela1.png                | Bin 0 -> 12754 bytes
+ .../cenarios22/prints/F02_preenchido.png           | Bin 0 -> 96831 bytes
+ .../cenarios22/prints/F02_resultado.png            | Bin 0 -> 56482 bytes
+ .../cenarios22/prints/F02_tela1.png                | Bin 0 -> 97157 bytes
+ .../cenarios22/prints/F02_vazio.png                | Bin 0 -> 98185 bytes
+ .../cenarios22/prints/F03_resultado.png            | Bin 0 -> 66914 bytes
+ .../cenarios22/prints/F03_sinais.png               | Bin 0 -> 99232 bytes
+ .../cenarios22/prints/F03_tela1.png                | Bin 0 -> 99870 bytes
+ .../cenarios22/prints/F04_recusa.png               | Bin 0 -> 96112 bytes
+ .../cenarios22/prints/F04_tela1.png                | Bin 0 -> 93865 bytes
+ .../cenarios22/prints/F04_valido.png               | Bin 0 -> 67095 bytes
+ .../cenarios22/prints/F05_admitirA.png             | Bin 0 -> 81369 bytes
+ .../cenarios22/prints/F05_admitirB.png             | Bin 0 -> 83917 bytes
+ .../cenarios22/prints/F05_esteira.png              | Bin 0 -> 78602 bytes
+ .../cenarios22/prints/F05_tela1.png                | Bin 0 -> 58883 bytes
+ .../cenarios22/prints/F06_modal_busca.png          | Bin 0 -> 76974 bytes
+ .../cenarios22/prints/F07_resultado.png            | Bin 0 -> 97403 bytes
+ .../cenarios22/prints/F07_tela1.png                | Bin 0 -> 85556 bytes
+ .../cenarios22/prints/F08_bloqueio.png             | Bin 0 -> 96349 bytes
+ .../cenarios22/prints/F08_tela1.png                | Bin 0 -> 106228 bytes
+ .../cenarios22/prints/F09_resultado.png            | Bin 0 -> 106531 bytes
+ .../cenarios22/prints/F09_sinais.png               | Bin 0 -> 91347 bytes
+ .../cenarios22/prints/F09_tela1.png                | Bin 0 -> 106682 bytes
+ .../cenarios22/prints/F10_desktop.png              | Bin 0 -> 114495 bytes
+ .../cenarios22/prints/F10_mobile.png               | Bin 0 -> 56340 bytes
+ .../cenarios22/prints/F11_A_alta.png               | Bin 0 -> 114361 bytes
+ .../cenarios22/prints/F11_A_consulta.png           | Bin 0 -> 99556 bytes
+ .../cenarios22/prints/F11_A_observacao.png         | Bin 0 -> 98326 bytes
+ .../cenarios22/prints/F11_B_alta_pdf.png           | Bin 0 -> 113716 bytes
+ .../cenarios22/prints/F11_B_modal_alta.png         | Bin 0 -> 127228 bytes
+ .../cenarios22/prints/F11_H_alta_sem_pdf.png       | Bin 0 -> 100100 bytes
+ .../cenarios22/prints/F11_aba_com_alta.png         | Bin 0 -> 69748 bytes
+ .../cenarios22/prints/F12_modal_historico.png      | Bin 0 -> 108344 bytes
+ .../cenarios22/prints/F12_resultado.png            | Bin 0 -> 79721 bytes
+ .../cenarios22/prints/F12_tela1.png                | Bin 0 -> 65348 bytes
+ .../cenarios22/prints/F13_medico_controle.png      | Bin 0 -> 81322 bytes
+ .../cenarios22/prints/F14_foco_E_fronteira.png     | Bin 0 -> 122350 bytes
+ .../cenarios22/prints/F14_painel_apos_C.png        | Bin 0 -> 124444 bytes
+ .../cenarios22/prints/F14_painel_final.png         | Bin 0 -> 129432 bytes
+ .../cenarios22/prints/F15_enfermeiro_normal.png    | Bin 0 -> 52150 bytes
+ .../cenarios22/prints/F15_enfermeiro_urgente.png   | Bin 0 -> 67877 bytes
+ .../prints/F15_enfermeiro_urgente_digitando.png    | Bin 0 -> 62244 bytes
+ .../cenarios22/prints/F15_medico_lista.png         | Bin 0 -> 59432 bytes
+ .../cenarios22/prints/F15_medico_urgente.png       | Bin 0 -> 72404 bytes
+ .../cenarios22/prints/F16_apos_gerar.png           | Bin 0 -> 108284 bytes
+ .../cenarios22/prints/F16_ficha.png                | Bin 0 -> 108300 bytes
+ .../cenarios22/prints/F16_tela1.png                | Bin 0 -> 63879 bytes
+ .../cenarios22/prints/F17_cadastro1.png            | Bin 0 -> 47059 bytes
+ .../prints/F17_cadastro2_apos_recarregar.png       | Bin 0 -> 47059 bytes
+ .../cenarios22/prints/F17_fila.png                 | Bin 0 -> 55035 bytes
+ .../cenarios22/prints/F17_tela1.png                | Bin 0 -> 54985 bytes
+ .../cenarios22/prints/F18_PA_130-85.png            | Bin 0 -> 104467 bytes
+ .../cenarios22/prints/F18_PA_190-120.png           | Bin 0 -> 106745 bytes
+ .../cenarios22/prints/F18_PA_85-50.png             | Bin 0 -> 107608 bytes
+ .../verificacao_bruta/cenarios22/resultados.json   | 305 +++++++++
+ .../verificacao_bruta/cenarios22_console.txt       |  49 ++
+ .../verificacao_bruta/concorrencia.txt             |  42 ++
+ .../verificacao_bruta/e2e_eventos.txt              |  16 +
+ .../rodada_final_5/verificacao_bruta/health.json   |   1 +
+ .../ida_volta/ida_volta_banco.csv                  |  11 +
+ .../rodada_final_5/verificacao_bruta/s1_s8.txt     |  63 ++
+ .../verificacao_bruta/s1_s8/s1_s8_resultado.json   | 119 ++++
+ .../verificacao_bruta/s1_s8/s7-regressao.md        |   9 +
+ .../verificacao_bruta/s1_s8/s8-saltos-estado.md    |   8 +
+ .../rodada_final_5/verificacao_bruta/s6.txt        |  71 ++
+ .../verificacao_bruta/s6/s6_resultado.json         |   5 +
+ .../verificacao_bruta/tf/tf07_matriz_perfis.md     |  21 +
+ .../verificacao_bruta/tf/tf_resultados.json        | 221 ++++++
+ .../tf05/fronteiras_resultados.csv                 |  27 +
+ .../verificacao_bruta/tf05/tf05_fronteiras.md      |  34 +
+ .../verificacao_bruta/tf05/tf05_resultado.json     |   1 +
+ .../rodada_final_5/verificacao_bruta/tf_casos.txt  |  10 +
+ evidencias_tcc/scripts_verificacao/README.md       |   1 +
+ .../scripts_verificacao/capturas_rodada5.mjs       |  91 +++
+ .../scripts_verificacao/registro_groq.cjs          |  32 +
+ 134 files changed, 4138 insertions(+), 7 deletions(-)

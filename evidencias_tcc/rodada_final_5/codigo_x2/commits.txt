@@ -1,0 +1,3 @@
+d745136 fix(ia): nome do paciente nao vai a Groq no historico; CID na primeira linha; formato oficial do codigo no bloco
+cdf3bf4 docs(rodada5): evidencias da verificacao em clone limpo do commit 01e9b18, chamadas reais a Groq e relatorio (sem publicacao: Figura 26 sem bloco)
+01e9b18 feat(ia): conferencia local dos codigos CID-10 sugeridos pela IA na tabela oficial do DATASUS (versao 2008)

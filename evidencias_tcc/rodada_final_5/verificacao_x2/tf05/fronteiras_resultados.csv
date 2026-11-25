@@ -1,0 +1,27 @@
+caso,entrada,esperado,obtido,aprovado
+SpO₂-91,SpO₂ 91,critical,critical (backend crítico: sim),sim
+SpO₂-92,SpO₂ 92,warning,warning (backend crítico: não),sim
+SpO₂-94,SpO₂ 94,warning,warning (backend crítico: não),sim
+SpO₂-95,SpO₂ 95,normal,normal (backend crítico: não),sim
+SpO₂-96,SpO₂ 96,normal,normal (backend crítico: não),sim
+FC-59,FC 59,critical,critical (backend crítico: sim),sim
+FC-60,FC 60,normal,normal (backend crítico: não),sim
+FC-90,FC 90,normal,normal (backend crítico: não),sim
+FC-91,FC 91,warning,warning (backend crítico: não),sim
+FC-100,FC 100,warning,warning (backend crítico: não),sim
+FC-101,FC 101,critical,critical (backend crítico: sim),sim
+Temperatura-37.7,Temperatura 37.7,normal,normal (backend crítico: não),sim
+Temperatura-37.8,Temperatura 37.8,warning,warning (backend crítico: não),sim
+Temperatura-39,Temperatura 39,warning,warning (backend crítico: não),sim
+Temperatura-39.1,Temperatura 39.1,critical,critical (backend crítico: sim),sim
+Pressão-90/60,Pressão 90/60,critical,critical (backend crítico: sim),sim
+Pressão-91/60,Pressão 91/60,warning,warning (backend crítico: não),sim
+Pressão-100/60,Pressão 100/60,warning,warning (backend crítico: não),sim
+Pressão-101/70,Pressão 101/70,normal,normal (backend crítico: não),sim
+Pressão-139/89,Pressão 139/89,normal,normal (backend crítico: não),sim
+Pressão-140/80,Pressão 140/80,warning,warning (backend crítico: não),sim
+Pressão-120/90,Pressão 120/90,warning,warning (backend crítico: não),sim
+Pressão-179/119,Pressão 179/119,warning,warning (backend crítico: não),sim
+Pressão-180/80,Pressão 180/80,critical,critical (backend crítico: sim),sim
+Pressão-120/120,Pressão 120/120,critical,critical (backend crítico: sim),sim
+Pressão-220/130,Pressão 220/130,critical,critical (backend crítico: sim),sim
