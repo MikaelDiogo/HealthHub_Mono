@@ -27,7 +27,13 @@ Cabeçalhos: `SUBCAT;CLASSIF;RESTRSEXO;CAUSAOBITO;DESCRICAO;DESCRABREV;REFER;EXC
 - A conferência diz apenas se o código existe na tabela e mostra a descrição oficial; **não** diz se o código é o correto para o paciente. A decisão clínica é do profissional.
 
 ## Licença e atribuição
-**Não conferido:** não consegui abrir a página do DATASUS a partir do ambiente de trabalho (conexão recusada), então **não transcrevo aqui o trecho exato** da página sobre o uso da CID-10. O pedido do autor descreve o conteúdo como: "a página do DATASUS diz que a CID-10 é disponibilizada para estimular a utilização" (paráfrase do pedido, não cópia da página). **Pendência do autor:** abrir a página, copiar o trecho literal e colar aqui antes de citar a licença no TCC. Atribuição: tabela CID-10, DATASUS/Ministério da Saúde, versão 2008.
+O órgão que disponibiliza a CID-10 na página de download é o **CBCD (Centro Brasileiro de Classificação de Doenças)**. O texto abaixo foi **fornecido pelo autor** no pedido da rodada 5 (continuação), atribuído à página http://www2.datasus.gov.br/cid10/V2008/download.htm:
+
+> "O CBCD disponibiliza a CID-10, versão eletrônica, em diversos formatos e padrões, estimulando, assim, a utilização da mesma e permitindo a melhoria da qualidade da informação fornecida."
+
+- **Data de leitura registrada:** 24/11/2026 (a data de hoje, como pedido).
+- **Não conferido por mim:** a página não abriu a partir do ambiente do Claude Code (conexão recusada; tentei duas vezes em 24/11/2026). Por isso **não verifiquei** se a frase da página é idêntica a esta nem li o restante da página.
+- **Alcance da frase:** ela diz que o CBCD disponibiliza a tabela e estimula a utilização. **Não é uma licença formal** e este repositório **não afirma** que há licença nem termos de uso na página. Atribuição: tabela CID-10, DATASUS/Ministério da Saúde (CBCD), versão 2008.
 
 ## Quando mudar esta tabela
 Qualquer troca de arquivo muda os SHA-256 acima, e o teste `cid10-assets.spec.ts` falha até este README ser atualizado.

@@ -16,6 +16,7 @@ import type { Patient } from '../../types/patient';
 import { chatService } from '../../services/chatService';
 import { parseAiReply } from '../../utils/aiResponse';
 import { mensagemDeErroDaIa, ehLimiteDaIa } from '../../utils/aiErro';
+import { montarHistorico } from '../../utils/historicoChat';
 
 type RecordingState = 'idle' | 'recording' | 'transcribing';
 
@@ -24,6 +25,8 @@ interface Message {
   sender: 'user' | 'ai';
   text: string;
   time: string;
+  /** Só da tela: não entra no histórico enviado à IA (a saudação traz o nome do paciente). */
+  local?: boolean;
 }
 
 export const Monitoring = () => {
@@ -69,7 +72,7 @@ export const Monitoring = () => {
     const ultima = patientData?.sinaisVitais?.[0];
     setLoadingAI(true);
     setMessages([{
-      id: 1, sender: 'ai',
+      id: 1, sender: 'ai', local: true,
       text: `Olá! Analisando **${patientData?.nome_completo}**. Como posso ajudar neste caso?`,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     }]);
@@ -105,7 +108,7 @@ export const Monitoring = () => {
           anamnese: currentPatient.anamnese,
           sinaisVitais: currentPatient.sinaisVitais?.[0],
         },
-        history: messages.slice(-4).map((m) => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text })),
+        history: montarHistorico(messages),
       });
       const parsed = parseAiReply(response.data);
       setMessages((prev) => [...prev, {

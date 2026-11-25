@@ -25,7 +25,7 @@ describe('chat: bloco de conferência de CID', () => {
     expect(out.reply.slice(texto.length + 2)).toBe([
       CABECALHO_CONFERENCIA,
       `- I10 – ${descSub('I10')}: consta na tabela.`,
-      '- E999 – não consta na tabela CID-10 do DATASUS (versão 2008).',
+      '- E99.9 – não consta na tabela CID-10 do DATASUS (versão 2008).',
     ].join('\n'));
     expect(out.reply).not.toContain('QUE O MODELO ESCREVEU' + ': consta'); // a descrição do bloco não é a do modelo
   });
@@ -38,7 +38,7 @@ describe('chat: bloco de conferência de CID', () => {
   it('resposta truncada (limite de tokens) que já citou CID também recebe o bloco', async () => {
     const prov = simulado(async () => ({ reply: 'CID-10: J18.9 – Pneumonia não espec', source: 'groq' }));
     const out = await new ClinicalChatService(prov).execute('p', {}, []);
-    expect(out.reply).toContain(`- J189 – ${descSub('J189')}: consta na tabela.`);
+    expect(out.reply).toContain(`- J18.9 – ${descSub('J189')}: consta na tabela.`);
   });
 
   it('o contrato da resposta não muda: só { reply, source }', async () => {
@@ -62,6 +62,34 @@ describe('chat: bloco de conferência de CID', () => {
     const prov = simulado(async () => ({ reply: 'CID-10: I10 – x', source: 'groq' }));
     expect((await new ClinicalChatService(prov, cid).execute('p', {}, [])).reply).toBe('CID-10: I10 – x');
     vi.restoreAllMocks();
+  });
+});
+
+describe('histórico enviado ao provedor (pedido 7, Passo 1)', () => {
+  const NOME = 'Maria Aparecida dos Santos Fictícia';
+  const SAUDACAO = `Olá! Analisando **${NOME}**. Como posso ajudar neste caso?`;
+  const enviado = async (history: any[], ctx: any = {}) => {
+    const prov = simulado(async () => ({ reply: 'ok', source: 'groq' }));
+    await new ClinicalChatService(prov).execute('pergunta', ctx, history);
+    return prov.execute.mock.calls[0][2] as Array<{ role: string; content: string }>;
+  };
+  it('a saudação inicial da tela NÃO vai ao provedor (padrão), mesmo sem o backend saber o nome', async () => {
+    const h = await enviado([{ role: 'assistant', content: SAUDACAO }, { role: 'user', content: 'dor lombar' }]);
+    expect(JSON.stringify(h)).not.toContain(NOME);
+    expect(h).toEqual([{ role: 'user', content: 'dor lombar' }]);
+  });
+  it('se o cliente enviar o nome no patientContext, qualquer mensagem do assistente que o contenha também é descartada', async () => {
+    const h = await enviado([{ role: 'assistant', content: 'Paciente ' + NOME.toUpperCase() + ' com dor' }, { role: 'assistant', content: 'Resposta normal' }], { nome_completo: NOME });
+    expect(h).toEqual([{ role: 'assistant', content: 'Resposta normal' }]);
+  });
+  it('histórico normal passa intacto (e o nome digitado pelo profissional no texto livre segue como foi digitado)', async () => {
+    const normal = [{ role: 'user', content: 'tem ' + NOME + ' com dor' }, { role: 'assistant', content: 'Sugiro avaliar sinais de alerta.' }];
+    expect(await enviado(normal, { nome_completo: NOME })).toEqual(normal);
+  });
+  it('o nome do patientContext não vai ao corpo do provedor (contextoSemIdentificacao continua valendo)', async () => {
+    const prov = simulado(async () => ({ reply: 'ok', source: 'groq' }));
+    await new ClinicalChatService(prov).execute('p', { nome_completo: NOME, alergias: 'x' } as any, []);
+    expect(JSON.stringify(prov.execute.mock.calls[0][1])).not.toContain(NOME);
   });
 });
 

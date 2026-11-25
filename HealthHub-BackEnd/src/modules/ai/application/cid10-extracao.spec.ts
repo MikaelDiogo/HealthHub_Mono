@@ -1,6 +1,6 @@
 // Extração conservadora de códigos CID e bloco de conferência. Esperados escritos à mão a partir do pedido da rodada 5.
 import { describe, it, expect } from 'vitest';
-import { extrairCodigos, mencionaCid, blocoDeConferencia, anexarConferencia, removerConferencia, CABECALHO_CONFERENCIA, LINHA_SEM_CODIGO, type ResultadoCid } from './cid10-extracao';
+import { extrairCodigos, mencionaCid, formatarCodigoOficial, posicaoLinhaCid, blocoDeConferencia, anexarConferencia, removerConferencia, CABECALHO_CONFERENCIA, LINHA_SEM_CODIGO, type ResultadoCid } from './cid10-extracao';
 
 describe('extrairCodigos: o que deve extrair', () => {
   it('"CID-10: I10 – ...; E11.9 – ..." devolve os dois (sem ponto, em ordem)', () => {
@@ -26,7 +26,6 @@ describe('extrairCodigos: falsos positivos que NÃO podem sair', () => {
     ['intervalo com travessão I10–I15', 'CID-10: grupo I10–I15'],
     ['CID10 colado', 'Usar CID10 como base'],
     ['COVID19 colado', 'CID: COVID19 não conta'],
-    ['quarto caractere sem ponto', 'CID: E119 sem ponto'],
     ['dois decimais', 'CID: I21.90'],
     ['minúsculas', 'CID: i10'],
   ])('%s', (_nome, texto) => {
@@ -40,6 +39,40 @@ describe('extrairCodigos: falsos positivos que NÃO podem sair', () => {
   it('palavras que apenas contêm "cid" (decidir, incidência) não contam como a palavra CID', () => {
     expect(mencionaCid('é preciso decidir a conduta; incidência alta; I10')).toBe(false);
     expect(extrairCodigos('é preciso decidir a conduta I10')).toEqual([]);
+  });
+});
+
+// ── Pedido 7, Passo 3: linha que começa por "CID-10:" / "CID:" aceita o código de 4 caracteres SEM ponto; formato oficial no bloco ──
+describe('linha que COMEÇA por CID-10: / CID: (código de 4 caracteres sem ponto)', () => {
+  it('"CID: E119" e "CID-10: E119 – ..." extraem E119 (antes do pedido 7 o esperado era [])', () => {
+    expect(extrairCodigos('CID: E119 sem ponto')).toEqual(['E119']);
+    expect(extrairCodigos('CID-10: E119 – Diabetes; I10 – Hipertensão; J18.9 – Pneumonia')).toEqual(['E119', 'I10', 'J189']);
+  });
+  it('com marcação Markdown na frente e com hífen não separável (o modelo usa)', () => {
+    expect(extrairCodigos('**CID-10:** E119 – Diabetes')).toEqual(['E119']);
+    expect(extrairCodigos('CID\u201110: M545 – Lombalgia')).toEqual(['M545']);
+  });
+  it('nas DEMAIS linhas a regra conservadora continua: E119 sem ponto NÃO é extraído', () => {
+    expect(extrairCodigos('Hipótese: cid provável: E119')).toEqual([]);   // a linha não COMEÇA por CID:
+    expect(extrairCodigos('Sugestão de CID (E119)')).toEqual([]);
+  });
+  it('mesmo na linha CID-10: continuam fora vitamina B12, intervalos, cinco caracteres e dois decimais', () => {
+    expect(extrairCodigos('CID-10: vitamina B12; T36-T50; E1190; I21.90')).toEqual([]);
+  });
+  it('posicaoLinhaCid: 1 = primeira linha; null se nenhuma linha começa por CID-10:/CID:', () => {
+    expect(posicaoLinhaCid('CID-10: I10 – x\nresto')).toBe(1);
+    expect(posicaoLinhaCid('Texto\n\n**CID-10:** I10')).toBe(3);
+    expect(posicaoLinhaCid('Texto que cita CID no meio\noutra linha')).toBeNull();
+  });
+});
+
+describe('formatarCodigoOficial: 3 caracteres sem ponto; 4 caracteres com ponto depois do terceiro', () => {
+  it.each([['I10', 'I10'], ['I21', 'I21'], ['E119', 'E11.9'], ['e11.9', 'E11.9'], ['J189', 'J18.9'], ['X123', 'X12.3'], ['i219', 'I21.9']])('%s -> %s', (entrada, esperado) => {
+    expect(formatarCodigoOficial(entrada)).toBe(esperado);
+  });
+  it('o bloco mostra E11.9, mesmo que o código tenha sido extraído como E119', () => {
+    const bloco = blocoDeConferencia('CID-10: E119 – x', (c) => ({ codigo: c, situacao: 'subcategoria', descricao: 'D' }));
+    expect(bloco).toBe('Conferência na CID-10 (DATASUS, versão 2008):\n- E11.9 – D: consta na tabela.');
   });
 });
 
@@ -65,7 +98,7 @@ describe('bloco de conferência: texto exato', () => {
       'Conferência na CID-10 (DATASUS, versão 2008):',
       '- I10 – DESCRICAO-A: consta na tabela.',
       '- I21 – DESCRICAO-B: consta como categoria (sem o quarto caractere).',
-      '- X123 – não consta na tabela CID-10 do DATASUS (versão 2008).',
+      '- X12.3 – não consta na tabela CID-10 do DATASUS (versão 2008).',
     ].join('\n'));
   });
   it('menciona CID mas nenhum código identificado: linha única do pedido', () => {

@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { AI_CHAT_PROVIDER, IAiChatProvider } from '../domain/ai-chat-provider.interface';
 import { anexarConferencia, removerConferencia } from './cid10-extracao';
+import { filtrarHistorico, nomeDoContexto } from './historico-seguro';
 import { Cid10Service } from './cid10.service';
 
 export interface PatientContext {
@@ -46,8 +47,9 @@ export class ClinicalChatService {
   ) {}
 
   async execute(message: string, patientContext: PatientContext, history: ChatMessage[] = []) {
-    // O bloco de conferência de uma resposta anterior NÃO volta à Groq (a descrição oficial da tabela fica só no servidor e na tela).
-    const semConferencia = (history || []).map((m) => (m && m.role === 'assistant' && typeof m.content === 'string' ? { ...m, content: removerConferencia(m.content) } : m));
+    // 1) Nenhuma mensagem do assistente com a saudação da tela ou com o nome do paciente (se conhecido) vai à Groq.
+    // 2) O bloco de conferência de uma resposta anterior NÃO volta à Groq (a descrição oficial da tabela fica só no servidor e na tela).
+    const semConferencia = filtrarHistorico(history, nomeDoContexto(patientContext)).map((m) => (m && m.role === 'assistant' && typeof m.content === 'string' ? { ...m, content: removerConferencia(m.content) } : m));
     const resposta = await this.provider.execute(message, contextoSemIdentificacao(patientContext), semConferencia);
     // Erros do provedor (429, 500, 503) já saíram acima, inalterados. Se a tabela local falhar, a resposta do modelo segue sem o bloco.
     try {
