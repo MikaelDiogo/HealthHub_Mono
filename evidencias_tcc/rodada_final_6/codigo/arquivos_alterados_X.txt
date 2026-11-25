@@ -1,0 +1,8 @@
+ HealthHub-BackEnd/.env.example                     | 29 +++++++----
+ HealthHub-BackEnd/Readme.md                        | 16 +++++-
+ .../src/components/TermosUsoModal/index.tsx        | 25 +++++----
+ .../src/pages/PoliticaDados/index.tsx              | 19 ++++---
+ HealthHub-Project/src/utils/gerarPDFPolitica.ts    | 20 ++++----
+ HealthHub-Project/src/utils/textosLegais.spec.ts   | 60 ++++++++++++++++++++++
+ README.md                                          | 40 ++++++++++++---
+ 7 files changed, 162 insertions(+), 47 deletions(-)

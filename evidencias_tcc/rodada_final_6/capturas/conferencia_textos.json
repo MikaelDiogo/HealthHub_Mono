@@ -1,0 +1,440 @@
+{
+ "commit": "2fe065034d539b27f5b467f71951039bef86c6f6",
+ "data": "25/11/2026, 01:15:35",
+ "tamanho_dos_textos_em_caracteres": {
+  "T": 7460,
+  "P": 4052,
+  "F": 7135
+ },
+ "comparacao": "sem acentos, sem diferenca de caixa, espacos e quebras de linha unificados",
+ "itens": [
+  {
+   "id": "A1",
+   "tipo": "ausente",
+   "rotulo": "Zod",
+   "padrao_normalizado": "\\bzod\\b",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "A2",
+   "tipo": "ausente",
+   "rotulo": "Logs de auditoria",
+   "padrao_normalizado": "logs de auditoria",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "A3",
+   "tipo": "ausente",
+   "rotulo": "\"registros de autenticação\"",
+   "padrao_normalizado": "registros de autenticacao",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "A4",
+   "tipo": "ausente",
+   "rotulo": "\"exclusão de prontuários\"",
+   "padrao_normalizado": "exclusao de prontuarios",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "A5",
+   "tipo": "ausente",
+   "rotulo": "promessa de \"e-mail do responsável\"",
+   "padrao_normalizado": "e-mail do responsavel",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "A6",
+   "tipo": "ausente",
+   "rotulo": "\"Última atualização: junho/2026\"",
+   "padrao_normalizado": "junho/2026",
+   "resultado": {
+    "T": {
+     "aplica": false
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "F": {
+     "aplica": false
+    }
+   }
+  },
+  {
+   "id": "A7",
+   "tipo": "ausente",
+   "rotulo": "\"nascimento\" (trava da rodada 4)",
+   "padrao_normalizado": "nascimento",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 0,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P1",
+   "tipo": "presente",
+   "rotulo": "validação no backend (class-validator)",
+   "padrao_normalizado": "class-validator",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P2",
+   "tipo": "presente",
+   "rotulo": "Registro de eventos da esteira",
+   "padrao_normalizado": "registro de eventos da esteira",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P3",
+   "tipo": "presente",
+   "rotulo": "conexão SSL \"prevista\" para produção",
+   "padrao_normalizado": "ssl com o banco prevista para o ambiente de producao",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P4",
+   "tipo": "presente",
+   "rotulo": "HTTPS \"previsto\" para produção",
+   "padrao_normalizado": "https previsto para o ambiente de producao",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P5",
+   "tipo": "presente",
+   "rotulo": "\"prevista/previsto para o ambiente de produção\" (SSL e HTTPS: 2 ocorrências)",
+   "padrao_normalizado": "previst[oa] para o ambiente de producao",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 2,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 2,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 2,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P6",
+   "tipo": "presente",
+   "rotulo": "10 tentativas por IP a cada 15 minutos em produção",
+   "padrao_normalizado": "10 tentativas por ip a cada 15 minutos em producao",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P7",
+   "tipo": "presente",
+   "rotulo": "tokens JWT \"não armazenados no servidor\"",
+   "padrao_normalizado": "nao armazenados no servidor",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P8",
+   "tipo": "presente",
+   "rotulo": "\"limite aplicado pela tela\" (4 mensagens)",
+   "padrao_normalizado": "limite aplicado pela tela",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P9",
+   "tipo": "presente",
+   "rotulo": "direitos: \"sem funcionalidade automática no sistema\"",
+   "padrao_normalizado": "sem funcionalidade automatica no sistema",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P10",
+   "tipo": "presente",
+   "rotulo": "última atualização \"novembro de 2026\"",
+   "padrao_normalizado": "novembro de 2026",
+   "resultado": {
+    "T": {
+     "aplica": false
+    },
+    "P": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    },
+    "F": {
+     "aplica": false
+    }
+   }
+  },
+  {
+   "id": "P11",
+   "tipo": "presente",
+   "rotulo": "título \"Contato do responsável\"",
+   "padrao_normalizado": "contato do responsavel",
+   "resultado": {
+    "T": {
+     "aplica": true,
+     "ocorrencias": 2,
+     "ok": true
+    },
+    "P": {
+     "aplica": false
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 2,
+     "ok": true
+    }
+   }
+  },
+  {
+   "id": "P12",
+   "tipo": "presente",
+   "rotulo": "aceitação \"registrada no navegador do usuário\"",
+   "padrao_normalizado": "registrada no navegador do usuario",
+   "resultado": {
+    "T": {
+     "aplica": false
+    },
+    "P": {
+     "aplica": false
+    },
+    "F": {
+     "aplica": true,
+     "ocorrencias": 1,
+     "ok": true
+    }
+   }
+  }
+ ],
+ "resumo": {
+  "verificacoes": 50,
+  "falhas": 0,
+  "lista_de_falhas": []
+ }
+}
