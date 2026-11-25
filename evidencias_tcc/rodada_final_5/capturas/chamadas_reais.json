@@ -1,0 +1,59 @@
+{
+ "commit": "01e9b18a346f82c04b76780a333ab8364c24ec02",
+ "pergunta": "Quais os diagnósticos diferenciais mais prováveis, os sinais de alerta a pesquisar e a conduta inicial? Sugira o CID provável.",
+ "paciente": "FICTÍCIO-06 912537 (fictício)",
+ "chamadas": [
+  {
+   "chamada": 1,
+   "via": "tela",
+   "http_groq": 200,
+   "finish_reason": "length",
+   "completion_tokens": 1024,
+   "reasoning_tokens": 507,
+   "max_tokens_enviado": 1024,
+   "chars_resposta_modelo": 1931,
+   "escreveu_linha_CID10": false,
+   "linha_CID10": null,
+   "codigos_extraidos": [],
+   "conferencia": [],
+   "resposta_final_tem_bloco": false,
+   "resposta_final_igual_ao_esperado_localmente": true
+  },
+  {
+   "chamada": 2,
+   "via": "api",
+   "http_groq": 200,
+   "finish_reason": "length",
+   "completion_tokens": 1024,
+   "reasoning_tokens": 512,
+   "max_tokens_enviado": 1024,
+   "chars_resposta_modelo": 1758,
+   "escreveu_linha_CID10": false,
+   "linha_CID10": null,
+   "codigos_extraidos": [],
+   "conferencia": [],
+   "resposta_final_tem_bloco": false,
+   "resposta_final_igual_ao_esperado_localmente": true,
+   "http_api": 201,
+   "chars_resposta_final": 1758
+  },
+  {
+   "chamada": 3,
+   "via": "api",
+   "http_groq": 200,
+   "finish_reason": "length",
+   "completion_tokens": 1024,
+   "reasoning_tokens": 868,
+   "max_tokens_enviado": 1024,
+   "chars_resposta_modelo": 623,
+   "escreveu_linha_CID10": false,
+   "linha_CID10": null,
+   "codigos_extraidos": [],
+   "conferencia": [],
+   "resposta_final_tem_bloco": false,
+   "resposta_final_igual_ao_esperado_localmente": true,
+   "http_api": 201,
+   "chars_resposta_final": 623
+  }
+ ]
+}

@@ -1,0 +1,1 @@
+01e9b18 feat(ia): conferencia local dos codigos CID-10 sugeridos pela IA na tabela oficial do DATASUS (versao 2008)

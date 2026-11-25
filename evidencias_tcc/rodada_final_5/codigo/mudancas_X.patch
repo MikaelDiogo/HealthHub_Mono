@@ -1,0 +1,749 @@
+diff --git a/.gitattributes b/.gitattributes
+new file mode 100644
+index 0000000..ad908b7
+--- /dev/null
++++ b/.gitattributes
+@@ -0,0 +1,2 @@
++# CSV da CID-10 do DATASUS: nunca converter fim de linha nem codificacao (ISO-8859-1, CRLF)
++HealthHub-BackEnd/src/modules/ai/data/cid10/*.CSV binary
+diff --git a/DOCUMENTO_ENGENHARIA_SOFTWARE.md b/DOCUMENTO_ENGENHARIA_SOFTWARE.md
+index 8b2d5b9..1bfbc70 100644
+--- a/DOCUMENTO_ENGENHARIA_SOFTWARE.md
++++ b/DOCUMENTO_ENGENHARIA_SOFTWARE.md
+@@ -1501,6 +1501,28 @@ Quando a Groq recusa uma chamada por excesso de requisições (HTTP 429 do prove
+ - Os demais erros do provedor continuam `500` com `{ "error": "Assistente clínico indisponível." }` (chat) ou `{ "error": "Falha ao transcrever o áudio." }` (áudio); sem chave configurada continua `503`. Note que esses usam o campo `error`, e o 429 usa `message`.
+ - Tela: o chat de monitoramento mostra a `message` do 429; para qualquer outro erro mostra "Erro ao conectar com o assistente.". No áudio, só o 429 gera aviso no chat.
+ 
++### 10.10 Conferência de códigos CID-10 na tabela oficial do DATASUS (rodada 5)
++
++O prompt do chat clínico pede o código CID-10 provável, mas o modelo pode errar ou inventar códigos. O sistema passou a **conferir, localmente, cada código citado pela IA** contra a CID-10 publicada pelo DATASUS (Ministério da Saúde), **versão 2008**, e a mostrar a descrição oficial ou o aviso de que o código não consta.
++
++- **Fonte e arquivos:** `CID-10-SUBCATEGORIAS.CSV` (12.451 linhas de dados: 12.188 com código de 4 caracteres e 263 com 3) e `CID-10-CATEGORIAS.CSV` (2.045), copiados sem alterar nenhum byte (ISO-8859-1, CRLF) para `HealthHub-BackEnd/src/modules/ai/data/cid10/`, com SHA-256 e a procedência no `README.md` dessa pasta. O `nest-cli.json` copia os CSV para `dist/` no build.
++- **Serviço:** `Cid10Service` (`application/cid10.service.ts`) lê os dois arquivos uma vez e confere cada código (`i21.9`, `I219` e `I21.9` são o mesmo). Resultados: `subcategoria` (consta no arquivo de subcategorias; inclui categorias sem subcategorias, como `I10`), `categoria` (código de 3 caracteres de uma categoria que tem subcategorias, como `I21`: válido, mas pouco específico) e `nao_consta`. A descrição exibida é **sempre a do arquivo**, nunca a que o modelo escreveu.
++- **Extração conservadora** (`application/cid10-extracao.ts`): só linhas que contêm a palavra `CID` (palavra inteira, qualquer caixa); dentro delas, uma letra **maiúscula**, dois dígitos e, opcionalmente, ponto e um dígito (`I10`, `E11.9`). Não extrai intervalos sem espaço (`T36-T50`), tokens colados a letras ou dígitos (`CID10`, `COVID19`), códigos de quatro caracteres sem ponto (`E119`) nem o número logo depois de "vitamina" (`vitamina B12`); `A4` e `T4` não têm dois dígitos.
++- **Bloco no fim da resposta** (o contrato `{ reply, source }` não muda; é só mais texto, separado por uma linha em branco; o texto do modelo fica intacto, também quando a resposta vem truncada):
++
++```
++Conferência na CID-10 (DATASUS, versão 2008):
++- I10 – <descrição oficial>: consta na tabela.
++- I21 – <descrição oficial>: consta como categoria (sem o quarto caractere).
++- X123 – não consta na tabela CID-10 do DATASUS (versão 2008).
++```
++
++  Se a resposta cita CID mas nenhum código é identificado: `Conferência na CID-10 (DATASUS, versão 2008): nenhum código identificado na resposta.` Se não cita CID, nada é acrescentado. Os códigos aparecem sem ponto, como na tabela.
++- **Privacidade:** a conferência é só no servidor. Nada da tabela e nenhum código vai à Groq; o bloco de respostas anteriores também é retirado do histórico antes de reenviar a conversa ao provedor.
++- **Falha da tabela:** se os arquivos não puderem ser lidos, a resposta do modelo segue sem o bloco (o erro vai ao log). Os erros do provedor (429, 500, 503) não mudam.
++- **Prompt:** só a regra 6 mudou, para pedir **logo após as hipóteses diagnósticas** (e não no fim, onde o limite de tokens pode cortar) uma linha começando por `CID-10:` com os códigos da CID-10 (versão brasileira do DATASUS) no formato `código – descrição`, separados por ponto e vírgula.
++- **Limites:** a tabela é de 2008 (códigos novos, como COVID-19 `U07.1`, **não constam**: verificado); a conferência mostra se o código **existe**, não se é o **adequado** ao paciente; a decisão clínica é do profissional.
++
+ ---
+ 
+ ## 11. Segurança, Privacidade e LGPD
+diff --git a/HealthHub-BackEnd/.gitignore b/HealthHub-BackEnd/.gitignore
+index 0f4413b..4796948 100644
+--- a/HealthHub-BackEnd/.gitignore
++++ b/HealthHub-BackEnd/.gitignore
+@@ -29,4 +29,6 @@ thumbs.db
+ ormconfig.json
+ 
+ # Datasets / arquivos de treinamento
+-data/
+\ No newline at end of file
++data/
++# Excecao: tabela oficial da CID-10 (DATASUS) usada pelo modulo de IA (rodada 5)
++!src/modules/ai/data/
+diff --git a/HealthHub-BackEnd/nest-cli.json b/HealthHub-BackEnd/nest-cli.json
+index ec0c746..c92a54d 100644
+--- a/HealthHub-BackEnd/nest-cli.json
++++ b/HealthHub-BackEnd/nest-cli.json
+@@ -4,6 +4,7 @@
+   "sourceRoot": "src",
+   "compilerOptions": {
+     "deleteOutDir": true,
++    "assets": [{ "include": "modules/ai/data/cid10/*.CSV", "watchAssets": false }],
+     "plugins": [{ "name": "@nestjs/swagger", "options": { "classValidatorShim": true, "introspectComments": false } }]
+   }
+ }
+diff --git a/HealthHub-BackEnd/scripts/verificar-build-cid10.mjs b/HealthHub-BackEnd/scripts/verificar-build-cid10.mjs
+new file mode 100644
+index 0000000..71494cb
+--- /dev/null
++++ b/HealthHub-BackEnd/scripts/verificar-build-cid10.mjs
+@@ -0,0 +1,29 @@
++// Prova do build: depois de `npm run build`, confere que os CSV da CID-10 foram copiados para dist/ (mesmos bytes da fonte) e que o serviço COMPILADO
++// os encontra e confere códigos, rodando a partir de OUTRA pasta de trabalho. Uso (na pasta HealthHub-BackEnd): node scripts/verificar-build-cid10.mjs
++import { createHash } from 'node:crypto';
++import { readFileSync, existsSync, mkdtempSync } from 'node:fs';
++import { createRequire } from 'node:module';
++import { tmpdir } from 'node:os';
++import { join, resolve } from 'node:path';
++
++const RAIZ = resolve(import.meta.dirname, '..');
++const sha = (f) => createHash('sha256').update(readFileSync(f)).digest('hex');
++let ok = true;
++const checar = (nome, cond, extra = '') => { console.log(`${cond ? 'OK  ' : 'FALHOU'} ${nome}${extra ? ' ' + extra : ''}`); if (!cond) ok = false; };
++
++for (const n of ['CID-10-SUBCATEGORIAS.CSV', 'CID-10-CATEGORIAS.CSV']) {
++  const fonte = join(RAIZ, 'src', 'modules', 'ai', 'data', 'cid10', n);
++  const dist = join(RAIZ, 'dist', 'modules', 'ai', 'data', 'cid10', n);
++  checar(`dist/ tem ${n}`, existsSync(dist));
++  if (existsSync(dist)) checar(`${n}: bytes de dist/ = bytes da fonte`, sha(dist) === sha(fonte), sha(dist).slice(0, 12) + '...');
++}
++process.chdir(mkdtempSync(join(tmpdir(), 'cid10-build-'))); // outra pasta de trabalho: o serviço não pode depender do cwd
++const { Cid10Service } = createRequire(import.meta.url)(join(RAIZ, 'dist', 'modules', 'ai', 'application', 'cid10.service.js'));
++const svc = new Cid10Service();
++const e = svc.estatisticas();
++checar('serviço compilado carrega as duas tabelas', e.subcategorias > 0 && e.categorias > 0, `(subcategorias=${e.subcategorias}, categorias=${e.categorias})`);
++checar('I10 consta como subcategoria', svc.conferir('I10').situacao === 'subcategoria');
++checar('I21 consta como categoria', svc.conferir('I21').situacao === 'categoria');
++checar('U07.1 não consta (versão 2008)', svc.conferir('U07.1').situacao === 'nao_consta');
++console.log(ok ? 'RESULTADO: APROVADO' : 'RESULTADO: REPROVADO');
++process.exit(ok ? 0 : 1);
+diff --git a/HealthHub-BackEnd/src/modules/ai/ai.module.ts b/HealthHub-BackEnd/src/modules/ai/ai.module.ts
+index 1c8c335..64c9eb7 100644
+--- a/HealthHub-BackEnd/src/modules/ai/ai.module.ts
++++ b/HealthHub-BackEnd/src/modules/ai/ai.module.ts
+@@ -1,5 +1,6 @@
+ import { Module } from '@nestjs/common';
+ import { ClinicalChatService } from './application/clinical-chat.service';
++import { Cid10Service } from './application/cid10.service';
+ import { AudioTranscriptionService } from './application/audio-transcription.service';
+ import { AiController } from './presentation/ai.controller';
+ import { AI_CHAT_PROVIDER } from './domain/ai-chat-provider.interface';
+@@ -9,6 +10,7 @@ import { GroqChatProvider } from './infrastructure/groq-chat.provider';
+   controllers: [AiController],
+   providers: [
+     ClinicalChatService,
++    Cid10Service,
+     AudioTranscriptionService,
+     // Único provedor hoje. Um futuro provedor Claude (via ANTHROPIC_API_KEY)
+     // entraria aqui como alternativa — nunca via setup token de Claude Code.
+diff --git a/HealthHub-BackEnd/src/modules/ai/application/cid10-assets.spec.ts b/HealthHub-BackEnd/src/modules/ai/application/cid10-assets.spec.ts
+new file mode 100644
+index 0000000..5dd31d9
+--- /dev/null
++++ b/HealthHub-BackEnd/src/modules/ai/application/cid10-assets.spec.ts
+@@ -0,0 +1,23 @@
++// Os CSV da CID-10 têm de ir para dist/ no build. Aqui confere a CONFIGURAÇÃO (nest-cli.json) e os bytes dos arquivos da fonte; a prova do build real
++// (npm run build + execução a partir de dist/) é feita por scripts/verificar-build-cid10.mjs.
++import { describe, it, expect } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { createHash } from 'node:crypto';
++
++const RAIZ = process.cwd(); // vitest roda na pasta do backend
++describe('CSV da CID-10 no build', () => {
++  it('nest-cli.json copia os CSV para dist/ (assets)', () => {
++    const cfg = JSON.parse(readFileSync(join(RAIZ, 'nest-cli.json'), 'utf8'));
++    const assets = cfg.compilerOptions.assets as Array<{ include: string }>;
++    expect(assets.map((a) => a.include)).toContain('modules/ai/data/cid10/*.CSV');
++  });
++  it('os arquivos da fonte têm os SHA-256 registrados no README da fonte', () => {
++    const pasta = join(RAIZ, 'src', 'modules', 'ai', 'data', 'cid10');
++    const readme = readFileSync(join(pasta, 'README.md'), 'utf8');
++    for (const nome of ['CID-10-SUBCATEGORIAS.CSV', 'CID-10-CATEGORIAS.CSV']) {
++      const sha = createHash('sha256').update(readFileSync(join(pasta, nome))).digest('hex');
++      expect(readme).toContain(sha);
++    }
++  });
++});
+diff --git a/HealthHub-BackEnd/src/modules/ai/application/cid10-extracao.spec.ts b/HealthHub-BackEnd/src/modules/ai/application/cid10-extracao.spec.ts
+new file mode 100644
+index 0000000..0d9fb2d
+--- /dev/null
++++ b/HealthHub-BackEnd/src/modules/ai/application/cid10-extracao.spec.ts
+@@ -0,0 +1,105 @@
++// Extração conservadora de códigos CID e bloco de conferência. Esperados escritos à mão a partir do pedido da rodada 5.
++import { describe, it, expect } from 'vitest';
++import { extrairCodigos, mencionaCid, blocoDeConferencia, anexarConferencia, removerConferencia, CABECALHO_CONFERENCIA, LINHA_SEM_CODIGO, type ResultadoCid } from './cid10-extracao';
++
++describe('extrairCodigos: o que deve extrair', () => {
++  it('"CID-10: I10 – ...; E11.9 – ..." devolve os dois (sem ponto, em ordem)', () => {
++    expect(extrairCodigos('CID-10: I10 – Hipertensão essencial (primária); E11.9 – Diabetes mellitus sem complicações')).toEqual(['I10', 'E119']);
++  });
++  it('só considera linhas com a palavra CID (qualquer caixa), em várias linhas', () => {
++    expect(extrairCodigos('Hipótese: diabetes (E11.9)\ncid provável: J18.9\nOutra linha com R50.9')).toEqual(['J189']);
++  });
++  it('não repete código', () => { expect(extrairCodigos('CID: I10; de novo I10 e I10')).toEqual(['I10']); });
++  it('código no fim da linha, entre parênteses e antes de ponto final', () => {
++    expect(extrairCodigos('CID provável (I10).')).toEqual(['I10']);
++    expect(extrairCodigos('Sugestão de CID: R50.9.')).toEqual(['R509']);
++  });
++});
++
++describe('extrairCodigos: falsos positivos que NÃO podem sair', () => {
++  it.each([
++    ['vitamina B12 numa linha com CID', 'CID: investigar deficiência de vitamina B12'],
++    ['vitamina B12 antes do código', 'CID-10: dosar Vitamina B12; I10 – Hipertensão'],
++    ['papel A4', 'Para o CID imprimir em papel A4'],
++    ['T4 livre', 'CID provável: pedir T4 livre e TSH'],
++    ['intervalo T36-T50', 'CID-10: capítulo T36-T50 (intoxicações)'],
++    ['intervalo com travessão I10–I15', 'CID-10: grupo I10–I15'],
++    ['CID10 colado', 'Usar CID10 como base'],
++    ['COVID19 colado', 'CID: COVID19 não conta'],
++    ['quarto caractere sem ponto', 'CID: E119 sem ponto'],
++    ['dois decimais', 'CID: I21.90'],
++    ['minúsculas', 'CID: i10'],
++  ])('%s', (_nome, texto) => {
++    const r = extrairCodigos(texto);
++    if (_nome === 'vitamina B12 antes do código') expect(r).toEqual(['I10']); // só o código de verdade fica
++    else expect(r).toEqual([]);
++  });
++  it('linhas SEM a palavra CID não geram código, mesmo com "B12", "A4" e "I10"', () => {
++    expect(extrairCodigos('Vitamina B12, papel A4 e T4 livre. Hipótese I10 provável.')).toEqual([]);
++  });
++  it('palavras que apenas contêm "cid" (decidir, incidência) não contam como a palavra CID', () => {
++    expect(mencionaCid('é preciso decidir a conduta; incidência alta; I10')).toBe(false);
++    expect(extrairCodigos('é preciso decidir a conduta I10')).toEqual([]);
++  });
++});
++
++describe('mencionaCid', () => {
++  it('detecta a palavra CID e CID-10, sem diferenciar caixa', () => {
++    expect(mencionaCid('Sugestão de CID: ?')).toBe(true);
++    expect(mencionaCid('cid-10: nada')).toBe(true);
++    expect(mencionaCid('texto sem a sigla')).toBe(false);
++    expect(mencionaCid('')).toBe(false);
++  });
++});
++
++// Tabela FALSA só para testar o formato do bloco (os testes de conteúdo oficial estão em cid10.service.spec.ts)
++const falsa = (codigo: string): ResultadoCid => ({
++  I10: { codigo: 'I10', situacao: 'subcategoria' as const, descricao: 'DESCRICAO-A' },
++  I21: { codigo: 'I21', situacao: 'categoria' as const, descricao: 'DESCRICAO-B' },
++}[codigo] ?? { codigo, situacao: 'nao_consta', descricao: null });
++
++describe('bloco de conferência: texto exato', () => {
++  it('três situações no formato do pedido', () => {
++    const bloco = blocoDeConferencia('CID-10: I10 – x; I21 – y; X12.3 – z', falsa);
++    expect(bloco).toBe([
++      'Conferência na CID-10 (DATASUS, versão 2008):',
++      '- I10 – DESCRICAO-A: consta na tabela.',
++      '- I21 – DESCRICAO-B: consta como categoria (sem o quarto caractere).',
++      '- X123 – não consta na tabela CID-10 do DATASUS (versão 2008).',
++    ].join('\n'));
++  });
++  it('menciona CID mas nenhum código identificado: linha única do pedido', () => {
++    expect(blocoDeConferencia('Sugerir CID depois do exame', falsa)).toBe('Conferência na CID-10 (DATASUS, versão 2008): nenhum código identificado na resposta.');
++    expect(LINHA_SEM_CODIGO).toBe('Conferência na CID-10 (DATASUS, versão 2008): nenhum código identificado na resposta.');
++  });
++  it('não menciona CID: nenhum bloco (null)', () => { expect(blocoDeConferencia('Hipertensão provável. Medir PA.', falsa)).toBeNull(); });
++});
++
++describe('anexarConferencia', () => {
++  const orig = 'Hipóteses: hipertensão.\nCID-10: I10 – Hipertensão essencial';
++  it('acrescenta ao FINAL, separado por UMA linha em branco, sem alterar o texto original (prefixo exato)', () => {
++    const out = anexarConferencia(orig, falsa);
++    expect(out.startsWith(orig)).toBe(true);
++    expect(out.slice(orig.length)).toBe('\n\n' + CABECALHO_CONFERENCIA + '\n- I10 – DESCRICAO-A: consta na tabela.');
++  });
++  it('não duplica linhas em branco quando a resposta já termina com quebra de linha', () => {
++    expect(anexarConferencia(orig + '\n', falsa).slice(orig.length)).toBe('\n\n' + CABECALHO_CONFERENCIA + '\n- I10 – DESCRICAO-A: consta na tabela.');
++    expect(anexarConferencia(orig + '\n\n', falsa).slice(orig.length)).toBe('\n\n' + CABECALHO_CONFERENCIA + '\n- I10 – DESCRICAO-A: consta na tabela.');
++  });
++  it('resposta sem CID, vazia ou truncada no meio: sem CID não muda; truncada com CID recebe o bloco mesmo assim', () => {
++    expect(anexarConferencia('Sem sigla nenhuma', falsa)).toBe('Sem sigla nenhuma');
++    expect(anexarConferencia('', falsa)).toBe('');
++    const truncada = 'CID-10: I10 – Hipertensão esse'; // cortada pelo limite de tokens
++    const out = anexarConferencia(truncada, falsa);
++    expect(out.startsWith(truncada)).toBe(true);
++    expect(out).toContain('- I10 – DESCRICAO-A: consta na tabela.');
++  });
++});
++
++describe('removerConferencia (histórico do chat)', () => {
++  it('tira o bloco e devolve exatamente o texto original', () => {
++    const orig = 'Texto do modelo.\nCID-10: I10 – x';
++    expect(removerConferencia(anexarConferencia(orig, falsa))).toBe(orig);
++  });
++  it('sem bloco, devolve igual', () => { expect(removerConferencia('qualquer texto')).toBe('qualquer texto'); });
++});
+diff --git a/HealthHub-BackEnd/src/modules/ai/application/cid10-extracao.ts b/HealthHub-BackEnd/src/modules/ai/application/cid10-extracao.ts
+new file mode 100644
+index 0000000..b76ad9f
+--- /dev/null
++++ b/HealthHub-BackEnd/src/modules/ai/application/cid10-extracao.ts
+@@ -0,0 +1,70 @@
++// Extração conservadora de códigos CID-10 do texto da IA e montagem do bloco de conferência (rodada 5).
++// Funções puras: a consulta à tabela oficial entra como parâmetro (ver cid10.service.ts). Nada daqui vai para a Groq.
++
++export type SituacaoCid = 'subcategoria' | 'categoria' | 'nao_consta';
++export interface ResultadoCid { codigo: string; situacao: SituacaoCid; descricao: string | null }
++
++export const CABECALHO_CONFERENCIA = 'Conferência na CID-10 (DATASUS, versão 2008):';
++export const LINHA_SEM_CODIGO = `${CABECALHO_CONFERENCIA} nenhum código identificado na resposta.`;
++
++const PALAVRA_CID = /\bCID\b/i;
++// Intervalos como T36-T50 ou I10–I15 (sem espaços ao redor do traço) não são códigos: são apagados antes da busca.
++const INTERVALO = /[A-Z]\d{2}(?:\.\d)?[-–—][A-Z]\d{2}(?:\.\d)?/g;
++// Uma letra maiúscula, dois dígitos e, opcionalmente, ponto e um dígito. Não pode estar colado a letra/dígito (ex.: CID10, COVID19)
++// nem ser seguido de mais dígitos (ex.: I21.90, E119).
++const CODIGO = /(?<![A-Za-z0-9])([A-Z]\d{2}(?:\.\d)?)(?![A-Za-z0-9]|\.\d)/g;
++// "vitamina B12" não é CID: a palavra imediatamente antes descarta o candidato.
++const ANTES_DE_VITAMINA = /\b(?:vitaminas?|vit\.?)\s*$/i;
++
++export const normalizarCodigo = (c: string): string => c.replace(/[\s.]/g, '').toUpperCase();
++
++const linhasDe = (texto: string): string[] => texto.split(/\r?\n/);
++
++/** A resposta menciona a palavra CID (qualquer caixa, como palavra inteira) em alguma linha? */
++export function mencionaCid(texto: string): boolean {
++  return linhasDe(texto).some((l) => PALAVRA_CID.test(l));
++}
++
++/** Códigos candidatos (sem ponto, em ordem de aparição, sem repetir) das linhas que contêm a palavra CID. */
++export function extrairCodigos(texto: string): string[] {
++  const achados: string[] = [];
++  for (const linha of linhasDe(texto)) {
++    if (!PALAVRA_CID.test(linha)) continue;
++    const limpa = linha.replace(INTERVALO, (m) => ' '.repeat(m.length));
++    for (const m of limpa.matchAll(CODIGO)) {
++      if (ANTES_DE_VITAMINA.test(limpa.slice(0, m.index))) continue;
++      const cod = normalizarCodigo(m[1]);
++      if (!achados.includes(cod)) achados.push(cod);
++    }
++  }
++  return achados;
++}
++
++export function linhaDoResultado(r: ResultadoCid): string {
++  if (r.situacao === 'subcategoria') return `- ${r.codigo} – ${r.descricao}: consta na tabela.`;
++  if (r.situacao === 'categoria') return `- ${r.codigo} – ${r.descricao}: consta como categoria (sem o quarto caractere).`;
++  return `- ${r.codigo} – não consta na tabela CID-10 do DATASUS (versão 2008).`;
++}
++
++/** Bloco de conferência ou null (a resposta não menciona CID). Só consulta a tabela local. */
++export function blocoDeConferencia(resposta: string, conferir: (codigo: string) => ResultadoCid): string | null {
++  if (!mencionaCid(resposta)) return null;
++  const codigos = extrairCodigos(resposta);
++  if (codigos.length === 0) return LINHA_SEM_CODIGO;
++  return [CABECALHO_CONFERENCIA, ...codigos.map((c) => linhaDoResultado(conferir(c)))].join('\n');
++}
++
++/** Acrescenta o bloco ao FINAL da resposta, separado por uma linha em branco; o texto original fica intacto (prefixo). */
++export function anexarConferencia(resposta: string, conferir: (codigo: string) => ResultadoCid): string {
++  const bloco = blocoDeConferencia(resposta, conferir);
++  if (bloco === null) return resposta;
++  const separador = resposta.endsWith('\n\n') ? '' : resposta.endsWith('\n') ? '\n' : '\n\n';
++  return resposta + separador + bloco;
++}
++
++/** Tira o bloco de uma resposta antiga (histórico do chat) para que a descrição oficial NÃO volte à Groq. */
++export function removerConferencia(texto: string): string {
++  const i = texto.indexOf(CABECALHO_CONFERENCIA);
++  if (i < 0) return texto;
++  return texto.slice(0, i).replace(/\s+$/, '');
++}
+diff --git a/HealthHub-BackEnd/src/modules/ai/application/cid10.service.spec.ts b/HealthHub-BackEnd/src/modules/ai/application/cid10.service.spec.ts
+new file mode 100644
+index 0000000..037804d
+--- /dev/null
++++ b/HealthHub-BackEnd/src/modules/ai/application/cid10.service.spec.ts
+@@ -0,0 +1,99 @@
++// Conferência de CID-10 na tabela oficial do DATASUS (versão 2008). Os esperados vêm do CSV lido AQUI, por um leitor independente do serviço
++// (linhas e colunas contadas pelo teste), nunca de códigos ou descrições escritos de memória. Os CÓDIGOS usados (I10, E119, J189, R509, I21, G40,
++// E999, I999, U07, U071) foram escolhidos a mão e confirmados no CSV antes de entrar aqui; cada teste lê a descrição do próprio arquivo.
++import { describe, it, expect, beforeAll } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { Cid10Service } from './cid10.service';
++
++const PASTA = join(__dirname, '..', 'data', 'cid10');
++function linhasDeDados(nome: string): string[][] {
++  const texto = readFileSync(join(PASTA, nome)).toString('latin1'); // ISO-8859-1
++  const linhas = texto.split('\r\n');
++  expect(linhas[linhas.length - 1]).toBe(''); // o arquivo termina em CRLF
++  return linhas.slice(1, -1).map((l) => l.split(';')); // sem cabeçalho e sem a linha vazia final
++}
++const SUB = linhasDeDados('CID-10-SUBCATEGORIAS.CSV'); // código = col 0; DESCRICAO = col 4
++const CAT = linhasDeDados('CID-10-CATEGORIAS.CSV');    // CAT = col 0; DESCRICAO = col 2
++const descSub = (cod: string) => { const l = SUB.find((c) => c[0] === cod); if (!l) throw new Error(cod + ' não está no CSV de subcategorias'); return l[4]; };
++const descCat = (cod: string) => { const l = CAT.find((c) => c[0] === cod); if (!l) throw new Error(cod + ' não está no CSV de categorias'); return l[2]; };
++
++describe('Cid10Service: carga dos dois arquivos', () => {
++  const svc = new Cid10Service();
++  it('o cabeçalho dos arquivos é o esperado', () => {
++    const cab = (n: string) => readFileSync(join(PASTA, n)).toString('latin1').split('\r\n')[0];
++    expect(cab('CID-10-SUBCATEGORIAS.CSV')).toBe('SUBCAT;CLASSIF;RESTRSEXO;CAUSAOBITO;DESCRICAO;DESCRABREV;REFER;EXCLUIDOS;');
++    expect(cab('CID-10-CATEGORIAS.CSV')).toBe('CAT;CLASSIF;DESCRICAO;DESCRABREV;REFER;EXCLUIDOS;');
++  });
++  it('as contagens do serviço batem com as linhas de dados contadas pelo teste', () => {
++    const e = svc.estatisticas();
++    expect(e.subcategorias).toBe(SUB.length);
++    expect(e.categorias).toBe(CAT.length);
++    expect(new Set(SUB.map((c) => c[0])).size).toBe(SUB.length); // sem código repetido
++    expect(e.tempoCargaMs).toBeGreaterThan(0);
++  });
++  it('os códigos de 3 e de 4 caracteres do arquivo de subcategorias somam o total (confronto com a estrutura descrita no pedido)', () => {
++    const tres = SUB.filter((c) => c[0].length === 3).length;
++    const quatro = SUB.filter((c) => c[0].length === 4).length;
++    expect(tres + quatro).toBe(SUB.length);
++    console.log(`[CID10] subcategorias=${SUB.length} (3 caracteres=${tres}; 4 caracteres=${quatro}); categorias=${CAT.length}; carga=${svc.estatisticas().tempoCargaMs.toFixed(1)} ms; heap≈${(svc.estatisticas().memoriaAproximadaBytes / 1048576).toFixed(1)} MiB; bytes lidos=${svc.estatisticas().bytesLidos}`);
++  });
++  it('acentos vêm corretos (ISO-8859-1 decodificado)', () => {
++    expect(svc.conferir('I10').descricao).toBe(descSub('I10'));
++    expect(svc.conferir('I10').descricao).toMatch(/Hipertensão/);
++  });
++});
++
++describe('Cid10Service.conferir: códigos que existem (descrição oficial do arquivo)', () => {
++  const svc = new Cid10Service();
++  it.each(['I10', 'E119', 'J189', 'R509'])('%s consta como subcategoria e a descrição é a do CSV', (cod) => {
++    const r = svc.conferir(cod);
++    expect(r.situacao).toBe('subcategoria');
++    expect(r.codigo).toBe(cod);
++    expect(r.descricao).toBe(descSub(cod));
++  });
++  it('I10 tem 3 caracteres e está no arquivo de SUBCATEGORIAS: vira subcategoria, não categoria', () => {
++    expect(SUB.some((c) => c[0] === 'I10')).toBe(true);
++    expect(svc.conferir('I10').situacao).toBe('subcategoria');
++  });
++});
++
++describe('Cid10Service.conferir: categoria sem o quarto caractere', () => {
++  const svc = new Cid10Service();
++  it.each(['I21', 'G40'])('%s é categoria que TEM subcategorias: situação "categoria" com a descrição do arquivo de categorias', (cod) => {
++    expect(SUB.some((c) => c[0] === cod)).toBe(false);                      // não está no arquivo de subcategorias
++    expect(SUB.some((c) => c[0].length === 4 && c[0].startsWith(cod))).toBe(true); // mas tem subcategorias
++    const r = svc.conferir(cod);
++    expect(r.situacao).toBe('categoria');
++    expect(r.descricao).toBe(descCat(cod));
++  });
++});
++
++describe('Cid10Service.conferir: códigos que NÃO constam', () => {
++  const svc = new Cid10Service();
++  it.each(['E999', 'I999'])('%s tem formato válido e não consta no arquivo', (cod) => {
++    expect(SUB.some((c) => c[0] === cod)).toBe(false);
++    expect(svc.conferir(cod)).toEqual({ codigo: cod, situacao: 'nao_consta', descricao: null });
++  });
++  it('COVID-19 (U07.1 e U07): NÃO constam nesta versão 2008 (confirmado no CSV; resultado real, não suposto)', () => {
++    expect(SUB.some((c) => c[0] === 'U071' || c[0] === 'U07')).toBe(false);
++    expect(CAT.some((c) => c[0] === 'U07')).toBe(false);
++    expect(svc.conferir('U07.1').situacao).toBe('nao_consta');
++    expect(svc.conferir('U07').situacao).toBe('nao_consta');
++  });
++  it('texto que não tem formato de código: não consta', () => {
++    for (const x of ['', 'ABC', 'hipertensão', '123', 'I1']) expect(svc.conferir(x).situacao).toBe('nao_consta');
++  });
++});
++
++describe('Cid10Service.conferir: normalização', () => {
++  const svc = new Cid10Service();
++  it('i21.9, I219 e I21.9 são o mesmo código e dão o mesmo resultado, com a descrição do arquivo', () => {
++    const a = svc.conferir('i21.9'), b = svc.conferir('I219'), c = svc.conferir('I21.9');
++    expect(a).toEqual(b); expect(b).toEqual(c);
++    expect(a.codigo).toBe('I219');
++    expect(a.situacao).toBe('subcategoria');
++    expect(a.descricao).toBe(descSub('I219'));
++  });
++  it('espaços nas pontas e minúsculas também normalizam', () => { expect(svc.conferir('  e11.9 ').codigo).toBe('E119'); });
++});
+diff --git a/HealthHub-BackEnd/src/modules/ai/application/cid10.service.ts b/HealthHub-BackEnd/src/modules/ai/application/cid10.service.ts
+new file mode 100644
+index 0000000..f56d25e
+--- /dev/null
++++ b/HealthHub-BackEnd/src/modules/ai/application/cid10.service.ts
+@@ -0,0 +1,73 @@
++import { Injectable } from '@nestjs/common';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { normalizarCodigo, type ResultadoCid } from './cid10-extracao';
++
++export interface EstatisticasCid10 { subcategorias: number; categorias: number; tempoCargaMs: number; memoriaAproximadaBytes: number; bytesLidos: number }
++
++const ARQ_SUBCATEGORIAS = 'CID-10-SUBCATEGORIAS.CSV';
++const ARQ_CATEGORIAS = 'CID-10-CATEGORIAS.CSV';
++
++/**
++ * Conferência LOCAL de códigos CID-10 na tabela oficial do DATASUS (versão 2008). Os dois CSV ficam em
++ * src/modules/ai/data/cid10 (copiados para dist/ no build) e nada deles é enviado à Groq.
++ * Formato dos arquivos: ISO-8859-1, CRLF, separador ';'. SUBCATEGORIAS: código na coluna 0, DESCRICAO na 4. CATEGORIAS: CAT na 0, DESCRICAO na 2.
++ */
++@Injectable()
++export class Cid10Service {
++  /** Pasta dos CSV; muda só em teste. */
++  pasta = join(__dirname, '..', 'data', 'cid10');
++  private subcategorias?: Map<string, string>;
++  private categorias?: Map<string, string>;
++  private stats?: EstatisticasCid10;
++
++  private carregar(): void {
++    if (this.subcategorias && this.categorias) return;
++    const heapAntes = process.memoryUsage().heapUsed;
++    const t0 = process.hrtime.bigint();
++    const a = this.lerCsv(ARQ_SUBCATEGORIAS, 4);
++    const b = this.lerCsv(ARQ_CATEGORIAS, 2);
++    this.subcategorias = a.mapa;
++    this.categorias = b.mapa;
++    this.stats = {
++      subcategorias: a.mapa.size,
++      categorias: b.mapa.size,
++      tempoCargaMs: Number(process.hrtime.bigint() - t0) / 1e6,
++      memoriaAproximadaBytes: Math.max(0, process.memoryUsage().heapUsed - heapAntes),
++      bytesLidos: a.bytes + b.bytes,
++    };
++  }
++
++  private lerCsv(nome: string, colDescricao: number): { mapa: Map<string, string>; bytes: number } {
++    const buf = readFileSync(join(this.pasta, nome));
++    const linhas = buf.toString('latin1').split(/\r?\n/); // latin1 = ISO-8859-1
++    const mapa = new Map<string, string>();
++    for (const linha of linhas.slice(1)) { // linha 0 = cabeçalho
++      if (linha === '') continue;
++      const campos = linha.split(';');
++      const codigo = normalizarCodigo(campos[0] ?? '');
++      if (codigo) mapa.set(codigo, (campos[colDescricao] ?? '').trim());
++    }
++    return { mapa, bytes: buf.length };
++  }
++
++  estatisticas(): EstatisticasCid10 {
++    this.carregar();
++    return this.stats!;
++  }
++
++  /**
++   * subcategoria: consta no arquivo de subcategorias (inclui categorias sem subcategorias, como I10).
++   * categoria: só o código de 3 caracteres de uma categoria que TEM subcategorias (válido, pouco específico, como I21).
++   * nao_consta: o resto. A descrição devolvida é sempre a do arquivo oficial.
++   */
++  conferir(codigo: string): ResultadoCid {
++    this.carregar();
++    const n = normalizarCodigo(codigo);
++    const sub = this.subcategorias!.get(n);
++    if (sub !== undefined) return { codigo: n, situacao: 'subcategoria', descricao: sub };
++    const cat = this.categorias!.get(n);
++    if (cat !== undefined && n.length === 3) return { codigo: n, situacao: 'categoria', descricao: cat };
++    return { codigo: n, situacao: 'nao_consta', descricao: null };
++  }
++}
+diff --git a/HealthHub-BackEnd/src/modules/ai/application/clinical-chat-cid.spec.ts b/HealthHub-BackEnd/src/modules/ai/application/clinical-chat-cid.spec.ts
+new file mode 100644
+index 0000000..04cf902
+--- /dev/null
++++ b/HealthHub-BackEnd/src/modules/ai/application/clinical-chat-cid.spec.ts
+@@ -0,0 +1,87 @@
++// Fluxo do chat com a conferência de CID, com provedor SIMULADO (nenhuma chamada à Groq). A tabela usada é a oficial do repositório.
++// Esperados escritos à mão a partir do pedido da rodada 5; as descrições são lidas do CSV pelo próprio teste.
++import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
++import { readFileSync } from 'node:fs';
++import { join } from 'node:path';
++import { HttpException, InternalServerErrorException, ServiceUnavailableException } from '@nestjs/common';
++import { ClinicalChatService } from './clinical-chat.service';
++import { Cid10Service } from './cid10.service';
++import { CABECALHO_CONFERENCIA } from './cid10-extracao';
++import { LimiteDeTaxaException } from '../infrastructure/limite-de-taxa';
++import type { IAiChatProvider } from '../domain/ai-chat-provider.interface';
++
++const SUB = readFileSync(join(__dirname, '..', 'data', 'cid10', 'CID-10-SUBCATEGORIAS.CSV')).toString('latin1').split('\r\n').slice(1, -1).map((l) => l.split(';'));
++const descSub = (cod: string) => SUB.find((c) => c[0] === cod)![4];
++
++const simulado = (impl: IAiChatProvider['execute']) => ({ execute: vi.fn(impl) });
++
++describe('chat: bloco de conferência de CID', () => {
++  it('um código válido e um inválido: o bloco traz a descrição OFICIAL do arquivo e o aviso, e o texto do modelo fica intacto', async () => {
++    const texto = 'Hipóteses: hipertensão.\nCID-10: I10 – texto QUE O MODELO ESCREVEU; E99.9 – código inventado';
++    const prov = simulado(async () => ({ reply: texto, source: 'groq' }));
++    const out = await new ClinicalChatService(prov).execute('pergunta', {}, []);
++    expect(out.source).toBe('groq');
++    expect(out.reply.startsWith(texto + '\n\n')).toBe(true);
++    expect(out.reply.slice(texto.length + 2)).toBe([
++      CABECALHO_CONFERENCIA,
++      `- I10 – ${descSub('I10')}: consta na tabela.`,
++      '- E999 – não consta na tabela CID-10 do DATASUS (versão 2008).',
++    ].join('\n'));
++    expect(out.reply).not.toContain('QUE O MODELO ESCREVEU' + ': consta'); // a descrição do bloco não é a do modelo
++  });
++
++  it('resposta sem CID não muda nada', async () => {
++    const prov = simulado(async () => ({ reply: 'Medir a pressão e reavaliar em 1 hora.', source: 'groq' }));
++    expect((await new ClinicalChatService(prov).execute('p', {}, [])).reply).toBe('Medir a pressão e reavaliar em 1 hora.');
++  });
++
++  it('resposta truncada (limite de tokens) que já citou CID também recebe o bloco', async () => {
++    const prov = simulado(async () => ({ reply: 'CID-10: J18.9 – Pneumonia não espec', source: 'groq' }));
++    const out = await new ClinicalChatService(prov).execute('p', {}, []);
++    expect(out.reply).toContain(`- J189 – ${descSub('J189')}: consta na tabela.`);
++  });
++
++  it('o contrato da resposta não muda: só { reply, source }', async () => {
++    const prov = simulado(async () => ({ reply: 'CID: I10', source: 'groq' }));
++    expect(Object.keys(await new ClinicalChatService(prov).execute('p', {}, [])).sort()).toEqual(['reply', 'source']);
++  });
++
++  it('a conferência é local: o que vai ao provedor não contém nada da tabela nem o bloco de respostas anteriores', async () => {
++    const prov = simulado(async () => ({ reply: 'ok', source: 'groq' }));
++    const anterior = 'Resposta antiga.\nCID-10: I10 – x\n\n' + CABECALHO_CONFERENCIA + `\n- I10 – ${descSub('I10')}: consta na tabela.`;
++    await new ClinicalChatService(prov).execute('nova pergunta', {}, [{ role: 'user', content: 'antes' }, { role: 'assistant', content: anterior }]);
++    const historicoEnviado = JSON.stringify(prov.execute.mock.calls[0][2]);
++    expect(historicoEnviado).not.toContain('Conferência na CID-10');
++    expect(historicoEnviado).not.toContain(descSub('I10'));
++    expect(historicoEnviado).toContain('Resposta antiga.'); // o resto do histórico segue igual
++  });
++
++  it('se a tabela local falhar, a resposta do modelo segue sem o bloco (o chat não quebra)', async () => {
++    vi.spyOn(console, 'error').mockImplementation(() => {});
++    const cid = new Cid10Service(); cid.pasta = join(__dirname, 'pasta-que-nao-existe');
++    const prov = simulado(async () => ({ reply: 'CID-10: I10 – x', source: 'groq' }));
++    expect((await new ClinicalChatService(prov, cid).execute('p', {}, [])).reply).toBe('CID-10: I10 – x');
++    vi.restoreAllMocks();
++  });
++});
++
++describe('erros do provedor continuam como na etiqueta tcc-rodada-final-4 (passam sem alteração)', () => {
++  beforeEach(() => { vi.spyOn(console, 'error').mockImplementation(() => {}); });
++  afterEach(() => { vi.restoreAllMocks(); });
++  const falha = async (e: unknown) => { try { await new ClinicalChatService(simulado(async () => { throw e; })).execute('p', {}, []); } catch (x) { return x as HttpException; } return undefined; };
++
++  it('429 do provedor segue HTTP 429 com a mensagem própria', async () => {
++    const x = await falha(new LimiteDeTaxaException('30'));
++    expect(x).toBeInstanceOf(LimiteDeTaxaException);
++    expect(x!.getStatus()).toBe(429);
++  });
++  it('500 genérico segue 500', async () => {
++    const x = await falha(new InternalServerErrorException({ error: 'Assistente clínico indisponível.' }));
++    expect(x!.getStatus()).toBe(500);
++    expect(x!.getResponse()).toEqual({ error: 'Assistente clínico indisponível.' });
++  });
++  it('503 sem chave segue 503', async () => {
++    const x = await falha(new ServiceUnavailableException({ error: 'Assistente clínico não configurado neste ambiente.' }));
++    expect(x!.getStatus()).toBe(503);
++  });
++});
+diff --git a/HealthHub-BackEnd/src/modules/ai/application/clinical-chat.service.ts b/HealthHub-BackEnd/src/modules/ai/application/clinical-chat.service.ts
+index a87c182..0399ea7 100644
+--- a/HealthHub-BackEnd/src/modules/ai/application/clinical-chat.service.ts
++++ b/HealthHub-BackEnd/src/modules/ai/application/clinical-chat.service.ts
+@@ -1,5 +1,7 @@
+ import { Inject, Injectable } from '@nestjs/common';
+ import { AI_CHAT_PROVIDER, IAiChatProvider } from '../domain/ai-chat-provider.interface';
++import { anexarConferencia, removerConferencia } from './cid10-extracao';
++import { Cid10Service } from './cid10.service';
+ 
+ export interface PatientContext {
+   alergias?: string;
+@@ -40,9 +42,19 @@ export class ClinicalChatService {
+   constructor(
+     @Inject(AI_CHAT_PROVIDER)
+     private readonly provider: IAiChatProvider,
++    private readonly cid10: Cid10Service = new Cid10Service(),
+   ) {}
+ 
+-  execute(message: string, patientContext: PatientContext, history: ChatMessage[] = []) {
+-    return this.provider.execute(message, contextoSemIdentificacao(patientContext), history);
++  async execute(message: string, patientContext: PatientContext, history: ChatMessage[] = []) {
++    // O bloco de conferência de uma resposta anterior NÃO volta à Groq (a descrição oficial da tabela fica só no servidor e na tela).
++    const semConferencia = (history || []).map((m) => (m && m.role === 'assistant' && typeof m.content === 'string' ? { ...m, content: removerConferencia(m.content) } : m));
++    const resposta = await this.provider.execute(message, contextoSemIdentificacao(patientContext), semConferencia);
++    // Erros do provedor (429, 500, 503) já saíram acima, inalterados. Se a tabela local falhar, a resposta do modelo segue sem o bloco.
++    try {
++      return { ...resposta, reply: anexarConferencia(resposta.reply, (c) => this.cid10.conferir(c)) };
++    } catch (err) {
++      console.error('[HealthHub Chat] Conferência de CID indisponível:', (err as Error).message);
++      return resposta;
++    }
+   }
+ }
+diff --git a/HealthHub-BackEnd/src/modules/ai/data/cid10/README.md b/HealthHub-BackEnd/src/modules/ai/data/cid10/README.md
+new file mode 100644
+index 0000000..b04d01d
+--- /dev/null
++++ b/HealthHub-BackEnd/src/modules/ai/data/cid10/README.md
+@@ -0,0 +1,33 @@
++# Tabela CID-10 do DATASUS (conferência local dos códigos sugeridos pela IA)
++
++Estes arquivos são a **tabela oficial da CID-10 publicada pelo DATASUS (Ministério da Saúde)**, copiados **sem alterar nenhum byte** (ISO-8859-1, fim de linha CRLF, separador `;`). O Git trata os dois como binários (`.gitattributes` na raiz do repositório), para não converter fim de linha. O serviço `Cid10Service` (`../../application/cid10.service.ts`) confere cada código sugerido pela IA contra eles, **só no servidor**: nada desta tabela é enviado à Groq.
++
++## Fonte
++| Item | Valor |
++|---|---|
++| Página | http://www2.datasus.gov.br/cid10/V2008/download.htm (arquivo `CID10CSV.zip`) |
++| Órgão | DATASUS, Ministério da Saúde |
++| Versão | **CID-10, versão 2008** |
++| Arquivo baixado pelo autor | `CID10CSV.zip`, 306.066 bytes, SHA-256 `84f23809275575f751255048064bbb244b0de33fd5987ab98df0f98e5f5d2c95` |
++| Data de modificação dos arquivos dentro do ZIP | `CID-10-SUBCATEGORIAS.CSV`: 01/10/2007 16:07; `CID-10-CATEGORIAS.CSV`: 01/10/2007 16:54 (carimbos gravados no ZIP) |
++| Data em que esta cópia entrou no repositório | 24/11/2026 (o autor baixou o ZIP da página oficial e o forneceu; o Claude Code não baixou de novo) |
++
++Do ZIP (seis arquivos) **só dois** entram aqui. Os outros (capítulos, grupos e a classificação de oncologia) não foram copiados.
++
++## Arquivos
++| Arquivo | Linhas de dados (sem o cabeçalho) | SHA-256 |
++|---|---|---|
++| `CID-10-SUBCATEGORIAS.CSV` | 12.451 (12.188 com código de 4 caracteres e 263 com código de 3 caracteres) | `1a85bef8f2065ad3e95ab07b6441e6f03404c54ab35849ebd4edccc3ba234e60` |
++| `CID-10-CATEGORIAS.CSV` | 2.045 | `e372033b1c04f321a9a98aac8534f2bd4f22aa40c622525b619a2f616a3b6fc8` |
++
++Cabeçalhos: `SUBCAT;CLASSIF;RESTRSEXO;CAUSAOBITO;DESCRICAO;DESCRABREV;REFER;EXCLUIDOS;` e `CAT;CLASSIF;DESCRICAO;DESCRABREV;REFER;EXCLUIDOS;`. A descrição oficial é a coluna `DESCRICAO`. Os 263 códigos de 3 caracteres do arquivo de subcategorias são categorias que não têm subcategorias (por exemplo `I10`).
++
++## Limites desta tabela
++- É a **versão 2008**. Códigos criados depois **podem não constar**. Verificado nestes arquivos: `U07` e `U07.1` (COVID-19) **não constam**.
++- A conferência diz apenas se o código existe na tabela e mostra a descrição oficial; **não** diz se o código é o correto para o paciente. A decisão clínica é do profissional.
++
++## Licença e atribuição
++**Não conferido:** não consegui abrir a página do DATASUS a partir do ambiente de trabalho (conexão recusada), então **não transcrevo aqui o trecho exato** da página sobre o uso da CID-10. O pedido do autor descreve o conteúdo como: "a página do DATASUS diz que a CID-10 é disponibilizada para estimular a utilização" (paráfrase do pedido, não cópia da página). **Pendência do autor:** abrir a página, copiar o trecho literal e colar aqui antes de citar a licença no TCC. Atribuição: tabela CID-10, DATASUS/Ministério da Saúde, versão 2008.
++
++## Quando mudar esta tabela
++Qualquer troca de arquivo muda os SHA-256 acima, e o teste `cid10-assets.spec.ts` falha até este README ser atualizado.
+diff --git a/HealthHub-BackEnd/src/modules/ai/infrastructure/groq-chat.provider.ts b/HealthHub-BackEnd/src/modules/ai/infrastructure/groq-chat.provider.ts
+index 9486cb8..d426e4e 100644
+--- a/HealthHub-BackEnd/src/modules/ai/infrastructure/groq-chat.provider.ts
++++ b/HealthHub-BackEnd/src/modules/ai/infrastructure/groq-chat.provider.ts
+@@ -23,7 +23,7 @@ function buildSystemPrompt(ctx: PatientContext = {}): string {
+ 3. Para comparações clínicas use tabela Markdown com vantagens, desvantagens, indicações e contraindicações.
+ 4. Nunca recuse uma questão clínica — ofereça sempre sua melhor análise. A decisão final é do médico.
+ 5. Ao citar medicamentos, inclua posologia padrão e ajustes para insuficiência renal/hepática quando pertinente.
+-6. Sempre que possível forneça referências a diretrizes de prática e sugira o CID provável.
++6. Sempre que possível forneça referências a diretrizes de prática. Logo após as hipóteses diagnósticas (e não no fim da resposta), escreva uma linha começando por "CID-10:" com os códigos prováveis da CID-10 (versão brasileira do DATASUS), no formato código – descrição, separados por ponto e vírgula.
+ 7. Máximo 4 parágrafos ou uma tabela + 2 parágrafos. Sem rodeios.`;
+ }
+ 
+diff --git a/HealthHub-BackEnd/src/modules/ai/presentation/ai.controller.ts b/HealthHub-BackEnd/src/modules/ai/presentation/ai.controller.ts
+index 68f9179..2651ae5 100644
+--- a/HealthHub-BackEnd/src/modules/ai/presentation/ai.controller.ts
++++ b/HealthHub-BackEnd/src/modules/ai/presentation/ai.controller.ts
+@@ -38,7 +38,7 @@ export class AiController {
+     private readonly audioTranscription: AudioTranscriptionService,
+   ) {}
+ 
+-  @ApiOperation({ summary: "Chat de apoio clínico com IA (texto)", description: "Perfis permitidos: medico, enfermeiro." })
++  @ApiOperation({ summary: "Chat de apoio clínico com IA (texto)", description: "Perfis permitidos: medico, enfermeiro. Se a resposta citar CID, o texto termina com um bloco \"Conferência na CID-10 (DATASUS, versão 2008)\", conferido localmente na tabela oficial (nada da tabela vai à IA)." })
+   @ApiResponse(RESPOSTA_429)
+   @Post(':id/chat')
+   @Roles('medico', 'enfermeiro')
+diff --git a/HealthHub-Project/src/utils/blocoConferenciaCid.spec.ts b/HealthHub-Project/src/utils/blocoConferenciaCid.spec.ts
+new file mode 100644
+index 0000000..d028561
+--- /dev/null
++++ b/HealthHub-Project/src/utils/blocoConferenciaCid.spec.ts
+@@ -0,0 +1,31 @@
++// A tela do chat (pages/Monitoring) mostra a resposta com <ReactMarkdown>. Este teste prova que o bloco de conferência de CID (acrescentado pelo
++// backend ao fim do texto, rodada 5) NÃO perde as quebras de linha ali: cabeçalho num parágrafo e uma linha de lista por código. Por isso o
++// frontend não precisou mudar. O texto do bloco é o formato exato do pedido (os testes do backend conferem o mesmo texto).
++import { describe, it, expect } from 'vitest';
++import { createElement } from 'react';
++import { renderToStaticMarkup } from 'react-dom/server';
++import ReactMarkdown from 'react-markdown';
++
++const html = (texto: string) => renderToStaticMarkup(createElement(ReactMarkdown, { children: texto }));
++const BLOCO = [
++  'Conferência na CID-10 (DATASUS, versão 2008):',
++  '- I10 – Hipertensão essencial (primária): consta na tabela.',
++  '- I21 – Infarto agudo do miocárdio: consta como categoria (sem o quarto caractere).',
++  '- X123 – não consta na tabela CID-10 do DATASUS (versão 2008).',
++].join('\n');
++
++describe('bloco de conferência de CID na tela (ReactMarkdown)', () => {
++  const saida = html('Hipóteses: hipertensão.\nCID-10: I10 – Hipertensão essencial (primária)\n\n' + BLOCO);
++  it('cada código do bloco vira um item de lista (3 itens), separado do texto do modelo', () => {
++    expect((saida.match(/<li>/g) || []).length).toBe(3);
++    expect(saida).toContain('<li>I10 – Hipertensão essencial (primária): consta na tabela.</li>');
++    expect(saida).toContain('<li>X123 – não consta na tabela CID-10 do DATASUS (versão 2008).</li>');
++  });
++  it('o cabeçalho do bloco fica em parágrafo próprio, antes da lista', () => {
++    expect(saida).toMatch(/<p>Conferência na CID-10 \(DATASUS, versão 2008\):<\/p>\s*<ul>/);
++  });
++  it('a linha "nenhum código identificado" aparece inteira, em um parágrafo', () => {
++    expect(html('Texto.\n\nConferência na CID-10 (DATASUS, versão 2008): nenhum código identificado na resposta.'))
++      .toContain('<p>Conferência na CID-10 (DATASUS, versão 2008): nenhum código identificado na resposta.</p>');
++  });
++});

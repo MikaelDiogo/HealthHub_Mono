@@ -1,0 +1,20 @@
+ .gitattributes                                     |   2 +
+ DOCUMENTO_ENGENHARIA_SOFTWARE.md                   |  22 +++++
+ HealthHub-BackEnd/.gitignore                       |   4 +-
+ HealthHub-BackEnd/nest-cli.json                    |   1 +
+ .../scripts/verificar-build-cid10.mjs              |  29 ++++++
+ HealthHub-BackEnd/src/modules/ai/ai.module.ts      |   2 +
+ .../modules/ai/application/cid10-assets.spec.ts    |  23 +++++
+ .../modules/ai/application/cid10-extracao.spec.ts  | 105 +++++++++++++++++++++
+ .../src/modules/ai/application/cid10-extracao.ts   |  70 ++++++++++++++
+ .../modules/ai/application/cid10.service.spec.ts   |  99 +++++++++++++++++++
+ .../src/modules/ai/application/cid10.service.ts    |  73 ++++++++++++++
+ .../ai/application/clinical-chat-cid.spec.ts       |  87 +++++++++++++++++
+ .../ai/application/clinical-chat.service.ts        |  16 +++-
+ .../modules/ai/data/cid10/CID-10-CATEGORIAS.CSV    | Bin 0 -> 197561 bytes
+ .../modules/ai/data/cid10/CID-10-SUBCATEGORIAS.CSV | Bin 0 -> 1352723 bytes
+ .../src/modules/ai/data/cid10/README.md            |  33 +++++++
+ .../ai/infrastructure/groq-chat.provider.ts        |   2 +-
+ .../src/modules/ai/presentation/ai.controller.ts   |   2 +-
+ .../src/utils/blocoConferenciaCid.spec.ts          |  31 ++++++
+ 19 files changed, 596 insertions(+), 5 deletions(-)
