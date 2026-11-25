@@ -26,8 +26,8 @@ Substitui fichas de papel por um fluxo digital completo: cadastro de pacientes, 
 ### 2. Clonar e instalar
 
 ```bash
-git clone <url-do-repositorio>
-cd Project_HealthHub
+git clone https://github.com/MikaelDiogo/HealthHub_Mono.git
+cd HealthHub_Mono
 
 # Backend
 cd HealthHub-BackEnd && npm install && cd ..
@@ -64,6 +64,18 @@ SEED_MEDICO_SENHA=senha_forte_aqui
 SEED_RECEPCIONISTA_SENHA=senha_forte_aqui
 SEED_ENFERMEIRO_SENHA=senha_forte_aqui
 ```
+
+> **Atenção (banco):** no `.env.example` a linha `DATABASE_URL` vem com um valor de exemplo. Se `DATABASE_URL` estiver definida, ela tem **prioridade** e os campos `DB_*` são ignorados; para usar `DB_*` (Docker local), apague ou comente a linha `DATABASE_URL`.
+>
+> **Depois de editar o `.env`, reinicie o backend:** as variáveis são lidas quando ele inicia.
+
+Variáveis que mudam o comportamento (detalhes em [`HealthHub-BackEnd/Readme.md`](HealthHub-BackEnd/Readme.md)):
+
+| Variável | Efeito |
+|---|---|
+| `NODE_ENV` | `production` faz o CORS aceitar só as origens de `ALLOWED_ORIGINS`, limita o login a 10 tentativas por IP a cada 15 minutos (fora de produção são 100), desliga o Swagger por padrão e desliga os logs de SQL. Qualquer outro valor é tratado como desenvolvimento |
+| `ALLOWED_ORIGINS` | Lista de origens do navegador permitidas no CORS, separadas por vírgula. **Só é lida em produção**; fora dela o CORS aceita apenas `localhost` nas portas 3000, 5173, 5174, 5175 e 4173 |
+| `SWAGGER_ENABLED` | `true` liga o Swagger (`/api/docs`) em qualquer ambiente; `false` desliga em qualquer ambiente; sem a variável, fica ligado fora de produção e desligado em produção |
 
 ### 4. Subir o banco de dados (PostgreSQL via Docker)
 
@@ -102,6 +114,8 @@ npm run migration:run   # cria todas as tabelas
 npm run seed            # cria os 3 usuários de desenvolvimento
 ```
 
+O seed **para com erro** se faltar alguma das variáveis `SEED_MEDICO_SENHA`, `SEED_RECEPCIONISTA_SENHA` ou `SEED_ENFERMEIRO_SENHA`. Os e-mails dos usuários mudam com `SEED_MEDICO_EMAIL`, `SEED_RECEPCIONISTA_EMAIL` e `SEED_ENFERMEIRO_EMAIL`; sem elas valem os e-mails padrão da tabela do passo 7. Se o usuário já existe (mesmo e-mail), o seed não o altera, então mudar a senha no `.env` depois não troca a senha já gravada.
+
 ### 6. Iniciar backend e frontend
 
 Em dois terminais separados:
@@ -130,7 +144,7 @@ Abra **http://localhost:5173** e faça login com um dos usuários criados pelo s
 | `enfermeiro@healthhub.com` | Enfermeiro | Dashboard, triagem, sinais vitais, IA, chat |
 | `recepcionista@healthhub.com` | Recepcionista | Esteira de cuidado, cadastro, chat |
 
-Senha: conforme definido nas variáveis `SEED_*_SENHA` do seu `.env`.
+Senha: conforme definido nas variáveis `SEED_*_SENHA` do seu `.env`. Os e-mails da tabela são os **padrão**: se você definiu `SEED_*_EMAIL`, use esses.
 
 ### Regra do cadastro de paciente
 
@@ -154,13 +168,27 @@ cd HealthHub-BackEnd && npm test && npm run build
 cd HealthHub-Project && npm test && npm run build
 ```
 
-A verificação ponta a ponta (22 cenários, S1 a S8, TF01 a TF08, concorrência e desempenho) roda em **banco de teste isolado**, com dados fictícios e a IA simulada: os scripts e o passo a passo estão em `evidencias_tcc/scripts_verificacao/README.md`.
+A verificação ponta a ponta (22 cenários, S1 a S8, TF01 a TF09, concorrência e desempenho) roda em **banco de teste isolado**, com dados fictícios e a IA simulada: os scripts e o passo a passo estão em `evidencias_tcc/scripts_verificacao/README.md`.
 
 ## Onde estão os materiais do TCC
 
 - `benchmark/`: harness, vinhetas e CSVs por chamada do benchmark dos modelos (com o README que conferiu a Tabela 2 e a verificação de pensamento estendido).
-- `evidencias_tcc/`: evidências das rodadas de testes (`rodada_final/`, `rodada_final_2/`), os scripts de verificação (`scripts_verificacao/`) e `LEIA-ME_EVIDENCIAS_ANTIGAS.md`, que lista o que é anterior à mudança do cadastro.
-- `RESULTADOS_PARA_TCC.md` e `RESULTADOS_PARA_TCC_2.md`: resultados por rodada, com números, caminhos das evidências e limitações.
+- `evidencias_tcc/`: evidências por rodada de testes: `rodada_final/` e `rodada_final_2/`; `rodada_final_3/` (limiares de alerta com fonte e pressão arterial); `rodada_final_4/` (erro 429 da IA e textos legais); `rodada_final_5/` (conferência de CID na tabela do DATASUS e nome do paciente fora do histórico da IA); `rodada_final_6/` (textos legais, `.env.example` e README alinhados ao código). Também os scripts de verificação (`scripts_verificacao/`) e `LEIA-ME_EVIDENCIAS_ANTIGAS.md`, que lista o que é anterior à mudança do cadastro.
+- Relatórios de resultado: na raiz, `RESULTADOS_PARA_TCC.md` e `RESULTADOS_PARA_TCC_2.md` (resultados por rodada, com números, caminhos das evidências e limitações) e `RESULTADOS_PARA_TCC_4.md` (limiares de alerta com fonte). Em `evidencias_tcc/`: `rodada_final_4/RESULTADOS_PARA_TCC_5.md`; `rodada_final_5/RESULTADOS_PARA_TCC_6.md` (tentativa incompleta da conferência de CID, mantida como histórico) e `rodada_final_5/RESULTADOS_PARA_TCC_7.md` (versão final da rodada 5); `rodada_final_6/RESULTADOS_PARA_TCC_8.md`.
+- Etiquetas (cada uma marca uma versão publicada de uma rodada): `tcc-rodada-final-2`, `tcc-rodada-final-3`, `tcc-rodada-final-3-1`, `tcc-rodada-final-4`, `tcc-rodada-final-5` e `tcc-rodada-final-6`. As etiquetas `pre-rodada4`, `pre-rodada5` e `pre-rodada6` são pontos de restauração anteriores a cada rodada.
+
+### Como abrir a versão da banca
+
+A versão da banca é a da etiqueta `tcc-rodada-final-6`:
+
+```bash
+git clone https://github.com/MikaelDiogo/HealthHub_Mono.git
+cd HealthHub_Mono
+git fetch --tags
+git switch --detach tcc-rodada-final-6
+```
+
+`--detach` abre o código exatamente como foi testado (leitura; para voltar ao desenvolvimento, `git switch evolucao-estrutura`). Depois siga o "Início rápido" acima.
 
 ---
 

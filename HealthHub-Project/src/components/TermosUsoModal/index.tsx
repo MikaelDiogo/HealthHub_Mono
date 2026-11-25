@@ -164,7 +164,7 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
             <Stack gap={6} mt="sm">
               <DataItem label="Dados de identificação do paciente" value="Nome completo (único campo obrigatório) e, quando informados, CPF, RG, idade, sexo, endereço e telefone. Se o nome não for conhecido, o sistema registra um nome provisório até a correção." />
               <DataItem label="Dados de saúde (sensíveis)" value="Sinais vitais (frequência cardíaca, pressão arterial, temperatura, saturação de oxigênio), alergias, medicamentos em uso e anamnese clínica." />
-              <DataItem label="Dados de acesso dos profissionais" value="Nome, e-mail, papel (role) e registros de autenticação (tokens JWT com validade de 24 horas)." />
+              <DataItem label="Dados de acesso dos profissionais" value="Nome, e-mail, papel (role) e tokens JWT com validade de 24 horas, não armazenados no servidor." />
               <DataItem label="Dados gerados pela IA" value="Histórico de conversas clínicas com o assistente de IA e transcrições de áudio enviadas para análise." />
             </Stack>
             <Alert mt="md" color="red" variant="light" icon={<IconAlertTriangle size={15} />} p="sm" radius="md">
@@ -203,7 +203,7 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
             </Text>
             <Stack gap={4} mt="sm">
               {[
-                'Cadastro, consulta, atualização e exclusão de prontuários de pacientes',
+                'Cadastro, consulta e atualização de prontuários de pacientes',
                 'Monitoramento e registro histórico de sinais vitais',
                 'Gerenciamento da fila e esteira de cuidado hospitalar',
                 'Apoio clínico via assistente de inteligência artificial (Groq — openai/gpt-oss-120b)',
@@ -232,13 +232,13 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
                 'Autenticação via JWT (HS256) com expiração automática em 24 horas',
                 'Controle de acesso baseado em papéis (RBAC): médico, enfermeiro, recepcionista',
                 'Hashing de senhas com bcrypt (rounds=12) — senhas nunca armazenadas em texto plano',
-                'Validação de todos os dados de entrada via Zod (schemas rigorosos)',
+                'Validação dos dados de entrada no backend (class-validator), com lista de campos permitidos',
                 'Headers HTTP de segurança via Helmet (CSP, HSTS, X-Frame-Options)',
-                'Limitação de tentativas de login (10 tentativas por IP a cada 15 minutos)',
-                'Tráfego protegido por HTTPS em ambiente de produção',
-                'Dados armazenados em banco PostgreSQL com conexão SSL',
+                'Limitação de tentativas de login: 10 tentativas por IP a cada 15 minutos em produção',
+                'HTTPS previsto para o ambiente de produção (depende da hospedagem)',
+                'Conexão SSL com o banco prevista para o ambiente de produção (não verificada nesta versão)',
                 'Credenciais e chaves de API isoladas em variáveis de ambiente',
-                'Logs de auditoria para tentativas de acesso não autorizadas',
+                'Registro de eventos da esteira (autor, perfil e horário)',
               ].map((item, i) => (
                 <Group key={i} gap="xs" align="flex-start">
                   <IconCheck size={14} color="var(--mantine-color-teal-6)" style={{ marginTop: 3, flexShrink: 0 }} />
@@ -257,7 +257,7 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
               <Box p="sm" style={{ background: 'var(--mantine-color-orange-0)', border: '1px solid var(--mantine-color-orange-3)', borderRadius: 8 }}>
                 <Text size="sm" fw={700} c="orange.8">Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo) para transcrição</Text>
                 <Text size="sm" c="slate.7" mt={4}>
-                  As perguntas ao assistente são enviadas à plataforma Groq (operador externo), com o contexto clínico do paciente selecionado: alergias, medicamentos em uso, anamnese e últimos sinais vitais, além de até 4 mensagens anteriores da conversa. O nome, o CPF, o RG, o telefone e o endereço não são enviados. Os textos livres (como a anamnese e a pergunta) são enviados como foram escritos: não digite dados de identificação neles. O áudio da transcrição é enviado à Groq para virar texto e não é gravado pelo HealthHub.
+                  As perguntas ao assistente são enviadas à plataforma Groq (operador externo), com o contexto clínico do paciente selecionado: alergias, medicamentos em uso, anamnese e últimos sinais vitais, além de até 4 mensagens anteriores da conversa, limite aplicado pela tela. O nome, o CPF, o RG, o telefone e o endereço não são enviados. Os textos livres (como a anamnese e a pergunta) são enviados como foram escritos: não digite dados de identificação neles. O áudio da transcrição é enviado à Groq para virar texto e não é gravado pelo HealthHub.
                 </Text>
               </Box>
             </Stack>
@@ -290,6 +290,9 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
                 </Group>
               ))}
             </Stack>
+            <Text size="sm" c="slate.7" lh={1.8} mt="sm">
+              Nesta versão, as solicitações são atendidas pelo contato do responsável, sem funcionalidade automática no sistema.
+            </Text>
           </Section>
 
           {/* 8. Retenção */}
@@ -328,11 +331,11 @@ export function TermosUsoModal({ opened, onAceitar, onRecusar }: TermosUsoModalP
           </Section>
 
           {/* 10. Contato */}
-          <Section icon={<IconUserShield size={18} />} color="teal" title="10. Contato e Encarregado (DPO)">
+          <Section icon={<IconUserShield size={18} />} color="teal" title="10. Contato do responsável">
             <Text size="sm" c="slate.7" lh={1.8}>
               Para exercer seus direitos como titular de dados ou para dúvidas relacionadas a esta Política de Privacidade,
-              entre em contato através dos canais institucionais da Faculdade Princesa do Oeste (FPO) ou pelo e-mail do
-              responsável pelo projeto:
+              entre em contato através dos canais institucionais da Faculdade Princesa do Oeste (FPO) ou com o autor do
+              projeto, identificado abaixo:
             </Text>
             <Box mt="sm" p="sm" style={{ background: 'var(--mantine-color-teal-0)', border: '1px solid var(--mantine-color-teal-3)', borderRadius: 8 }}>
               <Text size="sm" fw={700} c="teal.8">HealthHub — Projeto Acadêmico TCC</Text>

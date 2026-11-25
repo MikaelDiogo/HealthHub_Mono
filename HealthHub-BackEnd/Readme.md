@@ -66,6 +66,18 @@ Gerar `SECRET_KEY`:
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
+**Depois de editar o `.env`, reinicie o backend:** as variáveis são lidas quando ele inicia (com `npm run dev`, pare e suba de novo).
+
+**`DATABASE_URL` tem prioridade.** No `.env.example` ela vem com um valor de exemplo; se `DATABASE_URL` estiver definida, os campos `DB_*` são ignorados (`src/config/typeorm.config.ts`). Para usar `DB_*` (Docker local), apague ou comente a linha `DATABASE_URL`.
+
+### Variáveis que mudam o comportamento
+
+| Variável | Efeito |
+|---|---|
+| `NODE_ENV` | `production`: o CORS aceita só as origens de `ALLOWED_ORIGINS` (`src/main.ts`); o login é limitado a **10 tentativas por IP a cada 15 minutos** (fora de produção, 100; `auth.controller.ts`); o Swagger fica desligado por padrão (`src/config/swagger.ts`); os logs de SQL do TypeORM ficam desligados. Qualquer outro valor (ou nenhum) é tratado como desenvolvimento |
+| `ALLOWED_ORIGINS` | Origens do navegador permitidas no CORS, separadas por vírgula (ex.: `https://seu-dominio.com`). **Só é lida com `NODE_ENV=production`**; fora de produção o CORS aceita apenas `localhost` nas portas 3000, 5173, 5174, 5175 e 4173. Em produção, se ficar vazia, nenhuma origem de navegador é aceita |
+| `SWAGGER_ENABLED` | `true` liga o Swagger em qualquer ambiente; `false` desliga em qualquer ambiente; sem a variável, segue `NODE_ENV` (ver a seção "Documentação da API (Swagger)") |
+
 ---
 
 ## Banco de dados com Docker
@@ -128,7 +140,7 @@ docker compose up -d
 # 3. Rodar as migrations (cria todas as tabelas)
 npm run migration:run
 
-# 4. Criar os usuários de desenvolvimento (requer SEED_*_SENHA no .env)
+# 4. Criar os usuários de desenvolvimento (requer SEED_*_SENHA no .env; sem alguma delas o seed para com erro)
 npm run seed
 
 # 5. Iniciar em modo desenvolvimento (hot-reload)
@@ -182,7 +194,7 @@ Com a API rodando, abra `http://localhost:3001/api/docs` (JSON em `/api/docs-jso
 | `recepcionista@healthhub.com` | `recepcionista` |
 | `enfermeiro@healthhub.com` | `enfermeiro` |
 
-Senhas definidas pelas variáveis `SEED_*_SENHA` no `.env`.
+Senhas definidas pelas variáveis `SEED_*_SENHA` no `.env`. O seed **para com erro** ("variáveis de ambiente de senha faltando") se faltar `SEED_MEDICO_SENHA`, `SEED_RECEPCIONISTA_SENHA` ou `SEED_ENFERMEIRO_SENHA`. Os e-mails da tabela são os **padrão**: mudam com `SEED_MEDICO_EMAIL`, `SEED_RECEPCIONISTA_EMAIL` e `SEED_ENFERMEIRO_EMAIL`. Se o e-mail já existe, o seed não altera o usuário (mudar a senha no `.env` depois não troca a senha já gravada).
 
 ---
 

@@ -78,7 +78,7 @@ export function PoliticaDados() {
           {[
             { label: 'Identificação do paciente', items: ['Nome completo (único obrigatório)', 'CPF, RG, idade e sexo, quando informados', 'Endereço e telefone, quando informados'] },
             { label: 'Dados de saúde (sensíveis)', items: ['Sinais vitais (FC, PA, Temp, SpO2)', 'Alergias e medicamentos', 'Anamnese clínica'] },
-            { label: 'Acesso dos profissionais', items: ['Nome e e-mail', 'Papel (role)', 'Registros JWT (24h)'] },
+            { label: 'Acesso dos profissionais', items: ['Nome e e-mail', 'Papel (role)', 'Tokens JWT (24h), não armazenados no servidor'] },
             { label: 'Dados da IA', items: ['Histórico de conversas clínicas', 'Transcrições de áudio', 'Contexto clínico enviado'] },
           ].map((cat) => (
             <Box key={cat.label} p="sm" style={{ background: 'var(--mantine-color-slate-0)', border: '1px solid var(--mantine-color-slate-2)', borderRadius: 8 }}>
@@ -124,13 +124,13 @@ export function PoliticaDados() {
             'JWT HS256 com expiração de 24 horas',
             'RBAC: médico, enfermeiro, recepcionista',
             'Bcrypt rounds=12 (sem senhas em texto plano)',
-            'Validação Zod em todos os endpoints',
+            'Validação dos dados de entrada no backend (class-validator), com lista de campos permitidos',
             'Helmet (CSP, HSTS, X-Frame-Options)',
-            'Rate limiting: 10 tentativas/15 min/IP',
-            'HTTPS obrigatório em produção',
-            'PostgreSQL com conexão SSL',
+            'Limitação de tentativas de login: 10 tentativas por IP a cada 15 minutos em produção',
+            'HTTPS previsto para o ambiente de produção (depende da hospedagem)',
+            'Conexão SSL com o banco prevista para o ambiente de produção (não verificada nesta versão)',
             'Variáveis de ambiente para segredos',
-            'Logs de auditoria de acesso',
+            'Registro de eventos da esteira (autor, perfil e horário)',
           ].map((item) => (
             <Group key={item} gap={6} align="flex-start">
               <IconCheck size={14} color="var(--mantine-color-teal-6)" style={{ marginTop: 2, flexShrink: 0 }} />
@@ -143,7 +143,7 @@ export function PoliticaDados() {
       <PolicySection icon={<IconEye size={16} />} color="indigo" title="5. IA e Privacidade dos Dados Clínicos">
         <Box p="sm" style={{ background: 'var(--mantine-color-orange-0)', border: '1px solid var(--mantine-color-orange-3)', borderRadius: 8 }}>
           <Text size="sm" fw={700} c="orange.8" mb={4}>Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo)</Text>
-          <Text size="xs" c="slate.7">Dados enviados à Groq (servidor externo): alergias, medicamentos, anamnese e últimos sinais vitais do paciente em consulta, a pergunta e até 4 mensagens anteriores. O nome, o CPF, o RG, o telefone e o endereço não são enviados. Textos livres são enviados como escritos: não digite dados de identificação neles.</Text>
+          <Text size="xs" c="slate.7">Dados enviados à Groq (servidor externo): alergias, medicamentos, anamnese e últimos sinais vitais do paciente em consulta, a pergunta e até 4 mensagens anteriores (limite aplicado pela tela). O nome, o CPF, o RG, o telefone e o endereço não são enviados. Textos livres são enviados como escritos: não digite dados de identificação neles.</Text>
         </Box>
         <Alert mt="sm" color="yellow" variant="light" icon={<IconAlertTriangle size={14} />} radius="md" p="sm">
           <Text size="xs" fw={600}>
@@ -168,6 +168,9 @@ export function PoliticaDados() {
             </Group>
           ))}
         </SimpleGrid>
+        <Text size="sm" c="slate.7" lh={1.8} mt="sm">
+          Nesta versão, as solicitações são atendidas pelo contato do responsável, sem funcionalidade automática no sistema.
+        </Text>
       </PolicySection>
 
       <PolicySection icon={<IconUserShield size={16} />} color="teal" title="7. Contato">
@@ -183,7 +186,7 @@ export function PoliticaDados() {
 
       <Group justify="space-between" align="center">
         <Text size="xs" c="slate.4">
-          HealthHub v1.0 — Última atualização: junho/2026
+          HealthHub v1.0 — Última atualização: novembro de 2026
         </Text>
         <Button
           variant="light"

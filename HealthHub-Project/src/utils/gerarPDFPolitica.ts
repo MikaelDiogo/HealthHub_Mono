@@ -141,7 +141,7 @@ export function gerarPDFPolitica() {
   paragraph('O HealthHub trata as seguintes categorias de dados:');
   subBox('Dados de identificacao do paciente', 'Nome completo (unico campo obrigatorio) e, quando informados, CPF, RG, idade, sexo, endereco e telefone. Se o nome nao for conhecido, o sistema registra um nome provisorio ate a correcao.', 240, 249, 255);
   subBox('Dados de saude (sensiveis)', 'Sinais vitais (frequencia cardiaca, pressao arterial, temperatura, SpO2), alergias, medicamentos em uso e anamnese clinica.', 254, 242, 242);
-  subBox('Dados de acesso dos profissionais', 'Nome, e-mail, papel (role) e registros de autenticacao (tokens JWT com validade de 24 horas).', 240, 253, 244);
+  subBox('Dados de acesso dos profissionais', 'Nome, e-mail, papel (role) e tokens JWT com validade de 24 horas, nao armazenados no servidor.', 240, 253, 244);
   subBox('Dados gerados pela IA', 'Historico de conversas clinicas com o assistente de IA e transcricoes de audio enviadas para analise.', 250, 245, 255);
   paragraph('ATENCAO: Os dados de saude sao classificados como dados pessoais sensiveis pela LGPD (art. 5, II), sujeitando seu tratamento a bases legais especificas e salvaguardas reforcadas.');
 
@@ -160,7 +160,7 @@ export function gerarPDFPolitica() {
   sectionTitle('4. Finalidade do Tratamento');
   paragraph('Os dados coletados sao utilizados exclusivamente para as seguintes finalidades:');
   const finalidades = [
-    'Cadastro, consulta, atualizacao e exclusao de prontuarios de pacientes',
+    'Cadastro, consulta e atualizacao de prontuarios de pacientes',
     'Monitoramento e registro historico de sinais vitais',
     'Gerenciamento da fila e esteira de cuidado hospitalar',
     'Apoio clinico via assistente de inteligencia artificial (Groq - openai/gpt-oss-120b)',
@@ -180,12 +180,13 @@ export function gerarPDFPolitica() {
     'Autenticacao via JWT (HS256) com expiracao automatica em 24 horas',
     'Controle de acesso baseado em papeis (RBAC): medico, enfermeiro, recepcionista',
     'Hashing de senhas com bcrypt (rounds=12)',
-    'Validacao de todos os dados de entrada via Zod',
+    'Validacao dos dados de entrada no backend (class-validator), com lista de campos permitidos',
     'Headers HTTP de seguranca via Helmet (CSP, HSTS, X-Frame-Options)',
-    'Limitacao de tentativas de login (10 tentativas por IP a cada 15 minutos)',
-    'Trafego protegido por HTTPS em ambiente de producao',
-    'Dados armazenados em banco PostgreSQL com conexao SSL',
+    'Limitacao de tentativas de login: 10 tentativas por IP a cada 15 minutos em producao',
+    'HTTPS previsto para o ambiente de producao (depende da hospedagem)',
+    'Conexao SSL com o banco prevista para o ambiente de producao (nao verificada nesta versao)',
     'Credenciais e chaves de API isoladas em variaveis de ambiente',
+    'Registro de eventos da esteira (autor, perfil e horario)',
   ];
   medidas.forEach(bullet);
 
@@ -194,7 +195,7 @@ export function gerarPDFPolitica() {
   // 6
   sectionTitle('6. Uso da Inteligencia Artificial e Dados Clinicos');
   paragraph('Como o assistente clinico de IA do HealthHub trata os dados:');
-  subBox('Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo) para transcricao', 'As perguntas ao assistente sao enviadas a plataforma Groq (operador externo), com o contexto clinico do paciente selecionado: alergias, medicamentos em uso, anamnese e ultimos sinais vitais, alem de ate 4 mensagens anteriores da conversa. O nome, o CPF, o RG, o telefone e o endereco nao sao enviados. Os textos livres (como a anamnese e a pergunta) sao enviados como foram escritos: nao digite dados de identificacao neles. O audio da transcricao e enviado a Groq para virar texto e nao e gravado pelo HealthHub.', 255, 247, 237);
+  subBox('Groq (openai/gpt-oss-120b) e Whisper (whisper-large-v3-turbo) para transcricao', 'As perguntas ao assistente sao enviadas a plataforma Groq (operador externo), com o contexto clinico do paciente selecionado: alergias, medicamentos em uso, anamnese e ultimos sinais vitais, alem de ate 4 mensagens anteriores da conversa, limite aplicado pela tela. O nome, o CPF, o RG, o telefone e o endereco nao sao enviados. Os textos livres (como a anamnese e a pergunta) sao enviados como foram escritos: nao digite dados de identificacao neles. O audio da transcricao e enviado a Groq para virar texto e nao e gravado pelo HealthHub.', 255, 247, 237);
   paragraph('Em qualquer cenario, a responsabilidade pela decisao clinica permanece integralmente do profissional de saude. O assistente de IA e uma ferramenta de apoio e nunca substitui o julgamento clinico.');
 
   divider();
@@ -212,6 +213,7 @@ export function gerarPDFPolitica() {
     'Oposicao — Opor-se ao tratamento realizado em desconformidade com a lei.',
   ];
   direitos.forEach(bullet);
+  paragraph('Nesta versao, as solicitacoes sao atendidas pelo contato do responsavel, sem funcionalidade automatica no sistema.');
 
   divider();
 
@@ -240,7 +242,7 @@ export function gerarPDFPolitica() {
   divider();
 
   // 10
-  sectionTitle('10. Contato e Encarregado (DPO)');
+  sectionTitle('10. Contato do responsavel');
   paragraph('Para exercer seus direitos como titular de dados ou esclarecer duvidas sobre esta Politica:');
   subBox('HealthHub — Projeto Academico TCC',
     'Autor: Mikael Diogo Ferreira\nInstituicao: Faculdade Princesa do Oeste (FPO)\nCurso: Tecnologia em Analise e Desenvolvimento de Sistemas',
@@ -261,7 +263,7 @@ export function gerarPDFPolitica() {
     MARGIN + 4, y + 7
   );
   doc.text(
-    'A aceitacao destes termos e registrada com data e hora no sistema.',
+    'A aceitacao destes termos e registrada no navegador do usuario.',
     MARGIN + 4, y + 13
   );
 
